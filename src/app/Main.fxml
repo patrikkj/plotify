@@ -275,11 +275,12 @@
                         </Region>
                         <HBox VBox.vgrow="ALWAYS">
                            <children>
-                              <JFXListView focusTraversable="false" maxHeight="-Infinity" prefHeight="195.0">
+                              <JFXListView focusTraversable="false" maxHeight="-Infinity" prefHeight="195.0" HBox.hgrow="ALWAYS">
                                  <HBox.margin>
-                                    <Insets bottom="20.0" left="20.0" right="10.0" top="20.0" />
+                                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                                  </HBox.margin>
                               </JFXListView>
+                              <Region HBox.hgrow="ALWAYS" />
                               <AnchorPane>
                                  <children>
                                     <JFXTabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="195.0" prefWidth="360.0" stylesheets="@../resources/tabPane.css" tabMinWidth="175.0" AnchorPane.bottomAnchor="20.0" AnchorPane.topAnchor="20.0">
@@ -486,6 +487,7 @@
                                     </JFXTabPane>
                                  </children>
                               </AnchorPane>
+                              <Region HBox.hgrow="ALWAYS" />
                            </children>
                         </HBox>
                         <HBox>
@@ -514,7 +516,7 @@
                                     <Font name="System Bold" size="14.0" />
                                  </font>
                               </JFXButton>
-                              <Region HBox.hgrow="ALWAYS" />
+                              <Region prefWidth="10.0" HBox.hgrow="ALWAYS" />
                            </children>
                         </HBox>
                      </children>
@@ -547,11 +549,12 @@
                         </Region>
                         <HBox VBox.vgrow="ALWAYS">
                            <children>
-                              <JFXListView focusTraversable="false" maxHeight="-Infinity" prefHeight="195.0">
+                              <JFXListView focusTraversable="false" maxHeight="-Infinity" prefHeight="195.0" HBox.hgrow="ALWAYS">
                                  <HBox.margin>
-                                    <Insets bottom="20.0" left="20.0" right="10.0" top="20.0" />
+                                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                                  </HBox.margin>
                               </JFXListView>
+                              <Region HBox.hgrow="ALWAYS" />
                               <AnchorPane>
                                  <children>
                                     <VBox layoutY="20.0" spacing="5.0" AnchorPane.topAnchor="20.0">
@@ -699,6 +702,7 @@
                                     </VBox>
                                  </children>
                               </AnchorPane>
+                              <Region HBox.hgrow="ALWAYS" />
                            </children>
                         </HBox>
                         <HBox>
