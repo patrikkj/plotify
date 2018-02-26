@@ -26,6 +26,11 @@
 	-jfx-rippler-fill:  #450000;
 }
 
+.jfx-tab-pane:top .depth-container .tab-header-area .headers-region .tab:selected {
+	-fx-background-color: #e7e7e7;
+	-fx-effect: innershadow( gaussian, rgba( 180, 180, 180, 0.5 ), 30, 0, 0, 10 );
+}
+
 
 .jfx-tab-pane .depth-container .tab-header-area .headers-region .tab .jfx-rippler .tab-container .tab-label{
 	-fx-text-fill: #202020;
