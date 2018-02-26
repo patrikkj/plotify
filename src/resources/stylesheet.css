@@ -1,0 +1,22 @@
+#lineChart .chart-content .chart-plot-background {
+	-fx-background-color: #EEEEEE;
+}
+
+.jfx-text-field {
+	-jfx-focus-color: #450000;
+}
+
+.jfx-slider .colored-track {
+	-fx-background-color: #450000;
+	
+}
+
+.jfx-slider .thumb {
+	-fx-background-color: #450000;
+	
+}
+
+.jfx-slider .animated-thumb {
+	-fx-background-color: #450000;
+	
+}
