@@ -1,4 +1,5 @@
 .jfx-tab-pane .depth-container .tab-header-area .control-buttons-tab {
+	visibility: hidden;
 	-fx-pref-width: 0;
 }
 .jfx-tab-pane .depth-container .tab-header-area .control-buttons-tab .jfx-rippler{
