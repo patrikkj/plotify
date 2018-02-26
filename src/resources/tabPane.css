@@ -16,10 +16,16 @@
 }
 .jfx-tab-pane .depth-container .tab-header-area .headers-region .tab-selected-line{
 	-fx-background-color:  #450000;
+	-fx-min-width: 150;
+	-fx-pref-width: 150;
+	-fx-max-width: 150;
+	-fx-scale-shape: false;
 }
+
 .jfx-tab-pane:top .depth-container .tab-header-area .headers-region .tab .jfx-rippler {
 	-jfx-rippler-fill:  #450000;
 }
+
 
 .jfx-tab-pane .depth-container .tab-header-area .headers-region .tab .jfx-rippler .tab-container .tab-label{
 	-fx-text-fill: #202020;

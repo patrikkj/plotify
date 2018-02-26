@@ -278,7 +278,7 @@
                               </JFXListView>
                               <AnchorPane>
                                  <children>
-                                    <JFXTabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="195.0" prefWidth="360.0" stylesheets="@../resources/tabPane.css" tabMaxWidth="175.0" tabMinWidth="175.0" AnchorPane.bottomAnchor="20.0" AnchorPane.topAnchor="20.0">
+                                    <JFXTabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="195.0" prefWidth="360.0" stylesheets="@../resources/tabPane.css" tabMinWidth="175.0" AnchorPane.bottomAnchor="20.0" AnchorPane.topAnchor="20.0">
                                        <tabs>
                                           <Tab closable="false" text="Properties">
                                              <content>
