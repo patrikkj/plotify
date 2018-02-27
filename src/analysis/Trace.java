@@ -145,7 +145,7 @@ public class Trace {
 				System.out.print('.');
 
 			//Print iteration results
-//			System.out.println(String.format("%d\t\ta = %.8f\t\t v = %.8f\t\t x = %.8f\t\t eKin = %.8f\t\t ePot = %.8f\t\t eTot = %.8f\t\t", iter, a, v, x, eKin, ePot, eTot).replace(',', '.'));
+			System.out.println(String.format("%d\t\ta = %.8f\t\t v = %.8f\t\t x = %.8f\t\t eKin = %.8f\t\t ePot = %.8f\t\t eTot = %.8f\t\t", iter, a, v, x, eKin, ePot, eTot).replace(',', '.'));
 		}
 		
 		//Print final result
@@ -167,7 +167,7 @@ public class Trace {
 		double c = Trace.SPHERE;					//Constant for calculating moment of inertia
 		double v0 = 0;								//Initial velocity
 		double x0 = minX;							//Initial x-coordinate
-		double step = 0.000001;						//Step size for numerical integration (Eulers' method)
+		double step = 0.00001;						//Step size for numerical integration (Eulers' method)
 		
 		//Initialize new experiment
 		Trace experiment = new Trace(polySpline, m, c, v0, x0);
