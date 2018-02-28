@@ -96,6 +96,7 @@ public class Trace {
 		this.maxX= maxX;
 		this.initV = initV;
 		this.step = step;
+		System.out.println(filepath);
 	}
 	
 	
@@ -112,7 +113,7 @@ public class Trace {
 		
 		//Set domain and x-range
 		domain = func.getDomain();
-		minX = Math.max(minX, domain[0]);
+		minX = Math.max(minX, domain[0] + 0.001);
 		maxX = Math.min(maxX, domain[1]);
 	}
 	
@@ -261,12 +262,12 @@ public class Trace {
 				System.out.print('.');
 
 			//Print iteration results
-			System.out.println(String.format("%d\t\ta = %.8f\t\t v = %.8f\t\t x = %.8f\t\t eKin = %.8f\t\t ePot = %.8f\t\t eTot = %.8f\t\t", iter, a, v, x, eKin, ePot, eTot).replace(',', '.'));
+//			System.out.println(String.format("%d\t\ta = %.8f\t\t v = %.8f\t\t x = %.8f\t\t eKin = %.8f\t\t ePot = %.8f\t\t eTot = %.8f\t\t", iter, a, v, x, eKin, ePot, eTot).replace(',', '.'));
 		}
 		
 		//Print final result
 //		System.out.println("\nFinished!");
-		System.out.printf("\n\nAccuracy: %s%%\n", (1 - (initTotEnergy - eTot)/eTot)*100);
+		System.out.printf("\n\nRelative total energy: %.9f %%\n", ((initTotEnergy - eTot)/eTot)*100);
 		System.out.printf("\nIterations: %,d\nStep size (seconds): %s\nTotal time (seconds): %s\n", iter, step, iter * step);
 		
 		//Print computation time
@@ -279,10 +280,10 @@ public class Trace {
 	public static void main(String[] args) throws FileNotFoundException {
 		// Initial parameters
 		String name = "Test";
-		String filepath = "C:\\Users\\Patrik\\git\\Patrik-Forked\\Physics\\src\\imports\\mass_A.txt";
+		String filepath = "C:\\Users\\Patrik\\git\\Patrik-Forked\\Physics\\src\\imports\\mass_B.txt";
 		Integration integration = Integration.EULER_METHOD;				//Integration type
 		Interpolation interpolation = Interpolation.POLYNOMIAL_SPLINE;	//Interpolation type
-		Inertia inertia = Inertia.SPHERE_SOLID;							//Moment of inertia
+		Inertia inertia = Inertia.CYLINDER_HOLLOW;							//Moment of inertia
 		double mass = 10;												//Mass of rolling object
 		double radius = 0.2;											//Radius of rolling object
 		double minX = 0;												//Min x-coordinate

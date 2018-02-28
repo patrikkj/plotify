@@ -145,8 +145,8 @@ public class Interpolation {
 			String[] lineArray = fileArray[i].split("\t");
 			
 			//Append values to output arrays
-			outputX.add(Double.parseDouble(lineArray[1]));
-			outputY.add(Double.parseDouble(lineArray[2]));
+			outputX.add(Double.parseDouble(lineArray[1].replace(',', '.')));
+			outputY.add(Double.parseDouble(lineArray[2].replace(',', '.')));
 		}
 		
 		//Map to primitive type

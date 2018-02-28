@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 public enum Inertia {
 	// Object types
-	POINT_OF_MASS	(0, 0d/0d, "Point of mass"),
+	POINT_OF_MASS	(0, 0d, "Point of mass"),
 	DISC_SOLID		(1, 1d/2d, "Disc (Solid)"),
 	DISC_HOLLOW		(2, 1d/1d, "Disc (Hollow)"),
 	SPHERE_SOLID	(3, 2d/5d, "Sphere (Solid)"),
