@@ -42,7 +42,7 @@ public class Interpolation {
 	 * Input parameters:
 	 *  - String filepath: Absolute filepath to standard Tracker export file (.txt)
 	 */
-	public static PolySpline polynomialSplineInterpolation(String filepath) throws FileNotFoundException {
+	public static PolySpline polynomialSplineInterpolation(String filepath) {
 		//Parse tracking data from filepath to two arrays of doubles.
 		double[][] fileData = parseFile(filepath);
 
@@ -97,7 +97,7 @@ public class Interpolation {
 	 * Input parameters:
 	 *  - String filepath: Absolute filepath to standard Tracker export file (.txt)
 	 */
-	public static Polynomial polynomialInterpolation(String filepath) throws FileNotFoundException {
+	public static Polynomial polynomialInterpolation(String filepath) {
 		//Parse tracking data from filepath to two arrays of doubles.
 		double[][] fileData = parseFile(filepath);
 		
@@ -113,10 +113,18 @@ public class Interpolation {
 	 *  - double[] x: array of x coordinates in strictly increasing order
 	 *  - double[] y: array of y coordinates at x coordinate specified in fist array
 	 */
-	private static double[][] parseFile(String filepath) throws FileNotFoundException {
+	private static double[][] parseFile(String filepath)  {
 		//Local variables
-		Scanner input = new Scanner(new FileReader(filepath));
+		Scanner input = null;
 		StringBuilder stringBuilder = new StringBuilder();
+
+		//Try reading file
+		try { 
+			input = new Scanner(new FileReader(filepath));
+		} 
+		catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 		
 		//Read file to StringBuilder object
 		while (input.hasNext())

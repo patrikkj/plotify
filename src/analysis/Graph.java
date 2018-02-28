@@ -15,6 +15,10 @@ public class Graph {
 	private double thickness;
 	
 	
+	public Graph() {
+		
+	}
+	
 	public Graph(String name, List<Float> xCollection, List<Float> yCollection, Trace trace) {
 		this.name = name;
 		this.xCollection = xCollection;
