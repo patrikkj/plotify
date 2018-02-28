@@ -1,4 +1,4 @@
-package analysis;
+package app;
 
 import java.util.List;
 

@@ -10,8 +10,6 @@ import com.jfoenix.controls.JFXSlider;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.controls.JFXToggleButton;
 
-import analysis.Graph;
-import analysis.Trace;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -126,6 +124,8 @@ public class MainController {
 		// Retrive selected Trace
 		int traceIndex = traceListView.getSelectionModel().getSelectedIndex();
 		Trace trace = traceList.get(traceIndex);
+		
+		
 		
 		//Update trace properties
 		traceName.setText(trace.getName());
