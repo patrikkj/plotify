@@ -13,7 +13,7 @@ import functions.Differentiable;
 
 
 public class Trace {
-	// Trace properties
+	// Trace properties (Setters & Getters)
 	private String name;
 	private String filepath;
 	private Integration integration;
@@ -26,15 +26,14 @@ public class Trace {
 	private Double initV;
 	private Double step;
 	
-	// Trace Details
+	// Trace Details (Only Getters)
 	private Integration integrationType;
 	private Interpolation interpolationType;
-	private String funcType;
 	private String stepSize;
 	private String iterations;
 	private String totalTime;
 	private String computationTime;
-	private String energyPreserved;
+	private String energyDifference;
 
 	//Function
 	private Differentiable func;
@@ -55,7 +54,7 @@ public class Trace {
 	///////////////////////////////////////////////
 	// Enumerations in separate package (.enums) //
 	///////////////////////////////////////////////
-	public static final double G = 9.81;
+	public static final double G = 9.82814;
 	
 	
 	//Constructors
@@ -111,9 +110,12 @@ public class Trace {
 			break;
 		}
 		
+		//Set trace details
+		interpolationType = interpolation;
+		
 		//Set domain and x-range
 		domain = func.getDomain();
-		minX = Math.max(minX, domain[0] + 0.001);
+		minX = Math.max(minX, domain[0]);
 		maxX = Math.min(maxX, domain[1]);
 	}
 	
@@ -135,20 +137,29 @@ public class Trace {
 	}
 	
 	
-	//Getters (Strings)
+	//Getters (Trace properties)
 	public String getName() {return name;}
 	public String getFilepath() {return filepath;}
-	public String getInterpolationType() {return interpolation.TEXT;}
-	public String getIntegrationType() {return integration.TEXT;}
-	public String getInertia() {return inertia.TEXT;}
-	public String getMass() {return mass.toString();}
-	public String getRadius() {return radius.toString();}
-	public String getMinX() {return minX.toString();}
-	public String getMaxX() {return maxX.toString();}
-	public String getInitV() {return initV.toString();}
-	public String getStep() {return step.toString();}
+	public Interpolation getInterpolation() {return interpolation;}
+	public Integration getIntegration() {return integration;}
+	public Inertia getInertia() {return inertia;}
+	public Double getMass() {return mass;}
+	public Double getRadius() {return radius;}
+	public Double getMinX() {return minX;}
+	public Double getMaxX() {return maxX;}
+	public Double getInitV() {return initV;}
+	public Double getStep() {return step;}
+
+	//Getters (Trace details - Strings)
+	public String getInterpolationType() {return interpolationType.TEXT;}
+	public String getIntegrationType() {return integrationType.TEXT;}
+	public String getStepSize() {return stepSize;}
+	public String getIterations() {return iterations;}
+	public String getTotalTime() {return totalTime;}
+	public String getComputationTime() {return computationTime;}
+	public String getEnergyDifference() {return energyDifference;}
 	
-	//Setters
+	//Setters (Trace properties)
 	public void setName(String name) {this.name = name;}
 	public void setFilepath(String filepath) {this.filepath = filepath;}
 	public void setIntegration(Integration integration) {this.integration = integration;}
@@ -199,28 +210,33 @@ public class Trace {
 	
 	//Traces
 	/**Performs a trace of the experiment described by this Trace object using specified integration method*/
-	public void trace() {
+	public void trace(boolean printIterations, boolean printResults) {
 		// Validate instance variables
 		validateTrace();
 		
 		// Perform trace using given integration method
 		switch (integration) {
 		case EULER_METHOD:
-			eulerTrace();
-			return;
+			eulerTrace(printIterations);
+			break;
 		case EULER_IMPROVED_METHOD:
 			System.out.println("Integration type not supported: " + integration.TEXT);
-			return;
+			break;
 		case RUNGE_KUTTA_METHOD:
 			System.out.println("Integration type not supported: " + integration.TEXT);
-			return;
+			break;
 		}
+		
+		//Set trace details
+		integrationType = integration;
+		
+		//Print results if requested
+		if (printResults) printResults();
 	}
 	
 	/**Trace performed using Eulers method*/
-	private void eulerTrace() {
+	private void eulerTrace(boolean printIterations) {
 		// Set initial parameters
-		int iter = 0;
 		double x = minX; 
 		double v = initV;
 		double a = getAccel(x);	
@@ -234,11 +250,13 @@ public class Trace {
 		//Used to compute simulation time
 		System.out.println("Processing");
 		Instant start = Instant.now();
+		
+		//Keeps track of iterations
+		int iter = 0;
 		int approxIter = (int) ((domain[1] - domain[0]) / step); 
 		
 		//Iterate until track is complete (x has reached its' end value)
 		while (x < maxX) {
-			
 			//Using floats for lower memory consumption
 			aList.add((float) a);
 			vList.add((float) v);
@@ -262,40 +280,59 @@ public class Trace {
 				System.out.print('.');
 
 			//Print iteration results
-//			System.out.println(String.format("%d\t\ta = %.8f\t\t v = %.8f\t\t x = %.8f\t\t eKin = %.8f\t\t ePot = %.8f\t\t eTot = %.8f\t\t", iter, a, v, x, eKin, ePot, eTot).replace(',', '.'));
+			if (printIterations)
+				System.out.println(String.format("%d\t\ta = %.8f\t\t v = %.8f\t\t x = %.8f\t\t eKin = %.8f\t\t ePot = %.8f\t\t eTot = %.8f\t\t", iter, a, v, x, eKin, ePot, eTot).replace(',', '.'));
 		}
-		
-		//Print final result
-//		System.out.println("\nFinished!");
-		System.out.printf("\n\nRelative total energy: %.9f %%\n", ((initTotEnergy - eTot)/eTot)*100);
-		System.out.printf("\nIterations: %,d\nStep size (seconds): %s\nTotal time (seconds): %s\n", iter, step, iter * step);
-		
-		//Print computation time
+		// End computation timer
 		Instant end = Instant.now();
-		System.out.println(String.format("\nComputation time: %.3f seconds", (double) Duration.between(start, end).toMillis()/1000).replace(',', '.'));
+
+		// Update trace details
+		energyDifference = String.format("%.9f %%", ((initTotEnergy - eTot)/eTot)*100);
+		iterations = String.valueOf(iter * 2);
+		stepSize = String.valueOf(step);
+		totalTime = String.format("%f", iter * step).replace(',', '.');
+		computationTime = String.format("%.3f seconds", (double) Duration.between(start, end).toMillis()/1000).replace(',', '.');
 	}
 	
 	
 	//Other
+	public void printResults() {
+		System.out.printf("\nFunction type: %s\n"
+				+ "Integration type: %s\n"
+				+ "Iterations: %s\n"
+				+ "Step size (Δt): %s\n"
+				+ "Total time: %s\n"
+				+ "\n"
+				+ "Computation time: %s\n"
+				+ "Energy difference: %s\n", 
+					getInterpolationType(),
+					getIntegrationType(),
+					getIterations(),
+					getStep(),
+					getTotalTime(),
+					getComputationTime(),
+					getEnergyDifference());
+	}
+	
 	public static void main(String[] args) throws FileNotFoundException {
 		// Initial parameters
 		String name = "Test";
 		String filepath = "C:\\Users\\Patrik\\git\\Patrik-Forked\\Physics\\src\\imports\\mass_B.txt";
 		Integration integration = Integration.EULER_METHOD;				//Integration type
 		Interpolation interpolation = Interpolation.POLYNOMIAL_SPLINE;	//Interpolation type
-		Inertia inertia = Inertia.CYLINDER_HOLLOW;							//Moment of inertia
+		Inertia inertia = Inertia.POINT_OF_MASS;							//Moment of inertia
 		double mass = 10;												//Mass of rolling object
 		double radius = 0.2;											//Radius of rolling object
 		double minX = 0;												//Min x-coordinate
 		double maxX = Double.POSITIVE_INFINITY;							//Max x-coordinate
 		double initV = 0;												//Initial velocity
-		double step = 0.00001;											//Integration step size
+		double step = 0.000001;											//Integration step size
 		
 		//Initialize new experiment
 		Trace testTrace = new Trace(name, filepath, integration, interpolation, inertia, mass, radius, minX, maxX, initV, step);
 		
 		//Perform trace
-		testTrace.trace();
+		testTrace.trace(false, true);
 		
 	}
 }

@@ -130,9 +130,9 @@ public class MainController {
 		//Update trace properties
 		traceName.setText(trace.getName());
 		traceFilepath.getEditor().setText(trace.getFilepath());
-		traceInterpolation.getEditor().setText(trace.getInterpolationType());
-		traceObject.getEditor().setText(trace.getInertiaConst());
-		traceRadius.setText(trace.getRadius());
+		traceInterpolation.getEditor().setText(trace.getInterpolation().TEXT);
+		traceObject.getEditor().setText(trace.getInertia().TEXT);
+		traceRadius.setText(trace.getRadius().toString());
 		traceInitX.setText(trace.getInitX());
 		traceInitV.setText(trace.getInitV());
 		
