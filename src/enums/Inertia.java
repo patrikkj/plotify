@@ -75,4 +75,12 @@ public enum Inertia {
 	public static List<String> getTextValues() {
 		return Arrays.stream(values()).map(inertia -> inertia.TEXT).collect(Collectors.toList());
 	}
+	public static List<Inertia> getElements() {
+		return Arrays.stream(values()).collect(Collectors.toList());
+	}
+	
+	// toString - Values to be displayed in ComboBox
+	public String toString() {
+		return TEXT;
+	}
 }

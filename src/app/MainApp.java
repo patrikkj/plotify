@@ -7,23 +7,23 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 public class MainApp extends Application {
-	private double xOffset;
-	private double yOffset;
-	
+	private double xOffset, yOffset;
 	
 	@Override
 	public void start(Stage primaryStage) throws IOException {
 		Parent root = FXMLLoader.load(getClass().getResource("Main.fxml"));
 		Scene scene = new Scene(root);
-//		Image titleIcon = new Image(getClass().getResourceAsStream("../icons/main/main_dark.png"));
-
+		Image titleIcon = new Image(getClass().getResourceAsStream("../resources/physics_main.png"));
+		
 		//Transparency settings
 		scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+		primaryStage.initStyle(StageStyle.TRANSPARENT);
 		
 		//Set mouse pressed
         root.setOnMousePressed(new EventHandler<MouseEvent>() {
@@ -44,15 +44,17 @@ public class MainApp extends Application {
             }});
         
 		// Initialize application window
-		primaryStage.initStyle(StageStyle.TRANSPARENT);
 		primaryStage.setScene(scene);
-		primaryStage.setTitle("PattyPlot");
-//		primaryStage.getIcons().add(titleIcon);
+		primaryStage.setTitle("Wolfram Beta");
+		primaryStage.getIcons().add(titleIcon);
 		primaryStage.show();
 	}
 
 	public static void main(String[] args) throws IOException {
+		// DPI issues ?? :)
 //		Runtime.getRuntime().exec("REG ADD \"HKCU\\Software\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Layers\" /V %cd%\\WorkstationInstaller.exe /T REG_SZ /D HIGHDPIAWARE /F");
+		
+		// Run application
 		launch(args);
 	}
 }

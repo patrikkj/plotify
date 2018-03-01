@@ -16,7 +16,7 @@ public class Graph {
 	
 	
 	public Graph() {
-		
+		this.name = "New graph";
 	}
 	
 	public Graph(String name, List<Float> xCollection, List<Float> yCollection, Trace trace) {
@@ -26,4 +26,7 @@ public class Graph {
 		this.trace = trace;
 	}
 	
+	public String toString() {
+		return name;
+	}
 }

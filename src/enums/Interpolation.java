@@ -39,4 +39,12 @@ public enum Interpolation {
 	public static List<String> getTextValues() {
 		return Arrays.stream(values()).map(interpolation -> interpolation.TEXT).collect(Collectors.toList());
 	}
+	public static List<Interpolation> getElements() {
+		return Arrays.stream(values()).collect(Collectors.toList());
+	}
+
+	// toString - Values to be displayed in ComboBox
+	public String toString() {
+		return TEXT;
+	}
 }

@@ -62,7 +62,7 @@ public class Trace {
      * Constructor used by GUI.
      */
 	public Trace() {
-
+		this.name = "New trace";
 	}	
 	
 	/**
@@ -255,6 +255,7 @@ public class Trace {
 		int iter = 0;
 		int approxIter = (int) ((domain[1] - domain[0]) / step); 
 		
+		
 		//Iterate until track is complete (x has reached its' end value)
 		while (x < maxX) {
 			//Using floats for lower memory consumption
@@ -283,6 +284,8 @@ public class Trace {
 			if (printIterations)
 				System.out.println(String.format("%d\t\ta = %.8f\t\t v = %.8f\t\t x = %.8f\t\t eKin = %.8f\t\t ePot = %.8f\t\t eTot = %.8f\t\t", iter, a, v, x, eKin, ePot, eTot).replace(',', '.'));
 		}
+		
+		
 		// End computation timer
 		Instant end = Instant.now();
 
@@ -334,6 +337,10 @@ public class Trace {
 		//Perform trace
 		testTrace.trace(false, true);
 		
+	}
+
+	public String toString() {
+		return name;
 	}
 }
 

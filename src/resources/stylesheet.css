@@ -1,22 +1,37 @@
+/* Chart */
 #lineChart .chart-content .chart-plot-background {
 	-fx-background-color: #EEEEEE;
 }
 
+/* Text fields*/
 .jfx-text-field {
 	-jfx-focus-color: #450000;
 }
 
+/* Sliders */
 .jfx-slider .colored-track {
 	-fx-background-color: #450000;
-	
 }
-
 .jfx-slider .thumb {
 	-fx-background-color: #450000;
-	
 }
-
 .jfx-slider .animated-thumb {
 	-fx-background-color: #450000;
-	
+}
+
+/* Combo boxes */
+.jfx-combo-box .list-cell .text {
+	-fx-font: normal 11px "System";
+}
+.jfx-combo-box .input-focused-line {
+	-fx-background-color: #450000;
+}
+.jfx-combo-box .list-cell:hover {
+	-fx-background-color: #A0A0A0;
+}
+.jfx-combo-box .list-view .virtual-flow .clipped-container .sheet .list-cell:selected {
+	-fx-background-color: #454545;
+}
+.jfx-combo-box .list-view .virtual-flow .clipped-container .sheet .list-cell .jfx-rippler{
+	-jfx-rippler-fill: #000000;
 }

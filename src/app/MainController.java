@@ -1,8 +1,5 @@
 package app;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXListView;
@@ -10,6 +7,9 @@ import com.jfoenix.controls.JFXSlider;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.controls.JFXToggleButton;
 
+import enums.Inertia;
+import enums.Integration;
+import enums.Interpolation;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -18,7 +18,7 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.VBox;;
 
 public class MainController {
 	// Variable declarations
@@ -45,16 +45,19 @@ public class MainController {
     @FXML private JFXTextField yAxisMaxRange;
     
     // Traces
-    @FXML private JFXListView<Label> traceListView;
+    @FXML private JFXListView<Trace> traceListView;
     // Trace properties
     @FXML private JFXTextField traceName;
-    @FXML private JFXComboBox<?> traceFilepath;
-    @FXML private JFXComboBox<?> traceInterpolation;
-    @FXML private JFXComboBox<?> traceObject;
+    @FXML private JFXComboBox<String> traceFilepath;
+    @FXML private JFXComboBox<Integration> traceIntegration;
+    @FXML private JFXComboBox<Interpolation> traceInterpolation;
+    @FXML private JFXComboBox<Inertia> traceInertia;
     @FXML private JFXTextField traceMass;
     @FXML private JFXTextField traceRadius;
-    @FXML private JFXTextField traceInitX;
+    @FXML private JFXTextField traceMinX;
+    @FXML private JFXTextField traceMaxX;
     @FXML private JFXTextField traceInitV;
+    @FXML private JFXTextField traceStep;
     // Trace details
     @FXML private Label funcTypeLabel;
     @FXML private Label integrationTypeLabel;
@@ -62,10 +65,10 @@ public class MainController {
     @FXML private Label iterationsLabel;
     @FXML private Label totalTimeLabel;
     @FXML private Label computationTimeLabel;
-    @FXML private Label energyPreservedLabel;
+    @FXML private Label energyDifferenceLabel;
 
     // Graphs
-    @FXML private JFXListView<Label> graphListView;
+    @FXML private JFXListView<Graph> graphListView;
     // Graph properties
     @FXML private JFXTextField graphName;
     @FXML private JFXComboBox<?> graphXData;
@@ -84,39 +87,42 @@ public class MainController {
     @FXML private JFXToggleButton graphSmoothToggleButton;
     @FXML private JFXToggleButton graphVisibleToggleButton;
 
-    // Trace lists
-    private List<Trace> traceList;
-    private ObservableList<Label> traceLabelList;
-    
-    // Graph lists
-    private List<Graph> graphList;
-    private ObservableList<Label> graphLabelList;
+    //  Observable lists (Used in listViews)
+    private ObservableList<Trace> traceList;
+    private ObservableList<Graph> graphList;
     
     
     // Initializer
     @FXML private void initialize() {    	
     	initializeTraces();
     	initializeGraphs();
-    	
+    	initializeLists();
     }
     
     private void initializeTraces() {
     	// Initialize trace lists
-    	traceList = new ArrayList<>();
-    	traceLabelList = FXCollections.observableArrayList();
+    	traceList = FXCollections.observableArrayList();
     	
-    	// Bind list view to observable label list
-    	traceListView.setItems(traceLabelList);
+    	// Bind list view to observable list
+    	traceListView.setItems(traceList);
     }
     
     private void initializeGraphs() {
     	// Initialize graph lists
-    	graphList = new ArrayList<>();
-    	graphLabelList = FXCollections.observableArrayList();
-    	
-    	// Bind list view to observable label list
-    	graphListView.setItems(graphLabelList);
+    	graphList = FXCollections.observableArrayList();
+
+    	// Bind list view to observable list
+    	graphListView.setItems(graphList);
     }
+    
+    private void initializeLists() {
+//    	traceFilepath.setItems();
+        traceIntegration.setItems(FXCollections.observableList(Integration.getElements()));
+        traceInterpolation.setItems(FXCollections.observableList(Interpolation.getElements()));
+        traceInertia.setItems(FXCollections.observableList(Inertia.getElements()));
+        
+    }
+    
     
     // Updaters
 	@SuppressWarnings("unused")
@@ -125,25 +131,34 @@ public class MainController {
 		int traceIndex = traceListView.getSelectionModel().getSelectedIndex();
 		Trace trace = traceList.get(traceIndex);
 		
-		
-		
 		//Update trace properties
-		traceName.setText(trace.getName());
-		traceFilepath.getEditor().setText(trace.getFilepath());
-		traceInterpolation.getEditor().setText(trace.getInterpolation().TEXT);
-		traceObject.getEditor().setText(trace.getInertia().TEXT);
-		traceRadius.setText(trace.getRadius().toString());
-		traceInitX.setText(trace.getInitX());
-		traceInitV.setText(trace.getInitV());
+		traceName								.setText(trace.getName());
+	    traceFilepath			.getEditor()	.setText(trace.getFilepath());
+	    traceIntegration		.getEditor()	.setText(trace.getIntegration().TEXT);
+	    traceInterpolation		.getEditor()	.setText(trace.getInterpolation().TEXT);
+	    traceInertia			.getEditor()	.setText(trace.getInertia().TEXT);;
+	    traceMass								.setText(trace.getMass().toString());;
+	    traceRadius								.setText(trace.getRadius().toString());;
+	    traceMinX								.setText(trace.getMinX().toString());
+	    traceMaxX								.setText(trace.getMaxX().toString());
+	    traceInitV								.setText(trace.getInitV().toString());
+	    traceStep								.setText(trace.getStep().toString());
 		
 		//Update trace details
-		
+	    funcTypeLabel			.setText(trace.getInterpolationType());
+	    integrationTypeLabel	.setText(trace.getIntegrationType());
+	    stepSizeLabel			.setText(trace.getStepSize());
+	    iterationsLabel			.setText(trace.getIterations());
+	    totalTimeLabel			.setText(trace.getTotalTime());
+	    computationTimeLabel	.setText(trace.getComputationTime());
+	    energyDifferenceLabel	.setText(trace.getEnergyDifference());
     }
     
     @SuppressWarnings("unused")
 	private void updateGraphs() {
     	
     }
+    
     
     // Validators
     @SuppressWarnings("unused")
@@ -163,7 +178,6 @@ public class MainController {
     // Trace button handlers
     @FXML private void handleNewTraceClick(ActionEvent event) {
     	traceList.add(new Trace());
-    	traceLabelList.add(new Label("New Trace"));
     }
     
     @FXML private void handleDeleteTraceClick(ActionEvent event) {}
@@ -173,7 +187,6 @@ public class MainController {
     // Graph button handlers
     @FXML private void handleNewGraphClick(ActionEvent event) {
     	graphList.add(new Graph());
-    	graphLabelList.add(new Label("New Graph"));
     }
     
     @FXML private void handleDeleteGraphClick(ActionEvent event) {}
