@@ -1,5 +1,6 @@
 package app;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.time.Duration;
 import java.time.Instant;
@@ -10,12 +11,13 @@ import enums.Inertia;
 import enums.Integration;
 import enums.Interpolation;
 import functions.Differentiable;
+import javafx.beans.property.StringProperty;
 
 
 public class Trace {
 	// Trace properties (Setters & Getters)
 	private String name;
-	private String filepath;
+	private File file;
 	private Integration integration;
 	private Interpolation interpolation;
 	private Inertia inertia;
@@ -25,6 +27,8 @@ public class Trace {
 	private Double maxX;
 	private Double initV;
 	private Double step;
+	private boolean initialized;
+	private StringProperty nameProperty;
 	
 	// Trace Details (Only Getters)
 	private Integration integrationType;
@@ -38,8 +42,7 @@ public class Trace {
 	//Function
 	private Differentiable func;
 	private double[] domain;
-	
-	
+
 	//Containers
 	List<Float> aList = new ArrayList<Float>();
 	List<Float> vList = new ArrayList<Float>();
@@ -49,7 +52,7 @@ public class Trace {
 	List<Float> potList = new ArrayList<Float>();
 	List<Float> timeList = new ArrayList<Float>();
 	List<Float> yList = new ArrayList<Float>();
-	
+
 	
 	///////////////////////////////////////////////
 	// Enumerations in separate package (.enums) //
@@ -62,13 +65,14 @@ public class Trace {
      * Constructor used by GUI.
      */
 	public Trace() {
+		nameProperty.setValue(v);
 		this.name = "New trace";
 	}	
 	
 	/**
 	 * Creates a Trace object used for numerical analysis.
 	 * @param name
-	 * @param filepath
+	 * @param file
 	 * @param integration
 	 * @param interpolation
 	 * @param inertia
@@ -79,13 +83,13 @@ public class Trace {
 	 * @param initV
 	 * @param step
 	 */
-	public Trace(String name, String filepath, 
+	public Trace(String name, File file, 
 				Integration integration, Interpolation interpolation, Inertia inertia, 
 				double mass, double radius, double minX, double maxX, double initV, double step) 
 	{
 		//Assign values
 		this.name = name;
-		this.filepath = filepath;
+		this.file = file;
 		this.integration = integration;
 		this.interpolation = interpolation;
 		this.inertia = inertia;
@@ -95,7 +99,7 @@ public class Trace {
 		this.maxX= maxX;
 		this.initV = initV;
 		this.step = step;
-		System.out.println(filepath);
+		System.out.println(file);
 	}
 	
 	
@@ -103,10 +107,10 @@ public class Trace {
 		//Perform interpolation and set domain
 		switch (interpolation) {
 		case POLYNOMIAL:
-			func = analysis.Interpolation.polynomialInterpolation(filepath);
+			func = analysis.Interpolation.polynomialInterpolation(file);
 			break;
 		case POLYNOMIAL_SPLINE:
-			func = analysis.Interpolation.polynomialSplineInterpolation(filepath);
+			func = analysis.Interpolation.polynomialSplineInterpolation(file);
 			break;
 		}
 		
@@ -134,12 +138,15 @@ public class Trace {
 		//Validate inertia constant
 		if (inertia.VALUE < 0)
 			throw new IllegalArgumentException("Moment of inertia cannot be negative.");
+		
+		//Initialization complete
+		initialized = true;
 	}
 	
 	
 	//Getters (Trace properties)
 	public String getName() {return name;}
-	public String getFilepath() {return filepath;}
+	public File getFile() {return file;}
 	public Interpolation getInterpolation() {return interpolation;}
 	public Integration getIntegration() {return integration;}
 	public Inertia getInertia() {return inertia;}
@@ -149,7 +156,13 @@ public class Trace {
 	public Double getMaxX() {return maxX;}
 	public Double getInitV() {return initV;}
 	public Double getStep() {return step;}
-
+	public boolean isInitialized() {return initialized;}
+	
+	//Getters (Other)
+	public StringProperty nameProperty() {
+		return 
+	}
+	
 	//Getters (Trace details - Strings)
 	public String getInterpolationType() {return interpolationType.TEXT;}
 	public String getIntegrationType() {return integrationType.TEXT;}
@@ -161,7 +174,7 @@ public class Trace {
 	
 	//Setters (Trace properties)
 	public void setName(String name) {this.name = name;}
-	public void setFilepath(String filepath) {this.filepath = filepath;}
+	public void setFile(File file) {this.file = file;}
 	public void setIntegration(Integration integration) {this.integration = integration;}
 	public void setInterpolation(Interpolation interpolation) {this.interpolation = interpolation;}
 	public void setInertia(Inertia inertia) {this.inertia = inertia;}
@@ -320,7 +333,7 @@ public class Trace {
 	public static void main(String[] args) throws FileNotFoundException {
 		// Initial parameters
 		String name = "Test";
-		String filepath = "C:\\Users\\Patrik\\git\\Patrik-Forked\\Physics\\src\\imports\\mass_B.txt";
+		File file = new File("C:\\Users\\Patrik\\git\\Patrik-Forked\\Physics\\src\\imports\\mass_B.txt");
 		Integration integration = Integration.EULER_METHOD;				//Integration type
 		Interpolation interpolation = Interpolation.POLYNOMIAL_SPLINE;	//Interpolation type
 		Inertia inertia = Inertia.POINT_OF_MASS;							//Moment of inertia
@@ -332,7 +345,7 @@ public class Trace {
 		double step = 0.000001;											//Integration step size
 		
 		//Initialize new experiment
-		Trace testTrace = new Trace(name, filepath, integration, interpolation, inertia, mass, radius, minX, maxX, initV, step);
+		Trace testTrace = new Trace(name, file, integration, interpolation, inertia, mass, radius, minX, maxX, initV, step);
 		
 		//Perform trace
 		testTrace.trace(false, true);

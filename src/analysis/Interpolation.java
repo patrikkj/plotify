@@ -1,5 +1,6 @@
 package analysis;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -42,9 +43,9 @@ public class Interpolation {
 	 * Input parameters:
 	 *  - String filepath: Absolute filepath to standard Tracker export file (.txt)
 	 */
-	public static PolySpline polynomialSplineInterpolation(String filepath) {
+	public static PolySpline polynomialSplineInterpolation(File file) {
 		//Parse tracking data from filepath to two arrays of doubles.
-		double[][] fileData = parseFile(filepath);
+		double[][] fileData = parseFile(file);
 
 		//Perform interpolation
 		return polynomialSplineInterpolation(fileData[0], fileData[1]);
@@ -97,9 +98,9 @@ public class Interpolation {
 	 * Input parameters:
 	 *  - String filepath: Absolute filepath to standard Tracker export file (.txt)
 	 */
-	public static Polynomial polynomialInterpolation(String filepath) {
+	public static Polynomial polynomialInterpolation(File file) {
 		//Parse tracking data from filepath to two arrays of doubles.
-		double[][] fileData = parseFile(filepath);
+		double[][] fileData = parseFile(file);
 		
 		//Return coefficient array from interpolation
 		return polynomialInterpolation(fileData[0], fileData[1]);
@@ -113,14 +114,14 @@ public class Interpolation {
 	 *  - double[] x: array of x coordinates in strictly increasing order
 	 *  - double[] y: array of y coordinates at x coordinate specified in fist array
 	 */
-	private static double[][] parseFile(String filepath)  {
+	private static double[][] parseFile(File file)  {
 		//Local variables
 		Scanner input = null;
 		StringBuilder stringBuilder = new StringBuilder();
 
 		//Try reading file
 		try { 
-			input = new Scanner(new FileReader(filepath));
+			input = new Scanner(new FileReader(file));
 		} 
 		catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -157,7 +158,7 @@ public class Interpolation {
 	}
 	
 	public static void main(String[] args) throws FileNotFoundException {
-		PolySpline polySpline = polynomialSplineInterpolation("C:\\Users\\Patrik\\git\\Patrik-Forked\\Physics Plotter\\src\\imports\\mass_A.txt");
+		PolySpline polySpline = polynomialSplineInterpolation(new File("C:\\Users\\Patrik\\git\\Patrik-Forked\\Physics Plotter\\src\\imports\\mass_A.txt"));
 		
 		for (double x = 0.132; x < 1.44; x += 0.001) {
 			System.out.printf("x: %.3f \t\t y: %s\n", x, polySpline.eval(x));
