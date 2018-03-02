@@ -69,8 +69,11 @@ public class Graph {
 	}
 	
 	public void updateSeries() {
-		
+		//uses detail, xdata, ydata, trace
 	}
+	
+	
+	
 	
 	private void initializeSeries() {
 		
