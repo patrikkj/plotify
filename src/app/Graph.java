@@ -26,6 +26,7 @@ public class Graph {
 		this.trace = trace;
 	}
 	
+	@Override
 	public String toString() {
 		return name;
 	}

@@ -11,24 +11,30 @@ import enums.Inertia;
 import enums.Integration;
 import enums.Interpolation;
 import functions.Differentiable;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 
 public class Trace {
 	// Trace properties (Setters & Getters)
-	private String name;
-	private File file;
-	private Integration integration;
-	private Interpolation interpolation;
-	private Inertia inertia;
-	private Double mass;
-	private Double radius;
-	private Double minX;
-	private Double maxX;
-	private Double initV;
-	private Double step;
-	private boolean initialized;
-	private StringProperty nameProperty;
+	private StringProperty name;
+	private ObjectProperty<File> file;
+	private ObjectProperty<Integration> integration;
+	private ObjectProperty<Interpolation> interpolation;
+	private ObjectProperty<Inertia> inertia;
+	private ObjectProperty<Double> mass;
+	private ObjectProperty<Double> radius;
+	private ObjectProperty<Double> minX;
+	private ObjectProperty<Double> maxX;
+	private ObjectProperty<Double> initV;
+	private ObjectProperty<Double> step;
+	private BooleanProperty initialized;
 	
 	// Trace Details (Only Getters)
 	private Integration integrationType;
@@ -65,8 +71,9 @@ public class Trace {
      * Constructor used by GUI.
      */
 	public Trace() {
-		nameProperty.setValue(v);
-		this.name = "New trace";
+		//Initialize properties
+		initializeProperties();
+		setName("New trace");
 	}	
 	
 	/**
@@ -87,40 +94,57 @@ public class Trace {
 				Integration integration, Interpolation interpolation, Inertia inertia, 
 				double mass, double radius, double minX, double maxX, double initV, double step) 
 	{
+		//Initialize properties
+		initializeProperties();
+		
 		//Assign values
-		this.name = name;
-		this.file = file;
-		this.integration = integration;
-		this.interpolation = interpolation;
-		this.inertia = inertia;
-		this.mass = mass;
-		this.radius = radius;
-		this.minX = minX;
-		this.maxX= maxX;
-		this.initV = initV;
-		this.step = step;
-		System.out.println(file);
+		setName(name);
+		setFile(file);
+		setIntegration(integration);
+		setInterpolation(interpolation);
+		setInertia(inertia);
+		setMass(mass);
+		setRadius(radius);
+		setMinX(minX);
+		setMaxX(maxX);
+		setInitV(initV);
+		setStep(step);
+	}
+	
+	private void initializeProperties() {
+		name = new SimpleStringProperty();
+		file = new SimpleObjectProperty<>();
+		integration = new SimpleObjectProperty<>();
+		interpolation = new SimpleObjectProperty<>();
+		inertia = new SimpleObjectProperty<>();
+		mass = new SimpleObjectProperty<>();
+		radius = new SimpleObjectProperty<>();
+		minX = new SimpleObjectProperty<>();
+		maxX = new SimpleObjectProperty<>();
+		initV = new SimpleObjectProperty<>();
+		step = new SimpleObjectProperty<>();
+		initialized = new SimpleBooleanProperty();
 	}
 	
 	
 	private void initializeFunc() {
 		//Perform interpolation and set domain
-		switch (interpolation) {
+		switch (getInterpolation()) {
 		case POLYNOMIAL:
-			func = analysis.Interpolation.polynomialInterpolation(file);
+			func = analysis.Interpolation.polynomialInterpolation(getFile());
 			break;
 		case POLYNOMIAL_SPLINE:
-			func = analysis.Interpolation.polynomialSplineInterpolation(file);
+			func = analysis.Interpolation.polynomialSplineInterpolation(getFile());
 			break;
 		}
 		
 		//Set trace details
-		interpolationType = interpolation;
+		interpolationType = getInterpolation();
 		
 		//Set domain and x-range
 		domain = func.getDomain();
-		minX = Math.max(minX, domain[0]);
-		maxX = Math.min(maxX, domain[1]);
+		setMinX(Math.max(getMinX(), domain[0]));
+		setMaxX(Math.min(getMaxX(), domain[1]));
 	}
 	
 	//Validation
@@ -128,40 +152,49 @@ public class Trace {
 		initializeFunc();
 		
 		//Validate mass
-		if (mass <= 0)
+		if (getMass() <= 0)
 			throw new IllegalArgumentException("Mass must be positive.");
 		
 		//Validate radius
-		if (radius < 0)
+		if (getRadius() < 0)
 			throw new IllegalArgumentException("Radius cannot be negative.");
 		
 		//Validate inertia constant
-		if (inertia.VALUE < 0)
+		if (getInertia().VALUE < 0)
 			throw new IllegalArgumentException("Moment of inertia cannot be negative.");
 		
 		//Initialization complete
-		initialized = true;
+		setInitialized(true);
 	}
 	
+	
+	//Getters (Trace property values)
+	public String getName() {return name.get();}
+	public File getFile() {return file.get();}
+	public Interpolation getInterpolation() {return interpolation.get();}
+	public Integration getIntegration() {return integration.get();}
+	public Inertia getInertia() {return inertia.get();}
+	public Double getMass() {return mass.get();}
+	public Double getRadius() {return radius.get();}
+	public Double getMinX() {return minX.get();}
+	public Double getMaxX() {return maxX.get();}
+	public Double getInitV() {return initV.get();}
+	public Double getStep() {return step.get();}
+	public boolean isInitialized() {return initialized.get();}
 	
 	//Getters (Trace properties)
-	public String getName() {return name;}
-	public File getFile() {return file;}
-	public Interpolation getInterpolation() {return interpolation;}
-	public Integration getIntegration() {return integration;}
-	public Inertia getInertia() {return inertia;}
-	public Double getMass() {return mass;}
-	public Double getRadius() {return radius;}
-	public Double getMinX() {return minX;}
-	public Double getMaxX() {return maxX;}
-	public Double getInitV() {return initV;}
-	public Double getStep() {return step;}
-	public boolean isInitialized() {return initialized;}
-	
-	//Getters (Other)
-	public StringProperty nameProperty() {
-		return 
-	}
+	public StringProperty getNameProperty() {return name;}
+	public ObjectProperty<File> getFileProperty() {return file;}
+	public ObjectProperty<Interpolation> getInterpolationProperty() {return interpolation;}
+	public ObjectProperty<Integration> getIntegrationProperty() {return integration;}
+	public ObjectProperty<Inertia> getInertiaProperty() {return inertia;}
+	public ObjectProperty<Double> getMassProperty() {return mass;}
+	public ObjectProperty<Double> getRadiusProperty() {return radius;}
+	public ObjectProperty<Double> getMinXProperty() {return minX;}
+	public ObjectProperty<Double> getMaxXProperty() {return maxX;}
+	public ObjectProperty<Double> getInitVProperty() {return initV;}
+	public ObjectProperty<Double> getStepProperty() {return step;}
+	public BooleanProperty getInitializedProperty() {return initialized;}
 	
 	//Getters (Trace details - Strings)
 	public String getInterpolationType() {return interpolationType.TEXT;}
@@ -173,17 +206,18 @@ public class Trace {
 	public String getEnergyDifference() {return energyDifference;}
 	
 	//Setters (Trace properties)
-	public void setName(String name) {this.name = name;}
-	public void setFile(File file) {this.file = file;}
-	public void setIntegration(Integration integration) {this.integration = integration;}
-	public void setInterpolation(Interpolation interpolation) {this.interpolation = interpolation;}
-	public void setInertia(Inertia inertia) {this.inertia = inertia;}
-	public void setMass(Double mass) {this.mass = mass;}
-	public void setRadius(Double radius) {this.radius = radius;}
-	public void setMinX(Double minX) {this.minX = minX;}
-	public void setMaxX(Double maxX) {this.maxX = maxX;}
-	public void setInitV(Double initV) {this.initV = initV;}
-	public void setStep(Double step) {this.step = step;}
+	public void setName(String name) {this.name.set(name);}
+	public void setFile(File file) {this.file.set(file);}
+	public void setIntegration(Integration integration) {this.integration.set(integration);}
+	public void setInterpolation(Interpolation interpolation) {this.interpolation.set(interpolation);}
+	public void setInertia(Inertia inertia) {this.inertia.set(inertia);}
+	public void setMass(Double mass) {this.mass.set(mass);}
+	public void setRadius(Double radius) {this.radius.set(radius);}
+	public void setMinX(Double minX) {this.minX.set(minX);}
+	public void setMaxX(Double maxX) {this.maxX.set(maxX);}
+	public void setInitV(Double initV) {this.initV.set(initV);;}
+	public void setStep(Double step) {this.step.set(step);}
+	public void setInitialized(Boolean initialized) { this.initialized.set(initialized);}
 
 	
 	//Calculations
@@ -199,7 +233,7 @@ public class Trace {
 		// Denominator: 1 + I₀ / mr²
 		// 			  = 1 + c * mr² / mr²		| insert I₀ = c * mr²	
 		// 			  = 1 + c					| cancel terms
-		double denominator = 1 + inertia.VALUE;
+		double denominator = 1 + getInertia().VALUE;
 		
 		// Return acceleration
 		return numerator / denominator;
@@ -207,12 +241,12 @@ public class Trace {
 
 	/**Returns the kinetic energy for a given velocity v*/
 	public double getKineticEnergy(double v) {
-		return 0.5*mass*v*v  +  0.5*mass*inertia.VALUE*v*v;
+		return 0.5*getMass()*v*v  +  0.5*getMass()*getInertia().VALUE*v*v;
    	}
 	
 	/**Returns the potential energy for a given value of x*/
 	public double getPotentialEnergy(double x) {
-		return mass * Trace.G * func.eval(x);
+		return getMass() * Trace.G * func.eval(x);
 	}
 	
 	/**Returns the total energy for a given velocity v and value of x*/
@@ -228,20 +262,20 @@ public class Trace {
 		validateTrace();
 		
 		// Perform trace using given integration method
-		switch (integration) {
+		switch (getIntegration()) {
 		case EULER_METHOD:
 			eulerTrace(printIterations);
 			break;
 		case EULER_IMPROVED_METHOD:
-			System.out.println("Integration type not supported: " + integration.TEXT);
+			System.out.println("Integration type not supported: " + getIntegration().TEXT);
 			break;
 		case RUNGE_KUTTA_METHOD:
-			System.out.println("Integration type not supported: " + integration.TEXT);
+			System.out.println("Integration type not supported: " + getIntegration().TEXT);
 			break;
 		}
 		
 		//Set trace details
-		integrationType = integration;
+		integrationType = getIntegration();
 		
 		//Print results if requested
 		if (printResults) printResults();
@@ -250,8 +284,8 @@ public class Trace {
 	/**Trace performed using Eulers method*/
 	private void eulerTrace(boolean printIterations) {
 		// Set initial parameters
-		double x = minX; 
-		double v = initV;
+		double x = getMinX(); 
+		double v = getInitV();
 		double a = getAccel(x);	
 		double eKin = getKineticEnergy(v);
 		double ePot = getPotentialEnergy(x);
@@ -266,11 +300,11 @@ public class Trace {
 		
 		//Keeps track of iterations
 		int iter = 0;
-		int approxIter = (int) ((domain[1] - domain[0]) / step); 
+		int approxIter = (int) ((domain[1] - domain[0]) / getStep()); 
 		
 		
 		//Iterate until track is complete (x has reached its' end value)
-		while (x < maxX) {
+		while (x < getMaxX()) {
 			//Using floats for lower memory consumption
 			aList.add((float) a);
 			vList.add((float) v);
@@ -278,7 +312,7 @@ public class Trace {
 			totList.add((float) eTot);
 			kinList.add((float) eKin);
 			potList.add((float) ePot);
-			timeList.add((float) (iter*step));
+			timeList.add((float) (iter*getStep()));
 			yList.add((float) func.eval(x));
 			
 			eTot = getTotalEnergy(v, x);
@@ -286,8 +320,8 @@ public class Trace {
 			ePot = getPotentialEnergy(x);
 			
 			a = getAccel(x);	
-			v = v + a * step;
-			x = x + v * Math.cos(func.slopeAngle(x)) * step;
+			v = v + a * getStep();
+			x = x + v * Math.cos(func.slopeAngle(x)) * getStep();
 			
 			//Increment iteration counter
 			if (iter++ % (approxIter/10) == 0)
@@ -306,12 +340,14 @@ public class Trace {
 		energyDifference = String.format("%.9f %%", ((initTotEnergy - eTot)/eTot)*100);
 		iterations = String.valueOf(iter * 2);
 		stepSize = String.valueOf(step);
-		totalTime = String.format("%f", iter * step).replace(',', '.');
+		totalTime = String.format("%f", iter * getStep()).replace(',', '.');
 		computationTime = String.format("%.3f seconds", (double) Duration.between(start, end).toMillis()/1000).replace(',', '.');
 	}
 	
 	
 	//Other
+	
+	
 	public void printResults() {
 		System.out.printf("\nFunction type: %s\n"
 				+ "Integration type: %s\n"
@@ -352,8 +388,9 @@ public class Trace {
 		
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return getName();
 	}
 }
 

@@ -1,6 +1,5 @@
 package parsers;
 
-import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
 import java.util.Locale;

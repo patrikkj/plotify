@@ -30,6 +30,7 @@ public class PolySpline implements Differentiable {
 	/*
 	 * Returns the function value of the spline polynomial at given point
 	 */
+	@Override
 	public double eval(double x) {		
 		return polySpline.value(x);
 	}
@@ -37,6 +38,7 @@ public class PolySpline implements Differentiable {
 	/*
 	 * Returns the function value of the spline polynomials' first derivative at given point
 	 */
+	@Override
 	public double evalDerivative(double x) {
 		return polySpline.polynomialSplineDerivative().value(x);
 	}
@@ -44,6 +46,7 @@ public class PolySpline implements Differentiable {
 	/*
 	 * Returns the function value of the spline polynomials' second derivative at given point
 	 */
+	@Override
 	public double evalDerivativeII(double x) {
 		return polySpline.polynomialSplineDerivative().polynomialSplineDerivative().value(x);
 	}
@@ -53,6 +56,7 @@ public class PolySpline implements Differentiable {
 	/*
 	 * Returns a PolySpline object representing the first derivative of this function
 	 */
+	@Override
 	public PolySpline derivative() {
 		return new PolySpline(polySpline.polynomialSplineDerivative());
 	}
@@ -60,6 +64,7 @@ public class PolySpline implements Differentiable {
 	/*
 	 * Returns a PolySpline object representing the second derivative of this function
 	 */
+	@Override
 	public PolySpline derivativeII() {
 		return derivative().derivative();
 	}
@@ -70,6 +75,7 @@ public class PolySpline implements Differentiable {
 	 * Returns the slope angle at given point, in radians
 	 * Slope angle is positive for a curve with a negative derivative
 	 */
+	@Override
 	public double slopeAngle(double x) {
 		return Math.atan(-evalDerivative(x));
 	}
@@ -78,6 +84,7 @@ public class PolySpline implements Differentiable {
 	 * Returns the slope angle at given point, in degrees
 	 * Slope angle is positive for a curve with a negative derivative
 	 */
+	@Override
 	public double slopeAngleDegrees(double x) {
 		//Compute angle in radians
 		double radians = slopeAngle(x);
@@ -91,6 +98,7 @@ public class PolySpline implements Differentiable {
 	 * The sign of the radius of the osculating circle, is the same as that of the second derivative
 	 * https://en.wikipedia.org/wiki/Radius_of_curvature
 	 */
+	@Override
 	public double radiusOfCurvature(double x) {
 		double dy_dx_1 = evalDerivative(x);
 		double dy_dx_2 = evalDerivativeII(x);
@@ -105,6 +113,7 @@ public class PolySpline implements Differentiable {
 	
 	//Others
 	/**Returns the domain of this polynomial spline function*/
+	@Override
 	public double[] getDomain() {
 		return domain;
 	}
@@ -112,6 +121,7 @@ public class PolySpline implements Differentiable {
 	/*
 	 * Returns a string representing the spline polynomial described by this object
 	 */
+	@Override
 	public String toString(boolean includeZeroCoeffs, boolean addPadding) {
 		StringBuilder stringBuilder = new StringBuilder();
 		

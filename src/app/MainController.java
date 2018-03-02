@@ -12,10 +12,12 @@ import com.jfoenix.controls.JFXToggleButton;
 import enums.Inertia;
 import enums.Integration;
 import enums.Interpolation;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
@@ -24,7 +26,9 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.stage.Stage;;
+import javafx.stage.Stage;
+import javafx.util.StringConverter;
+import javafx.util.converter.NumberStringConverter;;
 
 public class MainController {
 	// Variable declarations
@@ -93,6 +97,11 @@ public class MainController {
     @FXML private JFXToggleButton graphSmoothToggleButton;
     @FXML private JFXToggleButton graphVisibleToggleButton;
 
+    // Property converter
+    NumberStringConverter numberStringConverter;
+    StringConverter<Double> customStringConverter;
+    
+    
     //  Observable lists
     private ObservableList<Trace> traceList;
     private ObservableList<Graph> graphList;
@@ -100,13 +109,30 @@ public class MainController {
     
     
     // Initializer
-    @FXML private void initialize() {    
+	@FXML private void initialize() {    
+    	// Initialize converter
+    	numberStringConverter = new NumberStringConverter();
+    	customStringConverter = new StringConverter<>() {
+			@Override
+			public Double fromString(String arg0) {
+				return (arg0.equals("")) ? null : Double.valueOf(arg0);
+			}
+
+			@Override
+			public String toString(Double arg0) {
+				return (arg0 == null) ? null : String.valueOf(arg0);
+			}
+		};
+		
     	initializeLists();
     	
     	// Set default trace
     	traceList.add(new Trace());
     	traceListView.getSelectionModel().selectFirst();
-    	traceListView.get
+    	
+    	// Add name listener
+		traceName.setOnAction(new EventHandler<ActionEvent>() 
+			{@Override public void handle(ActionEvent arg0) {traceListView.refresh();}});
     	
     	// Updaters
     	updateTraceView();
@@ -123,8 +149,6 @@ public class MainController {
     	graphListView.setItems(graphList);
     	traceFile.setItems(fileList);
     	
-    	traceListView.;
-
     	// Fill choiceBoxes
     	traceIntegration.setItems(FXCollections.observableList(Integration.getElements()));
         traceInterpolation.setItems(FXCollections.observableList(Interpolation.getElements()));
@@ -137,21 +161,18 @@ public class MainController {
 	private void updateTraceView() {
 		// Retrive selected Trace
 		Trace trace = traceListView.getSelectionModel().getSelectedItem();
-		
-		//Update trace properties
-		traceName								.setText(trace.getName());
-		if (trace.isInitialized()) {
-		    traceFile				.getEditor()	.setText(trace.getFile().getName());
-		    traceIntegration		.getEditor()	.setText(trace.getIntegration().TEXT);
-		    traceInterpolation		.getEditor()	.setText(trace.getInterpolation().TEXT);
-		    traceInertia			.getEditor()	.setText(trace.getInertia().TEXT);;
-		    traceMass								.setText(trace.getMass().toString());;
-		    traceRadius								.setText(trace.getRadius().toString());;
-		    traceMinX								.setText(trace.getMinX().toString());
-		    traceMaxX								.setText(trace.getMaxX().toString());
-		    traceInitV								.setText(trace.getInitV().toString());
-		    traceStep								.setText(trace.getStep().toString());
-		}
+		//Bind trace properties
+		traceName				.textProperty().bindBidirectional(trace.getNameProperty());
+	    traceFile				.valueProperty().bindBidirectional(trace.getFileProperty());
+	    traceIntegration		.valueProperty().bindBidirectional(trace.getIntegrationProperty());
+	    traceInterpolation		.valueProperty().bindBidirectional(trace.getInterpolationProperty());
+	    traceInertia			.valueProperty().bindBidirectional(trace.getInertiaProperty());
+	    traceMass				.textProperty().bindBidirectional(trace.getMassProperty(), customStringConverter);
+	    traceRadius				.textProperty().bindBidirectional(trace.getRadiusProperty(), customStringConverter);
+	    traceMinX				.textProperty().bindBidirectional(trace.getMinXProperty(), customStringConverter);
+	    traceMaxX				.textProperty().bindBidirectional(trace.getMaxXProperty(), customStringConverter);
+	    traceInitV				.textProperty().bindBidirectional(trace.getInitVProperty(), customStringConverter);
+	    traceStep				.textProperty().bindBidirectional(trace.getStepProperty(), customStringConverter);
 		
 		//Update trace details
 		if (trace.isInitialized()) {
@@ -191,10 +212,34 @@ public class MainController {
     	traceList.add(new Trace());
     }
     
-    @FXML private void handleDeleteTraceClick(ActionEvent event) {}
-    @FXML private void handleComputeClick(ActionEvent event) {}
-    @FXML private void handleComputeAllClick(ActionEvent event) {}
+    @FXML private void handleDeleteTraceClick(ActionEvent event) {
+    	Trace trace = traceListView.getSelectionModel().getSelectedItem();
+    	System.out.println(traceListView.getSelectionModel().getSelectedItem());
+    	System.out.printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+    			trace.getName(),
+    			trace.getFile(),
+    			trace.getIntegration(),
+    			trace.getInterpolation(),
+    			trace.getInertia(),
+    			trace.getMass(),
+    			trace.getMinX(),
+    			trace.getMaxX(),
+    			trace.getInitV(),
+    			trace.getStep());
+    	
+    }
+    @FXML private void handleComputeClick(ActionEvent event) {
+    	// Retrive selected Trace
+    	Trace trace = traceListView.getSelectionModel().getSelectedItem();
+    	
+    	// Run trace
+    	trace.trace(false, true);
 
+    	// Update
+    	updateTraceView();
+    }
+    @FXML private void handleComputeAllClick(ActionEvent event) {}
+    
     // Graph button handlers
     @FXML private void handleNewGraphClick(ActionEvent event) {
     	graphList.add(new Graph());

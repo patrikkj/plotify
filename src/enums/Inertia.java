@@ -80,6 +80,7 @@ public enum Inertia {
 	}
 	
 	// toString - Values to be displayed in ComboBox
+	@Override
 	public String toString() {
 		return TEXT;
 	}

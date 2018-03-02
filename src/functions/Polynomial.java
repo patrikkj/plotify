@@ -19,6 +19,7 @@ public class Polynomial implements Differentiable {
 	/*
 	 * Evaluates polyonmial represented by an array of coefficients, using Horner's method
 	 */
+	@Override
 	public double eval(double x) {
 		double result = coeffArray[0];
 		
@@ -31,6 +32,7 @@ public class Polynomial implements Differentiable {
 	/*
 	 * Evaluates first derivative of polynomial at given x-value
 	 */
+	@Override
 	public double evalDerivative(double x) {
 		return derivative().eval(x);
 	}
@@ -38,6 +40,7 @@ public class Polynomial implements Differentiable {
 	/*
 	 * Evaluates second derivative of polynomial at given x-value
 	 */
+	@Override
 	public double evalDerivativeII(double x) {		
 		return derivativeII().eval(x);
 	}
@@ -53,6 +56,7 @@ public class Polynomial implements Differentiable {
 	/*
 	 * Returns a Polynomial object, representing the first derivative of given polynomial
 	 */
+	@Override
 	public Polynomial derivative() {
 		double[] derivativeArray = new double[coeffArray.length - 1];
 		
@@ -66,6 +70,7 @@ public class Polynomial implements Differentiable {
 	/*
 	 * Returns a Polynomial object, representing the second derivative of given polynomial
 	 */
+	@Override
 	public Polynomial derivativeII() {
 		return derivative().derivative();
 	}
@@ -88,6 +93,7 @@ public class Polynomial implements Differentiable {
 	 * Returns the slope angle at given point, in radians
 	 * Slope angle is positive for a curve with a negative derivative
 	 */
+	@Override
 	public double slopeAngle(double x) {
 		return Math.atan(-evalDerivative(x));
 	}
@@ -96,6 +102,7 @@ public class Polynomial implements Differentiable {
 	 * Returns the slope angle at given point, in degrees
 	 * Slope angle is positive for a curve with a negative derivative
 	 */
+	@Override
 	public double slopeAngleDegrees(double x) {
 		//Compute angle in radians
 		double radians = slopeAngle(x);
@@ -109,6 +116,7 @@ public class Polynomial implements Differentiable {
 	 * The sign of the radius of the osculating circle, is the same as that of the second derivative
 	 * https://en.wikipedia.org/wiki/Radius_of_curvature
 	 */
+	@Override
 	public double radiusOfCurvature(double x) {
 		double dy_dx_1 = evalDerivative(x);
 		double dy_dx_2 = evalDerivativeII(x);
@@ -121,11 +129,13 @@ public class Polynomial implements Differentiable {
 	}
 
 	/**Returns the domain of this polynomial*/
+	@Override
 	public double[] getDomain() {
 		return domain;
 	}
 	
 	/**Returns a string representation of Polynomial*/
+	@Override
 	public String toString(boolean includeZeroCoeffs, boolean addPadding) {
 		return parsers.Polynomial.toString(coeffArray, includeZeroCoeffs, addPadding);
 	}
