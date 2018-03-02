@@ -1,6 +1,7 @@
 package app;
 
 import java.io.File;
+import java.io.FilenameFilter;
 
 import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXComboBox;
@@ -12,50 +13,56 @@ import com.jfoenix.controls.JFXToggleButton;
 import enums.Inertia;
 import enums.Integration;
 import enums.Interpolation;
-import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import javafx.util.converter.NumberStringConverter;;
 
 public class MainController {
-	// Variable declarations
-	// Root 
+	//// FXML fields
+	// ROOT 
     @FXML private VBox rootNode;
 
-    // Chart
-    @FXML private LineChart<?, ?> lineChart;
-    @FXML private CategoryAxis xAxis;
-    @FXML private NumberAxis yAxis;
+    
+    // CHART
+    @FXML private StackPane chartPane;
+    private LineChart<Number, Number> lineChart;
+    private NumberAxis xAxis;
+    private NumberAxis yAxis;
+    
     // Chart properties
     @FXML private JFXTextField chartTitle;
     @FXML private JFXTextField chartWidth;
     @FXML private JFXTextField chartHeight;
+    
     // X-Axis properties
     @FXML private JFXTextField xAxisName;
     @FXML private JFXTextField xAxisTickSize;
     @FXML private JFXTextField xAxisMinRange;
     @FXML private JFXTextField xAxisMaxRange;
+    
     // Y-Axis properties
     @FXML private JFXTextField yAxisName;
     @FXML private JFXTextField yAxisTickSize;
     @FXML private JFXTextField yAxisMinRange;
     @FXML private JFXTextField yAxisMaxRange;
     
-    // Traces
+    
+    // TRACES
     @FXML private JFXListView<Trace> traceListView;
+    
     // Trace properties
     @FXML private JFXTextField traceName;
     @FXML private JFXComboBox<File> traceFile;
@@ -68,6 +75,7 @@ public class MainController {
     @FXML private JFXTextField traceMaxX;
     @FXML private JFXTextField traceInitV;
     @FXML private JFXTextField traceStep;
+    
     // Trace details
     @FXML private Label funcTypeLabel;
     @FXML private Label integrationTypeLabel;
@@ -77,8 +85,10 @@ public class MainController {
     @FXML private Label computationTimeLabel;
     @FXML private Label energyDifferenceLabel;
 
-    // Graphs
+    
+    // GRAPHS
     @FXML private JFXListView<Graph> graphListView;
+    
     // Graph properties
     @FXML private JFXTextField graphName;
     @FXML private JFXComboBox<?> graphXData;
@@ -88,6 +98,7 @@ public class MainController {
     @FXML private JFXTextField graphXMax;
     @FXML private JFXTextField graphYMin;
     @FXML private JFXTextField graphYMax;
+    
     // Graph layout
     @FXML private JFXComboBox<?> graphStyle;
     @FXML private JFXColorPicker graphColorPicker;
@@ -96,11 +107,19 @@ public class MainController {
     @FXML private JFXSlider graphStrokeSlider;
     @FXML private JFXToggleButton graphSmoothToggleButton;
     @FXML private JFXToggleButton graphVisibleToggleButton;
-
-    // Property converter
-    NumberStringConverter numberStringConverter;
-    StringConverter<Double> customStringConverter;
     
+    
+    //// NON-FXML FIELDS
+    // Property converter
+    private StringConverter<Double> customStringConverter;
+    
+    // Cached trace (Used to manage property bindings)
+    private Trace selectedTrace;
+    private Trace prevTrace;
+
+    // Cached graph (Used to manage property bindings)
+    private Graph selectedGraph;
+    private Graph prevGraph;
     
     //  Observable lists
     private ObservableList<Trace> traceList;
@@ -108,41 +127,95 @@ public class MainController {
     private ObservableList<File> fileList;
     
     
+    // Initialization
+    /**
+     * Initializes application, called after FXML fields has been invoked.
+     */
     // Initializer
 	@FXML private void initialize() {    
     	// Initialize converter
-    	numberStringConverter = new NumberStringConverter();
     	customStringConverter = new StringConverter<>() {
-			@Override
+			@Override 
 			public Double fromString(String arg0) {
-				return (arg0.equals("")) ? null : Double.valueOf(arg0);
-			}
+				return (arg0.equals("")) ? null : Double.valueOf(arg0);}
 
 			@Override
 			public String toString(Double arg0) {
-				return (arg0 == null) ? null : String.valueOf(arg0);
-			}
+				return (arg0 == null) ? null : String.valueOf(arg0);}
 		};
 		
     	initializeLists();
+    	initializeTraceView();
+    	initializeGraphView();
     	
-    	// Set default trace
+    }
+    
+	private void initializeTraceView() {
+		// Set default trace
     	traceList.add(new Trace());
     	traceListView.getSelectionModel().selectFirst();
     	
     	// Add name listener
-		traceName.setOnAction(new EventHandler<ActionEvent>() 
-			{@Override public void handle(ActionEvent arg0) {traceListView.refresh();}});
+		traceName.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent arg0) {
+				traceListView.refresh();
+			}
+		});
     	
     	// Updaters
     	updateTraceView();
-    }
-    
+	}
+
+	private void initializeGraphView() {
+		// Initialize chart
+		xAxis = new NumberAxis();
+		yAxis = new NumberAxis();
+		lineChart = new LineChart<>(xAxis, yAxis);
+		
+		// Set chart properties
+		xAxis.setLabel("xAxis");
+		yAxis.setLabel("yAxis");
+		lineChart.setTitle("My linechart");
+		
+		// Add chart to GUI
+		chartPane.getChildren().setAll(lineChart);
+		
+		// Set default graph
+		graphList.add(new Graph());
+		graphListView.getSelectionModel().selectFirst();
+		
+		// Add name listener
+		graphName.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent arg0) {
+				graphListView.refresh();
+			}
+		});
+		
+		// Updaters
+		updateGraphView();
+	}
+	
+	/**
+     * Initializes and binds ListViews, loads imported files and initializes ChoiceBoxes.
+     */
     private void initializeLists() {
     	// Initialize observable lists
     	traceList = FXCollections.observableArrayList();
     	graphList = FXCollections.observableArrayList();
     	fileList = FXCollections.observableArrayList();
+    	
+    	// Import tracker files from 'import'
+    	File importFolder = new File(getClass().getResource("../imports").getPath());
+    	FilenameFilter fileFilter = new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String filename) {
+				return filename.endsWith(".txt");
+			}
+		};
+    	for (File dataFile : importFolder.listFiles(fileFilter))
+    		fileList.add(dataFile);
     	
     	// Bind observable lists
     	traceListView.setItems(traceList);
@@ -157,112 +230,148 @@ public class MainController {
     }
     
     
+    // GUI Updates
+    /**
+     * Manages trace bindings and updates trace details.
+     * Called when selected trace has been changed.
+     */
     // Updaters
 	private void updateTraceView() {
-		// Retrive selected Trace
-		Trace trace = traceListView.getSelectionModel().getSelectedItem();
-		//Bind trace properties
-		traceName				.textProperty().bindBidirectional(trace.getNameProperty());
-	    traceFile				.valueProperty().bindBidirectional(trace.getFileProperty());
-	    traceIntegration		.valueProperty().bindBidirectional(trace.getIntegrationProperty());
-	    traceInterpolation		.valueProperty().bindBidirectional(trace.getInterpolationProperty());
-	    traceInertia			.valueProperty().bindBidirectional(trace.getInertiaProperty());
-	    traceMass				.textProperty().bindBidirectional(trace.getMassProperty(), customStringConverter);
-	    traceRadius				.textProperty().bindBidirectional(trace.getRadiusProperty(), customStringConverter);
-	    traceMinX				.textProperty().bindBidirectional(trace.getMinXProperty(), customStringConverter);
-	    traceMaxX				.textProperty().bindBidirectional(trace.getMaxXProperty(), customStringConverter);
-	    traceInitV				.textProperty().bindBidirectional(trace.getInitVProperty(), customStringConverter);
-	    traceStep				.textProperty().bindBidirectional(trace.getStepProperty(), customStringConverter);
+		// Retrive selected list entry
+		selectedTrace = traceListView.getSelectionModel().getSelectedItem();
 		
-		//Update trace details
-		if (trace.isInitialized()) {
-		    funcTypeLabel			.setText(trace.getInterpolationType());
-		    integrationTypeLabel	.setText(trace.getIntegrationType());
-		    stepSizeLabel			.setText(trace.getStepSize());
-		    iterationsLabel			.setText(trace.getIterations());
-		    totalTimeLabel			.setText(trace.getTotalTime());
-		    computationTimeLabel	.setText(trace.getComputationTime());
-		    energyDifferenceLabel	.setText(trace.getEnergyDifference());
+		// Unbind previous trace
+		if (prevTrace != null) {
+			traceName				.textProperty().unbindBidirectional(prevTrace.getNameProperty());
+		    traceFile				.valueProperty().unbindBidirectional(prevTrace.getFileProperty());
+		    traceIntegration		.valueProperty().unbindBidirectional(prevTrace.getIntegrationProperty());
+		    traceInterpolation		.valueProperty().unbindBidirectional(prevTrace.getInterpolationProperty());
+		    traceInertia			.valueProperty().unbindBidirectional(prevTrace.getInertiaProperty());
+		    traceMass				.textProperty().unbindBidirectional(prevTrace.getMassProperty());
+		    traceRadius				.textProperty().unbindBidirectional(prevTrace.getRadiusProperty());
+		    traceMinX				.textProperty().unbindBidirectional(prevTrace.getMinXProperty());
+		    traceMaxX				.textProperty().unbindBidirectional(prevTrace.getMaxXProperty());
+		    traceInitV				.textProperty().unbindBidirectional(prevTrace.getInitVProperty());
+		    traceStep				.textProperty().unbindBidirectional(prevTrace.getStepProperty());
+		}
+		
+		// Cache selected trace
+		prevTrace = selectedTrace;
+		
+		// Bind trace properties
+		traceName				.textProperty().bindBidirectional(selectedTrace.getNameProperty());
+	    traceFile				.valueProperty().bindBidirectional(selectedTrace.getFileProperty());
+	    traceIntegration		.valueProperty().bindBidirectional(selectedTrace.getIntegrationProperty());
+	    traceInterpolation		.valueProperty().bindBidirectional(selectedTrace.getInterpolationProperty());
+	    traceInertia			.valueProperty().bindBidirectional(selectedTrace.getInertiaProperty());
+	    traceMass				.textProperty().bindBidirectional(selectedTrace.getMassProperty(), customStringConverter);
+	    traceRadius				.textProperty().bindBidirectional(selectedTrace.getRadiusProperty(), customStringConverter);
+	    traceMinX				.textProperty().bindBidirectional(selectedTrace.getMinXProperty(), customStringConverter);
+	    traceMaxX				.textProperty().bindBidirectional(selectedTrace.getMaxXProperty(), customStringConverter);
+	    traceInitV				.textProperty().bindBidirectional(selectedTrace.getInitVProperty(), customStringConverter);
+	    traceStep				.textProperty().bindBidirectional(selectedTrace.getStepProperty(), customStringConverter);
+		
+		// Update trace details
+		if (selectedTrace.isInitialized()) {
+		    funcTypeLabel			.setText(selectedTrace.getInterpolationType());
+		    integrationTypeLabel	.setText(selectedTrace.getIntegrationType());
+		    stepSizeLabel			.setText(selectedTrace.getStepSize());
+		    iterationsLabel			.setText(selectedTrace.getIterations());
+		    totalTimeLabel			.setText(selectedTrace.getTotalTime());
+		    computationTimeLabel	.setText(selectedTrace.getComputationTime());
+		    energyDifferenceLabel	.setText(selectedTrace.getEnergyDifference());
 		}
     }
     
-    @SuppressWarnings("unused")
-	private void updateGraphs() {
-    	
+	private void updateGraphView() {
+		// Retrive selected list entry
+		selectedGraph = graphListView.getSelectionModel().getSelectedItem();
+		
+		lineChart.getData().add(selectedGraph.getSeries());
     }
     
-    
-    // Validators
-    @SuppressWarnings("unused")
-    private void validateTrace() {
-    	
-    }
+ 
     
     
-    // Button handlers
+    
+    
+    //// Button handlers
     // Main menu button handlers
     @FXML private void handleNewProjectClick(ActionEvent event) {}
+    
     @FXML private void handleSaveClick(ActionEvent event) {}
+    
     @FXML private void handleLoadClick(ActionEvent event) {}
+    
     @FXML private void handleImportClick(ActionEvent event) {}
+    
     @FXML private void handleExportClick(ActionEvent event) {}
-
+    
+    
+    // Trace view button handlers
     // Trace button handlers
     @FXML private void handleNewTraceClick(ActionEvent event) {
     	traceList.add(new Trace());
     }
     
     @FXML private void handleDeleteTraceClick(ActionEvent event) {
-    	Trace trace = traceListView.getSelectionModel().getSelectedItem();
+    	
     	System.out.println(traceListView.getSelectionModel().getSelectedItem());
     	System.out.printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
-    			trace.getName(),
-    			trace.getFile(),
-    			trace.getIntegration(),
-    			trace.getInterpolation(),
-    			trace.getInertia(),
-    			trace.getMass(),
-    			trace.getMinX(),
-    			trace.getMaxX(),
-    			trace.getInitV(),
-    			trace.getStep());
-    	
+    			selectedTrace.getName(),
+    			selectedTrace.getFile(),
+    			selectedTrace.getIntegration(),
+    			selectedTrace.getInterpolation(),
+    			selectedTrace.getInertia(),
+    			selectedTrace.getMass(),
+    			selectedTrace.getMinX(),
+    			selectedTrace.getMaxX(),
+    			selectedTrace.getInitV(),
+    			selectedTrace.getStep());
     }
+    
     @FXML private void handleComputeClick(ActionEvent event) {
-    	// Retrive selected Trace
-    	Trace trace = traceListView.getSelectionModel().getSelectedItem();
-    	
     	// Run trace
-    	trace.trace(false, true);
+    	selectedTrace.trace(false, true);
 
     	// Update
     	updateTraceView();
     }
+    
     @FXML private void handleComputeAllClick(ActionEvent event) {}
     
+    
+    // Graph view button handlers
     // Graph button handlers
     @FXML private void handleNewGraphClick(ActionEvent event) {
     	graphList.add(new Graph());
+    	
+    	updateGraphView();
+    }
+    private double counter = 0;
+    @FXML private void handleDeleteGraphClick(ActionEvent event) {
+    	selectedGraph.getSeries().getData().add(new XYChart.Data<Number, Number>(Math.random()*10, Math.random()*20));
+    	
     }
     
-    @FXML private void handleDeleteGraphClick(ActionEvent event) {}
-    @FXML private void handleGraphUpClick(ActionEvent event) {}
+    @FXML private void handleGraphUpClick(ActionEvent event) {
+    	selectedGraph.setDefaultSeries();
+    }
+    
     @FXML private void handleGraphDownClick(ActionEvent event) {}
 
     
+    // Other
     // Trace file opener
     @FXML private void handleFileOpenClick(ActionEvent event) {
-    	// Retrive selected Trace
-    	Trace trace = traceListView.getSelectionModel().getSelectedItem();
-    	
     	// Retrive parent for file chooser
     	Stage mainStage = (Stage) rootNode.getScene().getWindow();
     	
     	// Construct file chooser
     	FileChooser fileChooser = new FileChooser();
-    	fileChooser.setTitle("Open Resource File");
+    	fileChooser.setTitle("Open Data File");
     	fileChooser.getExtensionFilters().addAll(
-    	         new ExtensionFilter("Text Files (*.txt)", "*.txt"),
+    	         new ExtensionFilter("Tracker file (*.txt)", "*.txt"),
     	         new ExtensionFilter("All Files", "*.*"));
     	
     	// Launch file chooser and retrive selected file
@@ -270,12 +379,13 @@ public class MainController {
     	
     	// Add file to fileList and update trace file
     	fileList.add(selectedFile);
-    	trace.setFile(selectedFile);
+    	selectedTrace.setFile(selectedFile);
     }
     
     @FXML private void handleTraceListClick(Event event) {
     	updateTraceView();
     }
+    
     @FXML private void handleGraphListClick(Event event) {
     }
 }

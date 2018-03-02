@@ -11,14 +11,12 @@ import enums.Inertia;
 import enums.Integration;
 import enums.Interpolation;
 import functions.Differentiable;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
 
 public class Trace {
@@ -73,7 +71,11 @@ public class Trace {
 	public Trace() {
 		//Initialize properties
 		initializeProperties();
+		
+		//Set default values
 		setName("New trace");
+		setIntegration(Integration.EULER_METHOD);
+		setInterpolation(Interpolation.POLYNOMIAL_SPLINE);
 	}	
 	
 	/**
@@ -182,6 +184,29 @@ public class Trace {
 	public Double getStep() {return step.get();}
 	public boolean isInitialized() {return initialized.get();}
 	
+	//Getters (Trace details - Strings)
+	public String getInterpolationType() {return interpolationType.TEXT;}
+	public String getIntegrationType() {return integrationType.TEXT;}
+	public String getStepSize() {return stepSize;}
+	public String getIterations() {return iterations;}
+	public String getTotalTime() {return totalTime;}
+	public String getComputationTime() {return computationTime;}
+	public String getEnergyDifference() {return energyDifference;}
+	
+	//Setters (Trace property values)
+	public void setName(String name) {this.name.set(name);}
+	public void setFile(File file) {this.file.set(file);}
+	public void setIntegration(Integration integration) {this.integration.set(integration);}
+	public void setInterpolation(Interpolation interpolation) {this.interpolation.set(interpolation);}
+	public void setInertia(Inertia inertia) {this.inertia.set(inertia);}
+	public void setMass(Double mass) {this.mass.set(mass);}
+	public void setRadius(Double radius) {this.radius.set(radius);}
+	public void setMinX(Double minX) {this.minX.set(minX);}
+	public void setMaxX(Double maxX) {this.maxX.set(maxX);}
+	public void setInitV(Double initV) {this.initV.set(initV);;}
+	public void setStep(Double step) {this.step.set(step);}
+	public void setInitialized(Boolean initialized) { this.initialized.set(initialized);}
+
 	//Getters (Trace properties)
 	public StringProperty getNameProperty() {return name;}
 	public ObjectProperty<File> getFileProperty() {return file;}
@@ -196,29 +221,6 @@ public class Trace {
 	public ObjectProperty<Double> getStepProperty() {return step;}
 	public BooleanProperty getInitializedProperty() {return initialized;}
 	
-	//Getters (Trace details - Strings)
-	public String getInterpolationType() {return interpolationType.TEXT;}
-	public String getIntegrationType() {return integrationType.TEXT;}
-	public String getStepSize() {return stepSize;}
-	public String getIterations() {return iterations;}
-	public String getTotalTime() {return totalTime;}
-	public String getComputationTime() {return computationTime;}
-	public String getEnergyDifference() {return energyDifference;}
-	
-	//Setters (Trace properties)
-	public void setName(String name) {this.name.set(name);}
-	public void setFile(File file) {this.file.set(file);}
-	public void setIntegration(Integration integration) {this.integration.set(integration);}
-	public void setInterpolation(Interpolation interpolation) {this.interpolation.set(interpolation);}
-	public void setInertia(Inertia inertia) {this.inertia.set(inertia);}
-	public void setMass(Double mass) {this.mass.set(mass);}
-	public void setRadius(Double radius) {this.radius.set(radius);}
-	public void setMinX(Double minX) {this.minX.set(minX);}
-	public void setMaxX(Double maxX) {this.maxX.set(maxX);}
-	public void setInitV(Double initV) {this.initV.set(initV);;}
-	public void setStep(Double step) {this.step.set(step);}
-	public void setInitialized(Boolean initialized) { this.initialized.set(initialized);}
-
 	
 	//Calculations
 	/**Method for evaulating the acceleration at given value of x*/
@@ -346,8 +348,6 @@ public class Trace {
 	
 	
 	//Other
-	
-	
 	public void printResults() {
 		System.out.printf("\nFunction type: %s\n"
 				+ "Integration type: %s\n"
