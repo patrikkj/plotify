@@ -131,9 +131,8 @@ public class MainController {
     /**
      * Initializes application, called after FXML fields has been invoked.
      */
-    // Initializer
 	@FXML private void initialize() {    
-    	// Initialize converter
+    	// Initialize converter (used for trace bindings)
     	customStringConverter = new StringConverter<>() {
 			@Override 
 			public Double fromString(String arg0) {
@@ -176,7 +175,7 @@ public class MainController {
 		// Set chart properties
 		xAxis.setLabel("xAxis");
 		yAxis.setLabel("yAxis");
-		lineChart.setTitle("My linechart");
+		lineChart.setTitle("My Chart");
 		
 		// Add chart to GUI
 		chartPane.getChildren().setAll(lineChart);
@@ -287,6 +286,8 @@ public class MainController {
 		// Retrive selected list entry
 		selectedGraph = graphListView.getSelectionModel().getSelectedItem();
 		
+		// Bind graph properties
+		
 		lineChart.getData().add(selectedGraph.getSeries());
     }
     
@@ -348,10 +349,16 @@ public class MainController {
     	
     	updateGraphView();
     }
-    private double counter = 0;
+    private double xval = 0;
+    private double yval = 0;
     @FXML private void handleDeleteGraphClick(ActionEvent event) {
-    	selectedGraph.getSeries().getData().add(new XYChart.Data<Number, Number>(Math.random()*10, Math.random()*20));
-    	
+    	selectedGraph.getSeries().getNode().setStyle("-fx-stroke: #450000;");
+    	lineChart.setCreateSymbols(false);
+    	for (int i = 0; i < 100; i++) {
+    		xval += 0.1;
+    		yval += Math.random() - 0.5d;
+    		selectedGraph.getSeries().getData().add(new XYChart.Data<Number, Number>(xval, yval));
+    	}
     }
     
     @FXML private void handleGraphUpClick(ActionEvent event) {
