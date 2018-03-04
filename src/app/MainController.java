@@ -15,6 +15,9 @@ import enums.Inertia;
 import enums.Integration;
 import enums.Interpolation;
 import enums.Style;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -37,34 +40,28 @@ public class MainController {
 	// ROOT 
     @FXML private VBox rootNode;
 
-    
     // CHART
     @FXML private StackPane chartPane;
     private LineChart<Number, Number> lineChart;
     private NumberAxis xAxis;
     private NumberAxis yAxis;
-    
     // Chart properties
     @FXML private JFXTextField chartTitle;
     @FXML private JFXTextField chartWidth;
     @FXML private JFXTextField chartHeight;
-    
     // X-Axis properties
     @FXML private JFXTextField xAxisName;
     @FXML private JFXTextField xAxisTickSize;
     @FXML private JFXTextField xAxisMinRange;
     @FXML private JFXTextField xAxisMaxRange;
-    
     // Y-Axis properties
     @FXML private JFXTextField yAxisName;
     @FXML private JFXTextField yAxisTickSize;
     @FXML private JFXTextField yAxisMinRange;
     @FXML private JFXTextField yAxisMaxRange;
     
-    
     // TRACES
     @FXML private JFXListView<Trace> traceListView;
-    
     // Trace properties
     @FXML private JFXTextField traceName;
     @FXML private JFXComboBox<File> traceFile;
@@ -72,12 +69,10 @@ public class MainController {
     @FXML private JFXComboBox<Interpolation> traceInterpolation;
     @FXML private JFXComboBox<Inertia> traceInertia;
     @FXML private JFXTextField traceMass;
-    @FXML private JFXTextField traceRadius;
     @FXML private JFXTextField traceMinX;
     @FXML private JFXTextField traceMaxX;
     @FXML private JFXTextField traceInitV;
     @FXML private JFXTextField traceStep;
-    
     // Trace details
     @FXML private Label funcTypeLabel;
     @FXML private Label integrationTypeLabel;
@@ -86,11 +81,9 @@ public class MainController {
     @FXML private Label totalTimeLabel;
     @FXML private Label computationTimeLabel;
     @FXML private Label energyDifferenceLabel;
-
     
     // GRAPHS
     @FXML private JFXListView<Graph> graphListView;
-    
     // Graph properties
     @FXML private JFXTextField graphName;
     @FXML private JFXComboBox<String> graphXData;
@@ -98,7 +91,6 @@ public class MainController {
     @FXML private JFXComboBox<Trace> graphTrace;
     @FXML private JFXTextField graphMinX;
     @FXML private JFXTextField graphMaxX;
-    
     // Graph layout
     @FXML private JFXComboBox<Style> graphStyle;
     @FXML private JFXColorPicker graphColorPicker;
@@ -108,20 +100,29 @@ public class MainController {
     @FXML private JFXToggleButton graphSmoothToggleButton;
     @FXML private JFXToggleButton graphVisibleToggleButton;
     
-    
     //// NON-FXML FIELDS
-    // Property converter
+    /**
+     * Used in Bidirectional bindings to convert String <-> Double.
+     * <dt>String to Double:</dt>
+     * <li>Allows both ',' and '.' as decimal separator.
+     * <li>Returns null if String is empty ("").
+     * <br></br>
+     * <dt>Double to String:</dt>
+     * <li>Returns null if Double is null.
+     */
     private StringConverter<Double> customStringConverter;
     
-    // Cached trace (Used to manage property bindings)
+    /*
+     * Cached traces and graphs, used to manage property bindings.
+     */
     private Trace selectedTrace;
     private Trace prevTrace;
-
-    // Cached graph (Used to manage property bindings)
     private Graph selectedGraph;
     private Graph prevGraph;
     
-    //  Observable lists
+    /*
+     * Observable lists used in ListViews and ChoiceBoxes
+     */
     private ObservableList<Trace> traceList;
     private ObservableList<Graph> graphList;
     private ObservableList<File> fileList;
@@ -137,19 +138,22 @@ public class MainController {
     	customStringConverter = new StringConverter<>() {
 			@Override 
 			public Double fromString(String arg0) {
-				return (arg0.equals("")) ? null : Double.valueOf(arg0);}
+				return (arg0.equals("")) ? null : Double.valueOf(arg0.replace(',', '.'));}
 			
 			@Override
 			public String toString(Double arg0) {
 				return (arg0 == null) ? null : String.valueOf(arg0);}
 		};
-		
+
     	initializeLists();
     	initializeTraceView();
     	initializeGraphView();
     	
     }
-    
+
+	/**
+	 * Initializes trace view and adds default trace to listView. 
+	 */
 	private void initializeTraceView() {
 		// Set default trace
     	traceList.add(new Trace());
@@ -160,6 +164,11 @@ public class MainController {
 			@Override
 			public void handle(ActionEvent arg0) {
 				traceListView.refresh();
+//				System.out.println(selectedGraph.getTrace());
+//				System.out.println(graphTrace.getButtonCell().getText());
+//				System.out.println(selectedGraph.getTrace().getName());
+				graphTrace.getButtonCell().setText(selectedGraph.getTrace().getName());
+//				System.out.println(graphTrace.getButtonCell().getText());
 			}
 		});
     	
@@ -167,6 +176,9 @@ public class MainController {
     	updateTraceView();
 	}
 
+	/**
+	 * Initializes chart, sets default chart and graph properties.
+	 */
 	private void initializeGraphView() {
 		// Initialize chart
 		xAxis = new NumberAxis();
@@ -187,11 +199,18 @@ public class MainController {
 		graphList.add(new Graph(selectedTrace));
 		graphListView.getSelectionModel().selectFirst();
 		
+		
+		
 		// Add name listener
 		graphName.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent arg0) {
 				graphListView.refresh();
+//				Trace tempTrace = selectedGraph.getTrace();
+//				selectedGraph.setTrace(new Trace());
+//				selectedGraph.setTrace(tempTrace);
+				graphTrace.getButtonCell().setText("Hei");
+//				graphTrace.getCellFactory().call(param)
 			}
 		});
 		
@@ -235,10 +254,12 @@ public class MainController {
         graphXData.setItems(dataList);
         graphYData.setItems(dataList);
         graphStyle.setItems(FXCollections.observableList(Style.getElements()));
+        
     }
     
     
-    // GUI Updates
+    
+    // GUI Update
     /**
      * Manages trace bindings and updates trace details.
      * Called when selected trace has been changed.
@@ -258,6 +279,10 @@ public class MainController {
 		bindTrace();
     }
     
+	/**
+     * Manages graph bindings and updates graph details.
+     * Called when selected graph has been changed.
+     */
 	private void updateGraphView() {
 		// Retrive selected list entry
 		selectedGraph = graphListView.getSelectionModel().getSelectedItem();
@@ -279,6 +304,9 @@ public class MainController {
 
 	
 	// Manage bindings
+	/**
+	 * Bind TraceView inputs to selected trace.
+	 */
 	private void bindTrace() {
 		// Bind trace properties
 		traceName					.textProperty().bindBidirectional(selectedTrace.getNameProperty());
@@ -287,7 +315,7 @@ public class MainController {
 	    traceInterpolation			.valueProperty().bindBidirectional(selectedTrace.getInterpolationProperty());
 	    traceInertia				.valueProperty().bindBidirectional(selectedTrace.getInertiaProperty());
 	    traceMass					.textProperty().bindBidirectional(selectedTrace.getMassProperty(), customStringConverter);
-	    traceRadius					.textProperty().bindBidirectional(selectedTrace.getRadiusProperty(), customStringConverter);
+//	    traceRadius					.textProperty().bindBidirectional(selectedTrace.getRadiusProperty(), customStringConverter);
 	    traceMinX					.textProperty().bindBidirectional(selectedTrace.getMinXProperty(), customStringConverter);
 	    traceMaxX					.textProperty().bindBidirectional(selectedTrace.getMaxXProperty(), customStringConverter);
 	    traceInitV					.textProperty().bindBidirectional(selectedTrace.getInitVProperty(), customStringConverter);
@@ -302,7 +330,10 @@ public class MainController {
 		computationTimeLabel	.setText(selectedTrace.getComputationTime() != null ? selectedTrace.getComputationTime() : "-");
 		energyDifferenceLabel	.setText(selectedTrace.getEnergyDifference() != null ? selectedTrace.getEnergyDifference() : "-");
 	}
-
+	
+	/**
+	 * Bind GraphView inputs to selected graph.
+	 */
 	private void bindGraph() {
 		// Bind graph properties
 		graphName					.textProperty().bindBidirectional(selectedGraph.getNameProperty());
@@ -311,6 +342,8 @@ public class MainController {
 		graphTrace					.valueProperty().bindBidirectional(selectedGraph.getTraceProperty());
 		graphMinX					.textProperty().bindBidirectional(selectedGraph.getMinXProperty(), customStringConverter);
 		graphMaxX					.textProperty().bindBidirectional(selectedGraph.getMaxXProperty(), customStringConverter);
+		
+
 		
 		// Bind graph layout properties
 		graphStyle					.valueProperty().bindBidirectional(selectedGraph.getStyleProperty());
@@ -322,6 +355,9 @@ public class MainController {
 		graphVisibleToggleButton	.selectedProperty().bindBidirectional(selectedGraph.getVisibleProperty());
 	}
 	
+	/**
+	 * Unbinds TraceView inputs from previously selected trace.
+	 */
 	private void unbindTrace() {
 		// Unbind trace properties
 		traceName				.textProperty().unbindBidirectional(prevTrace.getNameProperty());
@@ -330,13 +366,16 @@ public class MainController {
 		traceInterpolation		.valueProperty().unbindBidirectional(prevTrace.getInterpolationProperty());
 		traceInertia			.valueProperty().unbindBidirectional(prevTrace.getInertiaProperty());
 		traceMass				.textProperty().unbindBidirectional(prevTrace.getMassProperty());
-		traceRadius				.textProperty().unbindBidirectional(prevTrace.getRadiusProperty());
+//		traceRadius				.textProperty().unbindBidirectional(prevTrace.getRadiusProperty());
 		traceMinX				.textProperty().unbindBidirectional(prevTrace.getMinXProperty());
 		traceMaxX				.textProperty().unbindBidirectional(prevTrace.getMaxXProperty());
 		traceInitV				.textProperty().unbindBidirectional(prevTrace.getInitVProperty());
 		traceStep				.textProperty().unbindBidirectional(prevTrace.getStepProperty());
 	}
 	
+	/**
+	 * Unbinds GraphView inputs from previously selected graph.
+	 */
 	private void unbindGraph() {
 		// Unbind graph properties
 		graphName				.textProperty().unbindBidirectional(prevGraph.getNameProperty());
@@ -429,6 +468,7 @@ public class MainController {
     }
     
     @FXML private void handleGraphUpClick(ActionEvent event) {
+    	System.out.println(selectedGraph.getTrace());
     }
     
     @FXML private void handleGraphDownClick(ActionEvent event) {

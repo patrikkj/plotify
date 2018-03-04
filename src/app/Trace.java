@@ -30,7 +30,7 @@ public class Trace {
 	private ObjectProperty<Interpolation> interpolation;
 	private ObjectProperty<Inertia> inertia;
 	private ObjectProperty<Double> mass;
-	private ObjectProperty<Double> radius;
+//	private ObjectProperty<Double> radius;
 	private ObjectProperty<Double> minX;
 	private ObjectProperty<Double> maxX;
 	private ObjectProperty<Double> initV;
@@ -91,9 +91,9 @@ public class Trace {
 		setInterpolation(Interpolation.POLYNOMIAL_SPLINE);
 		setInertia(Inertia.POINT_OF_MASS);
 		setMass(1d);
-		setRadius(1d);
-		setMinX(0d);
-		setMaxX(100d);
+//		setRadius(1d);
+		setMinX(Double.NEGATIVE_INFINITY);
+		setMaxX(Double.POSITIVE_INFINITY);
 		setInitV(0d);
 		setStep(0.001);
 	}	
@@ -106,7 +106,6 @@ public class Trace {
 	 * @param interpolation
 	 * @param inertia
 	 * @param mass
-	 * @param radius
 	 * @param minX
 	 * @param maxX
 	 * @param initV
@@ -114,7 +113,7 @@ public class Trace {
 	 */
 	public Trace(String name, File file, 
 				Integration integration, Interpolation interpolation, Inertia inertia, 
-				double mass, double radius, double minX, double maxX, double initV, double step) 
+				double mass, double minX, double maxX, double initV, double step) 
 	{
 		//Initialize properties
 		initializeProperties();
@@ -126,7 +125,7 @@ public class Trace {
 		setInterpolation(interpolation);
 		setInertia(inertia);
 		setMass(mass);
-		setRadius(radius);
+//		setRadius(radius);
 		setMinX(minX);
 		setMaxX(maxX);
 		setInitV(initV);
@@ -142,7 +141,7 @@ public class Trace {
 		interpolation = new SimpleObjectProperty<>();
 		inertia = new SimpleObjectProperty<>();
 		mass = new SimpleObjectProperty<>();
-		radius = new SimpleObjectProperty<>();
+//		radius = new SimpleObjectProperty<>();
 		minX = new SimpleObjectProperty<>();
 		maxX = new SimpleObjectProperty<>();
 		initV = new SimpleObjectProperty<>();
@@ -201,9 +200,9 @@ public class Trace {
 		if (getMass() <= 0)
 			throw new IllegalArgumentException("Mass must be positive.");
 		
-		//Validate radius
-		if (getRadius() < 0)
-			throw new IllegalArgumentException("Radius cannot be negative.");
+//		//Validate radius
+//		if (getRadius() < 0)
+//			throw new IllegalArgumentException("Radius cannot be negative.");
 		
 		//Validate inertia constant
 		if (getInertia().VALUE < 0)
@@ -230,7 +229,7 @@ public class Trace {
 	public Integration getIntegration() {return integration.get();}
 	public Inertia getInertia() {return inertia.get();}
 	public Double getMass() {return mass.get();}
-	public Double getRadius() {return radius.get();}
+//	public Double getRadius() {return radius.get();}
 	public Double getMinX() {return minX.get();}
 	public Double getMaxX() {return maxX.get();}
 	public Double getInitV() {return initV.get();}
@@ -253,7 +252,7 @@ public class Trace {
 	public void setInterpolation(Interpolation interpolation) {this.interpolation.set(interpolation);}
 	public void setInertia(Inertia inertia) {this.inertia.set(inertia);}
 	public void setMass(Double mass) {this.mass.set(mass);}
-	public void setRadius(Double radius) {this.radius.set(radius);}
+//	public void setRadius(Double radius) {this.radius.set(radius);}
 	public void setMinX(Double minX) {this.minX.set(minX);}
 	public void setMaxX(Double maxX) {this.maxX.set(maxX);}
 	public void setInitV(Double initV) {this.initV.set(initV);;}
@@ -267,7 +266,7 @@ public class Trace {
 	public ObjectProperty<Integration> getIntegrationProperty() {return integration;}
 	public ObjectProperty<Inertia> getInertiaProperty() {return inertia;}
 	public ObjectProperty<Double> getMassProperty() {return mass;}
-	public ObjectProperty<Double> getRadiusProperty() {return radius;}
+//	public ObjectProperty<Double> getRadiusProperty() {return radius;}
 	public ObjectProperty<Double> getMinXProperty() {return minX;}
 	public ObjectProperty<Double> getMaxXProperty() {return maxX;}
 	public ObjectProperty<Double> getInitVProperty() {return initV;}
@@ -435,14 +434,14 @@ public class Trace {
 		Interpolation interpolation = Interpolation.POLYNOMIAL_SPLINE;	//Interpolation type
 		Inertia inertia = Inertia.POINT_OF_MASS;							//Moment of inertia
 		double mass = 10;												//Mass of rolling object
-		double radius = 0.2;											//Radius of rolling object
+//		double radius = 0.2;											//Radius of rolling object
 		double minX = 0;												//Min x-coordinate
 		double maxX = Double.POSITIVE_INFINITY;							//Max x-coordinate
 		double initV = 0;												//Initial velocity
 		double step = 0.000001;											//Integration step size
 		
 		//Initialize new experiment
-		Trace testTrace = new Trace(name, file, integration, interpolation, inertia, mass, radius, minX, maxX, initV, step);
+		Trace testTrace = new Trace(name, file, integration, interpolation, inertia, mass, minX, maxX, initV, step);
 		
 		//Perform trace
 		testTrace.trace(false, true);

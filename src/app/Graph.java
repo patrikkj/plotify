@@ -47,11 +47,12 @@ public class Graph {
 		// Initialize graph properties
 		initializeProperties();
 		series = new XYChart.Series<>();
-		series.nameProperty().bind(name);
+		series.nameProperty().bindBidirectional(name);
 
 		// Set default values
 		setName("Sample graph");
 		setTrace(initTrace);
+		setDetail(100d);
 		setColor(Color.valueOf("#FFFFFF"));
 		
 		// Apply change listener
@@ -79,9 +80,12 @@ public class Graph {
 		maxY.addListener(dataChangeListener);
 		smooth.addListener(dataChangeListener);
 		detail.addListener(dataChangeListener);
+		
+		
 	}
 	
 	private List<Float> reduceList(List<Float> inputList, double n) {
+		n = (double) Math.round(n);
 		// Verify that reduction is necessary
 		if (n >= inputList.size())
 			return inputList;
@@ -93,16 +97,10 @@ public class Graph {
 		double step = ((double) inputList.size() - 1d)  /  (n - 1d); 
 		
 		// Fill list
-		for (int i = 0; i < n; i++) {
-			
-			try {
+		for (int i = 0; i < n; i++)
 				outputList.add(inputList.get((int) Math.round(step * (double) i)));
-			} catch (IndexOutOfBoundsException e) {
-				System.out.printf("List length: %s, index: %s\n", inputList.size(), (int) Math.round(step * (double) i));
-			}
-			
-		}
-		System.out.printf("Requested length: %s, Actual length: %s\n", n, outputList.size());
+		
+		// Return reduced list
 		return outputList;
 	}
 	
@@ -113,6 +111,9 @@ public class Graph {
 		// Raw data sets
 		ObservableList<Float> rawXData = getTrace().getTraceMap().get(getXData());
 		ObservableList<Float> rawYData = getTrace().getTraceMap().get(getYData());
+		
+		// Break if any data sets are missing
+		if (rawXData == null  ||  rawYData == null) return;
 		
 		// Reduced lists
 		List<Float> reducedXData = reduceList(rawXData, getDetail());
