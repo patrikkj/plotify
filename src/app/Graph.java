@@ -1,24 +1,31 @@
 package app;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import enums.Style;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.paint.Color;
 
 public class Graph {
 	// Graph data properties
-	private XYChart.Series<Number, Number> series;
 	private StringProperty name;
-	private ObjectProperty<ObservableList<Float>> xData;
-	private ObjectProperty<ObservableList<Float>> yData;
+	private XYChart.Series<Number, Number> series;
+	private StringProperty xData;
+	private StringProperty yData;
 	private ObjectProperty<Trace> trace;
 	private ObjectProperty<Double> minX;
 	private ObjectProperty<Double> maxX;
@@ -27,63 +34,104 @@ public class Graph {
 	
 	// Graph layout properties
 	private ObjectProperty<Color> color;
-	private ObjectProperty<Double> stroke;
-	private ObjectProperty<Double> detail;
+	private DoubleProperty stroke;
+	private DoubleProperty detail;
 	private ObjectProperty<Style> style;
 	private BooleanProperty smooth;
 	private BooleanProperty points;
 	private BooleanProperty visible;
 	
-	public Graph() {
+	List<Data<Number, Number>> dataList; 
+	
+	public Graph(Trace initTrace) {
 		// Initialize graph properties
 		initializeProperties();
-
-		// Set sample graph
-		setName("Sample graph");
 		series = new XYChart.Series<>();
-		series.setName("My series");
-		
-		
-//		ChangeListener cl = new ChangeListener<T>() {
-//
-//			@Override
-//			public void changed(ObservableValue<? extends T> arg0, T arg1, T arg2) {
-//				
-//			}
-//		};
-		
-		
-		// Set default values
-//		setName("New graph");
-	}
+		series.nameProperty().bind(name);
 
-	@SuppressWarnings("unchecked")
-	public void setDefaultSeries() {
-//		ObservableList<XYChart.Data<Number, Number>> dataList = FXCollections.observableList(list)
-		XYChart.Series<Number, Number> ser = new XYChart.Series<>();
+		// Set default values
+		setName("Sample graph");
+		setTrace(initTrace);
+		setColor(Color.valueOf("#FFFFFF"));
 		
-		series.getData().setAll(new XYChart.Data<Number, Number>(0, 10),
-				new XYChart.Data<Number, Number>(1, 12),
-				new XYChart.Data<Number, Number>(2, 14),
-				new XYChart.Data<Number, Number>(3, 16));
+		// Apply change listener
+		applyChangeListener();
+	}
+	
+	
+	private void applyChangeListener() {
+		// Create changeListener
+		ChangeListener<Object> dataChangeListener = new ChangeListener<>() {
+			@Override
+			public void changed(ObservableValue<?> arg0, Object arg1, Object arg2) {
+				updateSeries();
+			}
+		};
+		
+		// Add listener to data-related properties
+		xData.addListener(dataChangeListener);
+		yData.addListener(dataChangeListener);
+		trace.addListener(dataChangeListener);
+		xData.addListener(dataChangeListener);
+		minX.addListener(dataChangeListener);
+		maxX.addListener(dataChangeListener);
+		minY.addListener(dataChangeListener);
+		maxY.addListener(dataChangeListener);
+		smooth.addListener(dataChangeListener);
+		detail.addListener(dataChangeListener);
+	}
+	
+	private List<Float> reduceList(List<Float> inputList, double n) {
+		// Verify that reduction is necessary
+		if (n >= inputList.size())
+			return inputList;
+		
+		// Create output list
+		List<Float> outputList = new ArrayList<>();
+		
+		// Calculate step size
+		double step = ((double) inputList.size() - 1d)  /  (n - 1d); 
+		
+		// Fill list
+		for (int i = 0; i < n; i++) {
+			
+			try {
+				outputList.add(inputList.get((int) Math.round(step * (double) i)));
+			} catch (IndexOutOfBoundsException e) {
+				System.out.printf("List length: %s, index: %s\n", inputList.size(), (int) Math.round(step * (double) i));
+			}
+			
+		}
+		System.out.printf("Requested length: %s, Actual length: %s\n", n, outputList.size());
+		return outputList;
 	}
 	
 	public void updateSeries() {
-		//uses detail, xdata, ydata, trace
-	}
-	
-	
-	
-	
-	private void initializeSeries() {
+		// Empty list used to build data set
+		dataList = new ArrayList<>();
 		
+		// Raw data sets
+		ObservableList<Float> rawXData = getTrace().getTraceMap().get(getXData());
+		ObservableList<Float> rawYData = getTrace().getTraceMap().get(getYData());
+		
+		// Reduced lists
+		List<Float> reducedXData = reduceList(rawXData, getDetail());
+		List<Float> reducedYData = reduceList(rawYData, getDetail());
+		
+		// Construct output list
+		for (int i = 0; i < reducedXData.size(); i++)
+			dataList.add(new Data<Number, Number>(reducedXData.get(i), reducedYData.get(i)));
+		
+		// Update series
+		series.getData().setAll(dataList);
 	}
+	
 	
 	private void initializeProperties() {
 		// Graph data properties
 		name = new SimpleStringProperty();
-		xData = new SimpleObjectProperty<>();
-		yData = new SimpleObjectProperty<>();
+		xData = new SimpleStringProperty();
+		yData = new SimpleStringProperty();
 		trace = new SimpleObjectProperty<>();
 		minX = new SimpleObjectProperty<>();
 		maxX = new SimpleObjectProperty<>();
@@ -92,8 +140,8 @@ public class Graph {
 		
 		// Graph layout properties
 		color = new SimpleObjectProperty<>();
-		stroke = new SimpleObjectProperty<>();
-		detail = new SimpleObjectProperty<>();
+		stroke = new SimpleDoubleProperty();
+		detail = new SimpleDoubleProperty();
 		style = new SimpleObjectProperty<>();
 		smooth = new SimpleBooleanProperty();
 		points = new SimpleBooleanProperty();
@@ -103,9 +151,9 @@ public class Graph {
 
 	// Data getters
 	public Series<Number, Number> getSeries() {return series;}
-	public String getName() {return name.get();}
-	public ObservableList<Float> getXData() {return xData.get();}
-	public ObservableList<Float> getYData() {return yData.get();}
+	public String getName() {return series.nameProperty().get();}
+	public String getXData() {return xData.get();}
+	public String getYData() {return yData.get();}
 	public Trace getTrace() {return trace.get();}
 	public Double getMinX() {return minX.get();}
 	public Double getMaxX() {return maxX.get();}
@@ -115,7 +163,7 @@ public class Graph {
 	// Layout getters
 	public Color getColor() {return color.get();}
 	public Double getStroke() {return stroke.get();}
-	public Double getDetail() {return detail.get();}
+	public Double getDetail() {return 10d / ((0.5d - detail.get())/100d + 1d) - 7;}
 	public Style getStyle() {return style.get();}
 	public Boolean getSmooth() {return smooth.get();}
 	public Boolean getPoints() {return points.get();}
@@ -124,8 +172,8 @@ public class Graph {
 	
 	// Data setters
 	public void setName(String name) {this.name.set(name);}
-	public void setXData(ObservableList<Float> xData) {this.xData.set(xData);}
-	public void setYData(ObservableList<Float> yData) {this.yData.set(yData);}
+	public void setXData(String xData) {this.xData.set(xData);}
+	public void setYData(String yData) {this.yData.set(yData);}
 	public void setTrace(Trace trace) {this.trace.set(trace);}
 	public void setMinX(Double minX) {this.minX.set(minX);}
 	public void setMaxX(Double maxX) {this.maxX.set(maxX);}
@@ -144,8 +192,8 @@ public class Graph {
 	
 	// Data property getters
 	public StringProperty getNameProperty() {return name;}
-	public ObjectProperty<ObservableList<Float>> getXDataProperty() {return xData;}
-	public ObjectProperty<ObservableList<Float>> getYDataProperty() {return yData;}
+	public StringProperty getXDataProperty() {return xData;}
+	public StringProperty getYDataProperty() {return yData;}
 	public ObjectProperty<Trace> getTraceProperty() {return trace;}
 	public ObjectProperty<Double> getMinXProperty() {return minX;}
 	public ObjectProperty<Double> getMaxXProperty() {return maxX;}
@@ -154,13 +202,70 @@ public class Graph {
 	
 	// Layout property getters
 	public ObjectProperty<Color> getColorProperty() {return color;}
-	public ObjectProperty<Double> getStrokeProperty() {return stroke;}
-	public ObjectProperty<Double> getDetailProperty() {return detail;}
+	public DoubleProperty getStrokeProperty() {return stroke;}
+	public DoubleProperty getDetailProperty() {return detail;}
 	public ObjectProperty<Style> getStyleProperty() {return style;}
 	public BooleanProperty getSmoothProperty() {return smooth;}
 	public BooleanProperty getPointsProperty() {return points;}
 	public BooleanProperty getVisibleProperty() {return visible;}
 	
+	public void printDetails() {
+		System.out.printf("\nSeries: %s\n"
+				+ "Name: %s\n"
+				+ "XData: %s\n"
+				+ "YData: %s\n"
+				+ "Trace: %s\n"
+				+ "MinX: %s\n"
+				+ "MaxX: %s\n"
+				+ "Color: %s\n"
+				+ "Stroke: %s\n"
+				+ "Detail: %s\n"
+				+ "Style: %s\n"
+				+ "Smooth: %s\n"
+				+ "Points: %s\n"
+				+ "Dataset length: %s\n"
+				+ "Requested length: %s\n"
+				+ "Trace xData length: %s\n"
+				+ "Trace yData length: %s\n",
+				getSeries(),
+				getName(),
+				getXData(),
+				getYData(),
+				getTrace(),
+				getMinX(),
+				getMaxX(),
+				getColor(),
+				getStroke(),
+				getDetail(),
+				getStyle(),
+				getSmooth(),
+				getPoints(),
+				dataList.size(),
+				getDetail(),
+				getTrace().getTraceMap().get(getXData()).size(),
+				getTrace().getTraceMap().get(getYData()).size());
+		
+		
+//		// Data getters
+//		public Series<Number, Number> getSeries() {return series;}
+//		public String getName() {return series.nameProperty().get();}
+//		public String getXData() {return xData.get();}
+//		public String getYData() {return yData.get();}
+//		public Trace getTrace() {return trace.get();}
+//		public Double getMinX() {return minX.get();}
+//		public Double getMaxX() {return maxX.get();}
+//		public Double getMinY() {return minY.get();}
+//		public Double getMaxY() {return maxY.get();}
+//
+//		// Layout getters
+//		public Color getColor() {return color.get();}
+//		public Double getStroke() {return stroke.get();}
+//		public Double getDetail() {return detail.get();}
+//		public Style getStyle() {return style.get();}
+//		public Boolean getSmooth() {return smooth.get();}
+//		public Boolean getPoints() {return points.get();}
+//		public Boolean getVisible() {return visible.get();}
+	}
 	
 	public String toString() {
 		return getName();

@@ -4,19 +4,22 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import enums.Inertia;
 import enums.Integration;
 import enums.Interpolation;
 import functions.Differentiable;
-import javafx.beans.property.StringProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 
 
 public class Trace {
@@ -48,20 +51,27 @@ public class Trace {
 	private double[] domain;
 
 	//Containers
-	List<Float> aList = new ArrayList<Float>();
-	List<Float> vList = new ArrayList<Float>();
-	List<Float> xList = new ArrayList<Float>();
-	List<Float> totList = new ArrayList<Float>();
-	List<Float> kinList = new ArrayList<Float>();
-	List<Float> potList = new ArrayList<Float>();
-	List<Float> timeList = new ArrayList<Float>();
-	List<Float> yList = new ArrayList<Float>();
-
+	private ObservableMap<String, ObservableList<Float>> traceMap;
+	private ObservableList<Float> aList;
+	private ObservableList<Float> vList;
+	private ObservableList<Float> xList;
+	private ObservableList<Float> yList;
+	private ObservableList<Float> totList;
+	private ObservableList<Float> kinList;
+	private ObservableList<Float> potList;
+	private ObservableList<Float> tList;
 	
-	///////////////////////////////////////////////
-	// Enumerations in separate package (.enums) //
-	///////////////////////////////////////////////
+	//Constants
 	public static final double G = 9.82814;
+	public static final String[] MAP_KEYS = new String[] {
+			"Acceleration",
+			"Velocity",
+			"Position (x)",
+			"Position (y)",
+			"Time (s)",
+			"Total Energy",
+			"Kinetic Energy",
+			"Potential energy"};
 	
 	
 	//Constructors
@@ -72,12 +82,22 @@ public class Trace {
 		//Initialize properties
 		initializeProperties();
 		
+		//Initialize map
+		initializeMap();
+		
 		//Set default values
 		setName("New trace");
 		setIntegration(Integration.EULER_METHOD);
 		setInterpolation(Interpolation.POLYNOMIAL_SPLINE);
+		setInertia(Inertia.POINT_OF_MASS);
+		setMass(1d);
+		setRadius(1d);
+		setMinX(0d);
+		setMaxX(100d);
+		setInitV(0d);
+		setStep(0.001);
 	}	
-	
+
 	/**
 	 * Creates a Trace object used for numerical analysis.
 	 * @param name
@@ -113,6 +133,8 @@ public class Trace {
 		setStep(step);
 	}
 	
+	
+	//Initialization
 	private void initializeProperties() {
 		name = new SimpleStringProperty();
 		file = new SimpleObjectProperty<>();
@@ -127,7 +149,6 @@ public class Trace {
 		step = new SimpleObjectProperty<>();
 		initialized = new SimpleBooleanProperty();
 	}
-	
 	
 	private void initializeFunc() {
 		//Perform interpolation and set domain
@@ -147,6 +168,29 @@ public class Trace {
 		domain = func.getDomain();
 		setMinX(Math.max(getMinX(), domain[0]));
 		setMaxX(Math.min(getMaxX(), domain[1]));
+	}
+	
+	private void initializeMap() {
+		// Initialize map and observable lists
+		traceMap = FXCollections.observableHashMap();
+		aList = FXCollections.observableArrayList();
+		vList = FXCollections.observableArrayList();
+		xList = FXCollections.observableArrayList();
+		yList = FXCollections.observableArrayList();
+		totList = FXCollections.observableArrayList();
+		kinList = FXCollections.observableArrayList();
+		potList = FXCollections.observableArrayList();
+		tList = FXCollections.observableArrayList();
+		
+		// Fill map
+		traceMap.put("Acceleration", aList);
+		traceMap.put("Velocity", vList);
+		traceMap.put("Position (x)", xList);
+		traceMap.put("Position (y)", yList);
+		traceMap.put("Time (s)", tList);
+		traceMap.put("Total Energy", totList);
+		traceMap.put("Kinetic Energy", kinList);
+		traceMap.put("Potential energy", potList);
 	}
 	
 	//Validation
@@ -170,6 +214,15 @@ public class Trace {
 	}
 	
 	
+	//Getters
+	public ObservableMap<String, ObservableList<Float>> getTraceMap() {return traceMap;}
+	public String getKey(ObservableList<Float> value) {
+		for (String key : traceMap.keySet())
+			if (traceMap.get(key).equals(value))
+				return key;
+		return null;
+	}
+	
 	//Getters (Trace property values)
 	public String getName() {return name.get();}
 	public File getFile() {return file.get();}
@@ -185,8 +238,8 @@ public class Trace {
 	public boolean isInitialized() {return initialized.get();}
 	
 	//Getters (Trace details - Strings)
-	public String getInterpolationType() {return interpolationType.TEXT;}
-	public String getIntegrationType() {return integrationType.TEXT;}
+	public Interpolation getInterpolationType() {return interpolationType;}
+	public Integration getIntegrationType() {return integrationType;}
 	public String getStepSize() {return stepSize;}
 	public String getIterations() {return iterations;}
 	public String getTotalTime() {return totalTime;}
@@ -263,6 +316,13 @@ public class Trace {
 		// Validate instance variables
 		validateTrace();
 		
+		// Clear logs if initialized
+		if (isInitialized())
+			initializeMap();
+		
+		// Set initialized property
+		setInitialized(true);
+		
 		// Perform trace using given integration method
 		switch (getIntegration()) {
 		case EULER_METHOD:
@@ -311,11 +371,11 @@ public class Trace {
 			aList.add((float) a);
 			vList.add((float) v);
 			xList.add((float) x);
+			yList.add((float) func.eval(x));
+			tList.add((float) (iter*getStep()));
 			totList.add((float) eTot);
 			kinList.add((float) eKin);
 			potList.add((float) ePot);
-			timeList.add((float) (iter*getStep()));
-			yList.add((float) func.eval(x));
 			
 			eTot = getTotalEnergy(v, x);
 			eKin = getKineticEnergy(v);
@@ -325,9 +385,10 @@ public class Trace {
 			v = v + a * getStep();
 			x = x + v * Math.cos(func.slopeAngle(x)) * getStep();
 			
-			//Increment iteration counter
-			if (iter++ % (approxIter/10) == 0)
-				System.out.print('.');
+			iter++;
+//			//Increment iteration counter
+//			if (iter++ % (approxIter/10) == 0)
+//				System.out.print('.');
 
 			//Print iteration results
 			if (printIterations)
@@ -341,7 +402,7 @@ public class Trace {
 		// Update trace details
 		energyDifference = String.format("%.9f %%", ((initTotEnergy - eTot)/eTot)*100);
 		iterations = String.valueOf(iter * 2);
-		stepSize = String.valueOf(step);
+		stepSize = String.valueOf(getStep());
 		totalTime = String.format("%f", iter * getStep()).replace(',', '.');
 		computationTime = String.format("%.3f seconds", (double) Duration.between(start, end).toMillis()/1000).replace(',', '.');
 	}
