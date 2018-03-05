@@ -162,13 +162,12 @@ public class MainController {
 			@Override
 			public void handle(ActionEvent arg0) {
 				traceListView.refresh();
-//				System.out.println(selectedGraph.getTrace());
-//				System.out.println(graphTrace.getButtonCell().getText());
-//				System.out.println(selectedGraph.getTrace().getName());
 				graphTrace.getButtonCell().setText(selectedGraph.getTrace().getName());
-//				Collection<Trace> tempList = traceList;
-				graphTrace.getCellFactory().
-//				System.out.println(graphTrace.getButtonCell().getText());
+				graphTrace.setItems(traceList);
+				traceList.add(new Trace());
+				graphTrace.getSelectionModel().selectNext();
+				graphTrace.getSelectionModel().selectPrevious();
+				traceList.remove(traceList.size() - 1);
 			}
 		});
     	
@@ -457,14 +456,14 @@ public class MainController {
     private double xval = 0;
     private double yval = 0;
     @FXML private void handleDeleteGraphClick(ActionEvent event) {
-//    	selectedGraph.getSeries().getNode().setStyle("-fx-stroke: #450000;");
-    	lineChart.setCreateSymbols(false);
-    	for (int i = 0; i < 1000; i++) {
-    		xval += 0.1;
-    		yval += Math.random();
-    		selectedGraph.getSeries().getData().add(new XYChart.Data<Number, Number>(xval, yval));
-    		
-    	}
+    	selectedGraph.getSeries().getNode().setStyle("-fx-stroke: #450000;");
+//    	lineChart.setCreateSymbols(false);
+//    	for (int i = 0; i < 1000; i++) {
+//    		xval += 0.1;
+//    		yval += Math.random();
+//    		selectedGraph.getSeries().getData().add(new XYChart.Data<Number, Number>(xval, yval));
+//    		
+//    	}
     }
     
     @FXML private void handleGraphUpClick(ActionEvent event) {
