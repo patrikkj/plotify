@@ -3,6 +3,7 @@ package app;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
+import java.util.Collection;
 
 import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXComboBox;
@@ -15,9 +16,6 @@ import enums.Inertia;
 import enums.Integration;
 import enums.Interpolation;
 import enums.Style;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -168,6 +166,8 @@ public class MainController {
 //				System.out.println(graphTrace.getButtonCell().getText());
 //				System.out.println(selectedGraph.getTrace().getName());
 				graphTrace.getButtonCell().setText(selectedGraph.getTrace().getName());
+//				Collection<Trace> tempList = traceList;
+				graphTrace.getCellFactory().
 //				System.out.println(graphTrace.getButtonCell().getText());
 			}
 		});
