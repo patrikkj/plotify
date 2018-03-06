@@ -7,6 +7,7 @@ import java.util.Collection;
 
 import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXComboBox;
+import com.jfoenix.controls.JFXListCell;
 import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXSlider;
 import com.jfoenix.controls.JFXTextField;
@@ -162,6 +163,8 @@ public class MainController {
 			@Override
 			public void handle(ActionEvent arg0) {
 				traceListView.refresh();
+				
+				
 				graphTrace.getButtonCell().setText(selectedGraph.getTrace().getName());
 				graphTrace.setItems(traceList);
 				traceList.add(new Trace());
@@ -202,13 +205,15 @@ public class MainController {
 		
 		// Add name listener
 		graphName.setOnAction(new EventHandler<ActionEvent>() {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void handle(ActionEvent arg0) {
 				graphListView.refresh();
 //				Trace tempTrace = selectedGraph.getTrace();
 //				selectedGraph.setTrace(new Trace());
 //				selectedGraph.setTrace(tempTrace);
-				graphTrace.getButtonCell().setText("Hei");
+		        ((JFXListView<JFXListCell<Trace>>) graphTrace.getCellFactory().call(null).getParent()).refresh();
+//				graphTrace.getButtonCell().setText("Hei");
 //				graphTrace.getCellFactory().call(param)
 			}
 		});
