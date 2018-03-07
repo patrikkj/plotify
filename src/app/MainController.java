@@ -81,7 +81,7 @@ public class MainController {
     @FXML private Label computationTimeLabel;
     @FXML private Label energyDifferenceLabel;
     
-    // GRAPHS
+   // GRAPHS
     @FXML private JFXListView<Graph> graphListView;
     // Graph properties
     @FXML private JFXTextField graphName;
@@ -97,7 +97,7 @@ public class MainController {
     @FXML private JFXToggleButton graphPointsToggleButton;
     @FXML private JFXSlider graphStrokeSlider;
     @FXML private JFXToggleButton graphSmoothToggleButton;
-    @FXML private JFXToggleButton graphVisibleToggleButton;
+    @FXML private JFXToggleButton graphVisibleToggleButton; 
     
     //// NON-FXML FIELDS
     /**
@@ -135,7 +135,7 @@ public class MainController {
 	@FXML private void initialize() {    
     	// Initialize converter (used for trace bindings)
     	customStringConverter = new StringConverter<>() {
-			@Override 
+			@Override
 			public Double fromString(String arg0) {
 				return (arg0.equals("")) ? null : Double.valueOf(arg0.replace(',', '.'));}
 			
@@ -260,7 +260,6 @@ public class MainController {
         graphStyle.setItems(FXCollections.observableList(Style.getElements()));
         
     }
-    
     
     
     // GUI Update
@@ -451,6 +450,7 @@ public class MainController {
     	updateTraceView();
     }
     
+    
     // Graph button handlers
     @FXML private void handleNewGraphClick(ActionEvent event) {
     	graphList.add(new Graph(selectedTrace));
@@ -478,7 +478,7 @@ public class MainController {
     @FXML private void handleGraphDownClick(ActionEvent event) {
     	selectedGraph.printDetails();
     }
-
+    
     @FXML private void handleGraphListClick(Event event) {
     	updateGraphView();
     }

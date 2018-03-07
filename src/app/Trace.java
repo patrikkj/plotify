@@ -443,6 +443,7 @@ public class Trace {
 		//Initialize new experiment
 		Trace testTrace = new Trace(name, file, integration, interpolation, inertia, mass, minX, maxX, initV, step);
 		
+		
 		//Perform trace
 		testTrace.trace(false, true);
 		
