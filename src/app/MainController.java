@@ -27,11 +27,14 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import javafx.util.StringConverter;
 
 public class MainController {
@@ -165,12 +168,14 @@ public class MainController {
 				traceListView.refresh();
 				
 				
-				graphTrace.getButtonCell().setText(selectedGraph.getTrace().getName());
+//				graphTrace.getButtonCell().setText(selectedGraph.getTrace().getName());
 				graphTrace.setItems(traceList);
-				traceList.add(new Trace());
-				graphTrace.getSelectionModel().selectNext();
-				graphTrace.getSelectionModel().selectPrevious();
-				traceList.remove(traceList.size() - 1);
+				graphTrace.getProperties().putAll(graphTrace.getProperties());
+				System.out.println("Tick");
+//				traceList.add(new Trace());
+//				graphTrace.getSelectionModel().selectNext();
+//				graphTrace.getSelectionModel().selectPrevious();
+//				traceList.remove(traceList.size() - 1);
 			}
 		});
     	
@@ -201,18 +206,45 @@ public class MainController {
 		graphList.add(new Graph(selectedTrace));
 		graphListView.getSelectionModel().selectFirst();
 		
-		
-		
+		// Set graph trace cell factory
+//		graphTrace.setCellFactory(new Callback<ListView<Trace>, CustomJFXListCell<Trace>>() {
+//			
+//		});
+		graphTrace.setCellFactory(new Callback<ListView<Trace>, ListCell<Trace>>(){
+			@Override
+            public ListCell<Trace> call(ListView<Trace> param) {
+                ListCell<Trace> cell = new ListCell<Trace>() {
+
+                    @Override
+                    protected void updateItem(Trace item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (item != null) {
+                            textProperty().bind(item.getNameProperty());
+                        } 
+//                        else {
+//                            setText("");
+//                        }
+                    }
+                };
+                return cell;
+            }
+		});
+//		this.setCellFactory(listView -> new JFXListCell<T>(){
+//            @Override
+//            public void updateItem(T item, boolean empty) {
+//                super.updateItem(item, empty);
+//                updateDisplayText(this,item,empty);
+//            }
+//        });
+
 		// Add name listener
 		graphName.setOnAction(new EventHandler<ActionEvent>() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void handle(ActionEvent arg0) {
 				graphListView.refresh();
 //				Trace tempTrace = selectedGraph.getTrace();
 //				selectedGraph.setTrace(new Trace());
 //				selectedGraph.setTrace(tempTrace);
-		        ((JFXListView<JFXListCell<Trace>>) graphTrace.getCellFactory().call(null).getParent()).refresh();
 //				graphTrace.getButtonCell().setText("Hei");
 //				graphTrace.getCellFactory().call(param)
 			}
@@ -258,7 +290,6 @@ public class MainController {
         graphXData.setItems(dataList);
         graphYData.setItems(dataList);
         graphStyle.setItems(FXCollections.observableList(Style.getElements()));
-        
     }
     
     
