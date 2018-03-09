@@ -17,8 +17,14 @@ public class TraceProcessor implements Runnable {
 	
 	@Override
 	public void run() {
+		//Before lifting; tell me your name :)
+		System.out.println("Processing: " + trace.getName() + " on " + Thread.currentThread());
+		
 		//Do some heavy lifting bruh
-		trace.trace(false, true);
+		trace.trace(false, false);
+		
+		//Print finish to console
+		System.out.println("Finished: " + trace.getName() + " on " + Thread.currentThread());
 		
 		//Perform GUI Updates in FX Application Thread
 		Platform.runLater(() -> trace.updateDetails());

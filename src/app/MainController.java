@@ -453,20 +453,23 @@ public class MainController {
     	// Select trace details view
     	traceTabPane.getSelectionModel().selectLast();
     	
-//    	// Run trace
-//    	selectedTrace.trace(false, true);
-    	selectedTrace.printResults();
-    	
     	// Run trace in parallel
     	selectedTrace.parallelTrace();
-    	
-    	selectedTrace.printResults();
     	
     	// Update
     	updateTraceView();
     }
     
-    @FXML private void handleComputeAllClick(ActionEvent event) {}
+    @FXML private void handleComputeAllClick(ActionEvent event) {
+    	// Select trace details view
+    	traceTabPane.getSelectionModel().selectLast();
+    	
+    	// Run all traces in parallel
+    	traceList.forEach(trace -> trace.parallelTrace());
+    	
+    	// Update
+    	updateTraceView();
+    }
     
     @FXML private void handleTraceListClick(Event event) {
     	updateTraceView();
