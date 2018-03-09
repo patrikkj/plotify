@@ -4,13 +4,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.HashSet;
 
 import enums.Inertia;
 import enums.Integration;
 import enums.Interpolation;
 import functions.Differentiable;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -30,26 +30,37 @@ public class Trace {
 	private ObjectProperty<Interpolation> interpolation;
 	private ObjectProperty<Inertia> inertia;
 	private ObjectProperty<Double> mass;
-//	private ObjectProperty<Double> radius;
 	private ObjectProperty<Double> minX;
 	private ObjectProperty<Double> maxX;
 	private ObjectProperty<Double> initV;
 	private ObjectProperty<Double> step;
 	private BooleanProperty initialized;
 	
-	// Trace Details (Only Getters)
-	private Integration integrationType;
-	private Interpolation interpolationType;
-	private String stepSize;
-	private String iterations;
-	private String totalTime;
-	private String computationTime;
-	private String energyDifference;
-
+	// Trace Details (Setters & Getters)
+	private StringProperty 
+		integrationType,
+		interpolationType,
+		stepSize,
+		iterations,
+		totalTime,
+		computationTime,
+		energyDifference;
+	
+	// Temporary fields to avoid multithread UI updates
+	private String 
+		tempIntegrationType,
+		tempInterpolationType,
+		tempStepSize,
+		tempIterations,
+		tempTotalTime,
+		tempComputationTime,
+		tempEnergyDifference;
+	
+	
 	//Function
 	private Differentiable func;
 	private double[] domain;
-
+	
 	//Containers
 	private ObservableMap<String, ObservableList<Float>> traceMap;
 	private ObservableList<Float> aList;
@@ -60,6 +71,9 @@ public class Trace {
 	private ObservableList<Float> kinList;
 	private ObservableList<Float> potList;
 	private ObservableList<Float> tList;
+	
+	//Associations
+	private HashSet<Graph> linkedGraphs;
 	
 	//Constants
 	public static final double G = 9.82814;
@@ -85,13 +99,15 @@ public class Trace {
 		//Initialize map
 		initializeMap();
 		
+		//Initialize linked graph container
+		linkedGraphs = new HashSet<>();
+		
 		//Set default values
 		setName("New trace");
 		setIntegration(Integration.EULER_METHOD);
 		setInterpolation(Interpolation.POLYNOMIAL_SPLINE);
 		setInertia(Inertia.POINT_OF_MASS);
 		setMass(1d);
-//		setRadius(1d);
 		setMinX(Double.NEGATIVE_INFINITY);
 		setMaxX(Double.POSITIVE_INFINITY);
 		setInitV(0d);
@@ -125,7 +141,6 @@ public class Trace {
 		setInterpolation(interpolation);
 		setInertia(inertia);
 		setMass(mass);
-//		setRadius(radius);
 		setMinX(minX);
 		setMaxX(maxX);
 		setInitV(initV);
@@ -141,12 +156,19 @@ public class Trace {
 		interpolation = new SimpleObjectProperty<>();
 		inertia = new SimpleObjectProperty<>();
 		mass = new SimpleObjectProperty<>();
-//		radius = new SimpleObjectProperty<>();
 		minX = new SimpleObjectProperty<>();
 		maxX = new SimpleObjectProperty<>();
 		initV = new SimpleObjectProperty<>();
 		step = new SimpleObjectProperty<>();
 		initialized = new SimpleBooleanProperty();
+		
+		integrationType = new SimpleStringProperty();
+		interpolationType = new SimpleStringProperty();
+		stepSize = new SimpleStringProperty();
+		iterations = new SimpleStringProperty();
+		totalTime = new SimpleStringProperty();
+		computationTime = new SimpleStringProperty();
+		energyDifference = new SimpleStringProperty();
 	}
 	
 	private void initializeFunc() {
@@ -161,7 +183,7 @@ public class Trace {
 		}
 		
 		//Set trace details
-		interpolationType = getInterpolation();
+		tempInterpolationType = getInterpolation().TEXT;
 		
 		//Set domain and x-range
 		domain = func.getDomain();
@@ -192,6 +214,22 @@ public class Trace {
 		traceMap.put("Potential energy", potList);
 	}
 	
+	//Updates
+	protected void updateDetails() {
+		// Update trace details
+		setIntegrationType(tempIntegrationType);
+		setInterpolationType(tempInterpolationType);
+		setEnergyDifference(tempEnergyDifference);
+		setIterations(tempIterations);
+		setStepSize(tempStepSize);
+		setTotalTime(tempTotalTime);
+		setComputationTime(tempComputationTime);
+		
+		//Update subscribing graphs
+		if (linkedGraphs != null)
+			linkedGraphs.forEach(graph -> graph.updateSeries());
+	}
+	
 	//Validation
 	public void validateTrace() {
 		initializeFunc();
@@ -199,10 +237,6 @@ public class Trace {
 		//Validate mass
 		if (getMass() <= 0)
 			throw new IllegalArgumentException("Mass must be positive.");
-		
-//		//Validate radius
-//		if (getRadius() < 0)
-//			throw new IllegalArgumentException("Radius cannot be negative.");
 		
 		//Validate inertia constant
 		if (getInertia().VALUE < 0)
@@ -229,7 +263,6 @@ public class Trace {
 	public Integration getIntegration() {return integration.get();}
 	public Inertia getInertia() {return inertia.get();}
 	public Double getMass() {return mass.get();}
-//	public Double getRadius() {return radius.get();}
 	public Double getMinX() {return minX.get();}
 	public Double getMaxX() {return maxX.get();}
 	public Double getInitV() {return initV.get();}
@@ -237,13 +270,13 @@ public class Trace {
 	public boolean isInitialized() {return initialized.get();}
 	
 	//Getters (Trace details - Strings)
-	public Interpolation getInterpolationType() {return interpolationType;}
-	public Integration getIntegrationType() {return integrationType;}
-	public String getStepSize() {return stepSize;}
-	public String getIterations() {return iterations;}
-	public String getTotalTime() {return totalTime;}
-	public String getComputationTime() {return computationTime;}
-	public String getEnergyDifference() {return energyDifference;}
+	public String getInterpolationType() {return interpolationType.get();}
+	public String getIntegrationType() {return integrationType.get();}
+	public String getStepSize() {return stepSize.get();}
+	public String getIterations() {return iterations.get();}
+	public String getTotalTime() {return totalTime.get();}
+	public String getComputationTime() {return computationTime.get();}
+	public String getEnergyDifference() {return energyDifference.get();}
 	
 	//Setters (Trace property values)
 	public void setName(String name) {this.name.set(name);}
@@ -252,13 +285,21 @@ public class Trace {
 	public void setInterpolation(Interpolation interpolation) {this.interpolation.set(interpolation);}
 	public void setInertia(Inertia inertia) {this.inertia.set(inertia);}
 	public void setMass(Double mass) {this.mass.set(mass);}
-//	public void setRadius(Double radius) {this.radius.set(radius);}
 	public void setMinX(Double minX) {this.minX.set(minX);}
 	public void setMaxX(Double maxX) {this.maxX.set(maxX);}
 	public void setInitV(Double initV) {this.initV.set(initV);;}
 	public void setStep(Double step) {this.step.set(step);}
 	public void setInitialized(Boolean initialized) { this.initialized.set(initialized);}
 
+	//Setters (Trace property detail values)
+	public void setIntegrationType(String integrationType) {this.integrationType.set(integrationType);}
+	public void setInterpolationType(String interpolationType) {this.interpolationType.set(interpolationType);}
+	public void setStepSize(String stepSize) {this.stepSize.set(stepSize);}
+	public void setIterations(String iterations) { this.iterations.set(iterations);}
+	public void setTotalTime(String totalTime) { this.totalTime.set(totalTime);}
+	public void setComputationTime(String computationTime) { this.computationTime.set(computationTime);}
+	public void setEnergyDifference(String energyDifference) { this.energyDifference.set(energyDifference);}
+		
 	//Getters (Trace properties)
 	public StringProperty getNameProperty() {return name;}
 	public ObjectProperty<File> getFileProperty() {return file;}
@@ -266,13 +307,28 @@ public class Trace {
 	public ObjectProperty<Integration> getIntegrationProperty() {return integration;}
 	public ObjectProperty<Inertia> getInertiaProperty() {return inertia;}
 	public ObjectProperty<Double> getMassProperty() {return mass;}
-//	public ObjectProperty<Double> getRadiusProperty() {return radius;}
 	public ObjectProperty<Double> getMinXProperty() {return minX;}
 	public ObjectProperty<Double> getMaxXProperty() {return maxX;}
 	public ObjectProperty<Double> getInitVProperty() {return initV;}
 	public ObjectProperty<Double> getStepProperty() {return step;}
 	public BooleanProperty getInitializedProperty() {return initialized;}
 	
+	//Getters (Trace property - details)
+	public StringProperty getIntegrationTypeProperty() {return integrationType;}
+	public StringProperty getInterpolationTypeProperty() {return interpolationType;}
+	public StringProperty getStepSizeProperty() {return stepSize;}
+	public StringProperty getIterationsProperty() {return iterations;}
+	public StringProperty getTotalTimeProperty() {return totalTime;}
+	public StringProperty getComputationTimeProperty() {return computationTime;}
+	public StringProperty getEnergyDifferenceProperty() {return energyDifference;}
+	
+	//Graph link
+	public void addGraph(Graph graph) {
+		linkedGraphs.add(graph);
+	}
+	public void removeGraph(Graph graph) {
+		linkedGraphs.remove(graph);
+	}
 	
 	//Calculations
 	/**Method for evaulating the acceleration at given value of x*/
@@ -336,10 +392,26 @@ public class Trace {
 		}
 		
 		//Set trace details
-		integrationType = getIntegration();
+		tempIntegrationType = getIntegration().TEXT;
+		
+		//If Trace is not processed in parallel thread, update GUI bindings
+		if (Platform.isFxApplicationThread())
+			updateDetails();
 		
 		//Print results if requested
 		if (printResults) printResults();
+		
+		//Update subscribing graphs
+		if (linkedGraphs != null)
+			linkedGraphs.forEach(graph -> graph.updateSeries());
+	}
+	
+	/**
+	 * Performs trace in using separate thread.
+	 */
+	public void parallelTrace() {
+		//Perform trace
+		new Thread(new TraceProcessor(this)).start();
 	}
 	
 	/**Trace performed using Eulers method*/
@@ -361,8 +433,6 @@ public class Trace {
 		
 		//Keeps track of iterations
 		int iter = 0;
-		int approxIter = (int) ((domain[1] - domain[0]) / getStep()); 
-		
 		
 		//Iterate until track is complete (x has reached its' end value)
 		while (x < getMaxX()) {
@@ -384,10 +454,8 @@ public class Trace {
 			v = v + a * getStep();
 			x = x + v * Math.cos(func.slopeAngle(x)) * getStep();
 			
-			iter++;
 //			//Increment iteration counter
-//			if (iter++ % (approxIter/10) == 0)
-//				System.out.print('.');
+			iter++;
 
 			//Print iteration results
 			if (printIterations)
@@ -399,11 +467,11 @@ public class Trace {
 		Instant end = Instant.now();
 
 		// Update trace details
-		energyDifference = String.format("%.9f %%", ((initTotEnergy - eTot)/eTot)*100);
-		iterations = String.valueOf(iter * 2);
-		stepSize = String.valueOf(getStep());
-		totalTime = String.format("%f", iter * getStep()).replace(',', '.');
-		computationTime = String.format("%.3f seconds", (double) Duration.between(start, end).toMillis()/1000).replace(',', '.');
+		tempEnergyDifference = String.format("%.9f %%", ((initTotEnergy - eTot)/eTot)*100);
+		tempIterations = String.valueOf(iter * 2);
+		tempStepSize = String.valueOf(getStep());
+		tempTotalTime = String.format("%f", iter * getStep()).replace(',', '.');
+		tempComputationTime = String.format("%.3f seconds", (double) Duration.between(start, end).toMillis()/1000).replace(',', '.');
 	}
 	
 	
@@ -434,18 +502,19 @@ public class Trace {
 		Interpolation interpolation = Interpolation.POLYNOMIAL_SPLINE;	//Interpolation type
 		Inertia inertia = Inertia.POINT_OF_MASS;							//Moment of inertia
 		double mass = 10;												//Mass of rolling object
-//		double radius = 0.2;											//Radius of rolling object
 		double minX = 0;												//Min x-coordinate
 		double maxX = Double.POSITIVE_INFINITY;							//Max x-coordinate
 		double initV = 0;												//Initial velocity
-		double step = 0.000001;											//Integration step size
+		double step = 0.000002;											//Integration step size
 		
 		//Initialize new experiment
 		Trace testTrace = new Trace(name, file, integration, interpolation, inertia, mass, minX, maxX, initV, step);
 		
 		
 		//Perform trace
-		testTrace.trace(false, true);
+		
+		testTrace.parallelTrace();
+//		testTrace.trace(false, true);
 		
 	}
 

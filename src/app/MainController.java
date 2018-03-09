@@ -2,14 +2,16 @@ package app;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
 
 import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXListCell;
 import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXSlider;
+import com.jfoenix.controls.JFXTabPane;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.controls.JFXToggleButton;
 
@@ -25,7 +27,6 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -64,6 +65,7 @@ public class MainController {
     
     // TRACES
     @FXML private JFXListView<Trace> traceListView;
+    @FXML private JFXTabPane traceTabPane;
     // Trace properties
     @FXML private JFXTextField traceName;
     @FXML private JFXComboBox<File> traceFile;
@@ -130,6 +132,10 @@ public class MainController {
     private ObservableList<File> fileList;
     private ObservableList<String> dataList;
     
+    /*
+     * Listener list for cells within choiceBox
+     */
+    private List<ListCell<Trace>> listenerList = new ArrayList<>();
     
     // Initialization
     /**
@@ -165,17 +171,15 @@ public class MainController {
 		traceName.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent arg0) {
+				// Update ListView entries
 				traceListView.refresh();
 				
-				
-//				graphTrace.getButtonCell().setText(selectedGraph.getTrace().getName());
-				graphTrace.setItems(traceList);
-				graphTrace.getProperties().putAll(graphTrace.getProperties());
-				System.out.println("Tick");
-//				traceList.add(new Trace());
-//				graphTrace.getSelectionModel().selectNext();
-//				graphTrace.getSelectionModel().selectPrevious();
-//				traceList.remove(traceList.size() - 1);
+				// Update choicebox entries
+				listenerList.stream()
+					.filter(cell -> cell != null)
+					.filter(cell -> cell.getItem() != null)
+					.forEach(cell -> cell.setText(cell.getItem().getName()));
+				graphTrace.getButtonCell().setText(selectedGraph.getTrace().getName());
 			}
 		});
     	
@@ -207,46 +211,20 @@ public class MainController {
 		graphListView.getSelectionModel().selectFirst();
 		
 		// Set graph trace cell factory
-//		graphTrace.setCellFactory(new Callback<ListView<Trace>, CustomJFXListCell<Trace>>() {
-//			
-//		});
 		graphTrace.setCellFactory(new Callback<ListView<Trace>, ListCell<Trace>>(){
 			@Override
-            public ListCell<Trace> call(ListView<Trace> param) {
-                ListCell<Trace> cell = new ListCell<Trace>() {
-
-                    @Override
-                    protected void updateItem(Trace item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (item != null) {
-                            textProperty().bind(item.getNameProperty());
-                        } 
-//                        else {
-//                            setText("");
-//                        }
-                    }
-                };
+            public ListCell<Trace> call(ListView<Trace> arg) {
+                ListCell<Trace> cell = new JFXListCell<Trace>(); 
+                listenerList.add(cell);
                 return cell;
             }
 		});
-//		this.setCellFactory(listView -> new JFXListCell<T>(){
-//            @Override
-//            public void updateItem(T item, boolean empty) {
-//                super.updateItem(item, empty);
-//                updateDisplayText(this,item,empty);
-//            }
-//        });
 
 		// Add name listener
 		graphName.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent arg0) {
 				graphListView.refresh();
-//				Trace tempTrace = selectedGraph.getTrace();
-//				selectedGraph.setTrace(new Trace());
-//				selectedGraph.setTrace(tempTrace);
-//				graphTrace.getButtonCell().setText("Hei");
-//				graphTrace.getCellFactory().call(param)
 			}
 		});
 		
@@ -356,13 +334,20 @@ public class MainController {
 	    traceStep					.textProperty().bindBidirectional(selectedTrace.getStepProperty(), customStringConverter);
 		
 		// Set trace details
-		funcTypeLabel			.setText(selectedTrace.getInterpolationType() != null ? selectedTrace.getInterpolationType().TEXT : "-");
-		integrationTypeLabel	.setText(selectedTrace.getIntegrationType() != null ? selectedTrace.getIntegrationType().TEXT : "-");
-		stepSizeLabel			.setText(selectedTrace.getStepSize() != null ? selectedTrace.getStepSize() : "-");
-		iterationsLabel			.setText(selectedTrace.getIterations() != null ? selectedTrace.getIterations() : "-");
-		totalTimeLabel			.setText(selectedTrace.getTotalTime() != null ? selectedTrace.getTotalTime() : "-");
-		computationTimeLabel	.setText(selectedTrace.getComputationTime() != null ? selectedTrace.getComputationTime() : "-");
-		energyDifferenceLabel	.setText(selectedTrace.getEnergyDifference() != null ? selectedTrace.getEnergyDifference() : "-");
+	    funcTypeLabel.textProperty().bind(selectedTrace.getInterpolationTypeProperty());
+	    integrationTypeLabel.textProperty().bind(selectedTrace.getIntegrationTypeProperty());
+	    stepSizeLabel.textProperty().bind(selectedTrace.getStepSizeProperty());
+	    iterationsLabel.textProperty().bind(selectedTrace.getIterationsProperty());
+	    totalTimeLabel.textProperty().bind(selectedTrace.getTotalTimeProperty());
+	    computationTimeLabel.textProperty().bind(selectedTrace.getComputationTimeProperty());
+	    energyDifferenceLabel.textProperty().bind(selectedTrace.getEnergyDifferenceProperty());
+//		funcTypeLabel			.setText(selectedTrace.getInterpolationType() != null ? selectedTrace.getInterpolationType() : "-");
+//		integrationTypeLabel	.setText(selectedTrace.getIntegrationType() != null ? selectedTrace.getIntegrationType() : "-");
+//		stepSizeLabel			.setText(selectedTrace.getStepSize() != null ? selectedTrace.getStepSize() : "-");
+//		iterationsLabel			.setText(selectedTrace.getIterations() != null ? selectedTrace.getIterations() : "-");
+//		totalTimeLabel			.setText(selectedTrace.getTotalTime() != null ? selectedTrace.getTotalTime() : "-");
+//		computationTimeLabel	.setText(selectedTrace.getComputationTime() != null ? selectedTrace.getComputationTime() : "-");
+//		energyDifferenceLabel	.setText(selectedTrace.getEnergyDifference() != null ? selectedTrace.getEnergyDifference() : "-");
 	}
 	
 	/**
@@ -465,14 +450,20 @@ public class MainController {
     }
     
     @FXML private void handleComputeClick(ActionEvent event) {
-    	// Run trace
-    	selectedTrace.trace(false, true);
-
+    	// Select trace details view
+    	traceTabPane.getSelectionModel().selectLast();
+    	
+//    	// Run trace
+//    	selectedTrace.trace(false, true);
+    	selectedTrace.printResults();
+    	
+    	// Run trace in parallel
+    	selectedTrace.parallelTrace();
+    	
+    	selectedTrace.printResults();
+    	
     	// Update
     	updateTraceView();
-    	
-    	// Update graph
-    	selectedGraph.updateSeries();
     }
     
     @FXML private void handleComputeAllClick(ActionEvent event) {}
@@ -489,17 +480,9 @@ public class MainController {
     	graphListView.getSelectionModel().selectLast();
     	updateGraphView();
     }
-    private double xval = 0;
-    private double yval = 0;
+
     @FXML private void handleDeleteGraphClick(ActionEvent event) {
     	selectedGraph.getSeries().getNode().setStyle("-fx-stroke: #450000;");
-//    	lineChart.setCreateSymbols(false);
-//    	for (int i = 0; i < 1000; i++) {
-//    		xval += 0.1;
-//    		yval += Math.random();
-//    		selectedGraph.getSeries().getData().add(new XYChart.Data<Number, Number>(xval, yval));
-//    		
-//    	}
     }
     
     @FXML private void handleGraphUpClick(ActionEvent event) {

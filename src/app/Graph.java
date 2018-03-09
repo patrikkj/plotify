@@ -56,18 +56,27 @@ public class Graph {
 		setColor(Color.valueOf("#FFFFFF"));
 		
 		// Apply change listener
-		applyChangeListener();
+		applyChangeListeners();
 	}
 	
 	
-	private void applyChangeListener() {
-		// Create changeListener
+	private void applyChangeListeners() {
+		// Create changeListeners
 		ChangeListener<Object> dataChangeListener = new ChangeListener<>() {
 			@Override
 			public void changed(ObservableValue<?> arg0, Object arg1, Object arg2) {
 				updateSeries();
 			}
 		};
+		ChangeListener<Trace> traceChangeListener = new ChangeListener<>() {
+			@Override
+			public void changed(ObservableValue<? extends Trace> arg0, Trace prev, Trace current) {
+				updateTraceLink(prev, current);
+			}
+		};
+		
+		// Add listener to manage Trace <-> Graph link
+		trace.addListener(traceChangeListener);
 		
 		// Add listener to data-related properties
 		xData.addListener(dataChangeListener);
@@ -80,8 +89,6 @@ public class Graph {
 		maxY.addListener(dataChangeListener);
 		smooth.addListener(dataChangeListener);
 		detail.addListener(dataChangeListener);
-		
-		
 	}
 	
 	private List<Float> reduceList(List<Float> inputList, double n) {
@@ -127,6 +134,10 @@ public class Graph {
 		series.getData().setAll(dataList);
 	}
 	
+	public void updateTraceLink(Trace prevTrace, Trace currentTrace) {
+		prevTrace.removeGraph(this);
+		currentTrace.addGraph(this);
+	}
 	
 	private void initializeProperties() {
 		// Graph data properties

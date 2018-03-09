@@ -272,7 +272,7 @@
                               <Region HBox.hgrow="ALWAYS" />
                               <AnchorPane>
                                  <children>
-                                    <JFXTabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="195.0" prefWidth="360.0" stylesheets="@../resources/tabPane.css" tabMinWidth="175.0" AnchorPane.bottomAnchor="20.0" AnchorPane.topAnchor="20.0">
+                                    <JFXTabPane fx:id="traceTabPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="195.0" prefWidth="360.0" stylesheets="@../resources/tabPane.css" tabMinWidth="175.0" AnchorPane.bottomAnchor="20.0" AnchorPane.topAnchor="20.0">
                                        <tabs>
                                           <Tab closable="false" text="Properties">
                                              <content>
@@ -318,19 +318,19 @@
                                                                <font>
                                                                   <Font size="10.0" />
                                                                </font></Label>
-                                                            <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Start X:" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                                            <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Init. velocity:" GridPane.columnIndex="2" GridPane.rowIndex="1">
                                                                <font>
                                                                   <Font size="10.0" />
                                                                </font></Label>
-                                                            <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="End X:" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                                                            <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Step size:" GridPane.columnIndex="2" GridPane.rowIndex="2">
                                                                <font>
                                                                   <Font size="10.0" />
                                                                </font></Label>
-                                                            <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Init. v:" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                                                            <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Start X:" GridPane.columnIndex="2" GridPane.rowIndex="3">
                                                                <font>
                                                                   <Font size="10.0" />
                                                                </font></Label>
-                                                            <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Step size:" GridPane.columnIndex="2" GridPane.rowIndex="4">
+                                                            <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="End X:" GridPane.columnIndex="2" GridPane.rowIndex="4">
                                                                <font>
                                                                   <Font size="10.0" />
                                                                </font></Label>
@@ -389,7 +389,7 @@
                                                                   <Font size="11.0" />
                                                                </font>
                                                             </JFXTextField>
-                                                            <JFXTextField fx:id="traceMinX" alignment="BOTTOM_CENTER" prefWidth="60.0" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                                                            <JFXTextField fx:id="traceInitV" alignment="BOTTOM_CENTER" prefWidth="60.0" GridPane.columnIndex="3" GridPane.rowIndex="1">
                                                                <GridPane.margin>
                                                                   <Insets left="10.0" right="10.0" />
                                                                </GridPane.margin>
@@ -397,15 +397,7 @@
                                                                   <Font size="11.0" />
                                                                </font>
                                                             </JFXTextField>
-                                                            <JFXTextField fx:id="traceMaxX" alignment="BOTTOM_CENTER" prefWidth="60.0" GridPane.columnIndex="3" GridPane.rowIndex="2">
-                                                               <font>
-                                                                  <Font size="11.0" />
-                                                               </font>
-                                                               <GridPane.margin>
-                                                                  <Insets left="10.0" right="10.0" />
-                                                               </GridPane.margin>
-                                                            </JFXTextField>
-                                                            <JFXTextField fx:id="traceInitV" alignment="BOTTOM_CENTER" prefWidth="60.0" GridPane.columnIndex="3" GridPane.rowIndex="3">
+                                                            <JFXTextField fx:id="traceStep" alignment="BOTTOM_CENTER" prefWidth="60.0" GridPane.columnIndex="3" GridPane.rowIndex="2">
                                                                <GridPane.margin>
                                                                   <Insets left="10.0" right="10.0" />
                                                                </GridPane.margin>
@@ -413,13 +405,21 @@
                                                                   <Font size="11.0" />
                                                                </font>
                                                             </JFXTextField>
-                                                            <JFXTextField fx:id="traceStep" alignment="BOTTOM_CENTER" prefWidth="60.0" GridPane.columnIndex="3" GridPane.rowIndex="4">
+                                                            <JFXTextField fx:id="traceMinX" alignment="BOTTOM_CENTER" prefWidth="60.0" GridPane.columnIndex="3" GridPane.rowIndex="3">
                                                                <GridPane.margin>
                                                                   <Insets left="10.0" right="10.0" />
                                                                </GridPane.margin>
                                                                <font>
                                                                   <Font size="11.0" />
                                                                </font>
+                                                            </JFXTextField>
+                                                            <JFXTextField fx:id="traceMaxX" alignment="BOTTOM_CENTER" prefWidth="60.0" GridPane.columnIndex="3" GridPane.rowIndex="4">
+                                                               <font>
+                                                                  <Font size="11.0" />
+                                                               </font>
+                                                               <GridPane.margin>
+                                                                  <Insets left="10.0" right="10.0" />
+                                                               </GridPane.margin>
                                                             </JFXTextField>
                                                          </children>
                                                       </GridPane>
