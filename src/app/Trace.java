@@ -421,8 +421,8 @@ public class Trace {
 		tempIntegrationType = getIntegration().TEXT;
 		
 		//If Trace is not processed in parallel thread, update GUI bindings
-		if (Platform.isFxApplicationThread())
-			updateDetails();
+//		if (Platform.isFxApplicationThread())
+//			updateDetails();
 		
 		//Print results if requested
 		if (printResults) printResults();
@@ -454,7 +454,6 @@ public class Trace {
 		double initTotEnergy = eTot;
 		
 		//Used to compute simulation time
-		System.out.println("Processing");
 		Instant start = Instant.now();
 		
 		//Keeps track of iterations
@@ -538,7 +537,6 @@ public class Trace {
 		
 		
 		//Perform trace
-		
 		testTrace.parallelTrace();
 //		testTrace.trace(false, true);
 		
