@@ -82,7 +82,7 @@ public class Trace {
 	private ObservableList<Float> yListRaw;
 	
 	//Associations
-	private HashSet<Graph> linkedGraphs;
+	public HashSet<Graph> linkedGraphs;
 	
 	//Constants
 	public static final double G = 9.82814;
@@ -241,7 +241,7 @@ public class Trace {
 	}
 	
 	//Updates
-	protected void updateDetails() {
+	public void updateTrace() {
 		// Update trace details
 		setIntegrationType(tempIntegrationType);
 		setInterpolationType(tempInterpolationType);
@@ -252,8 +252,7 @@ public class Trace {
 		setComputationTime(tempComputationTime);
 		
 		//Update subscribing graphs
-		if (linkedGraphs != null)
-			linkedGraphs.forEach(graph -> graph.updateSeries());
+		linkedGraphs.forEach(graph -> graph.updateGraph());
 	}
 	
 	//Validation
@@ -426,10 +425,6 @@ public class Trace {
 		
 		//Print results if requested
 		if (printResults) printResults();
-		
-		//Update subscribing graphs
-		if (linkedGraphs != null)
-			linkedGraphs.forEach(graph -> graph.updateSeries());
 	}
 	
 	/**

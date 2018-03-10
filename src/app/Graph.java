@@ -34,15 +34,14 @@ public class Graph {
 	
 	// Graph layout properties
 	private ObjectProperty<Color> color;
-	private DoubleProperty stroke;
-	private DoubleProperty detail;
 	private ObjectProperty<Style> style;
-	private BooleanProperty smooth;
-	private BooleanProperty points;
+	private DoubleProperty width;
+	private DoubleProperty detail;
 	private BooleanProperty visible;
-	
 	List<Data<Number, Number>> dataList; 
+
 	
+	// Constructor
 	public Graph(Trace initTrace) {
 		// Initialize graph properties
 		initializeProperties();
@@ -50,15 +49,42 @@ public class Graph {
 		series.nameProperty().bindBidirectional(name);
 
 		// Set default values
-		setName("Sample graph");
+		setName("New graph");
 		setTrace(initTrace);
-		setDetail(100d);
-		setColor(Color.valueOf("#FFFFFF"));
+		setXData("Position (x)");
+		setYData("Velocity");
+		setColor(Color.valueOf("#450000"));
+		setStyle(Style.FULL_LINE);
+		setWidth(50d);
+		setDetail(50d);
+
+		
+		// Add trace link
+		addTraceLink();
 		
 		// Apply change listener
 		applyChangeListeners();
 	}
 	
+	// Initialization
+	private void initializeProperties() {
+		// Graph data properties
+		name = new SimpleStringProperty();
+		xData = new SimpleStringProperty();
+		yData = new SimpleStringProperty();
+		trace = new SimpleObjectProperty<>();
+		minX = new SimpleObjectProperty<>();
+		maxX = new SimpleObjectProperty<>();
+		minY = new SimpleObjectProperty<>();
+		maxY = new SimpleObjectProperty<>();
+		
+		// Graph layout properties
+		color = new SimpleObjectProperty<>();
+		width = new SimpleDoubleProperty();
+		style = new SimpleObjectProperty<>();
+		detail = new SimpleDoubleProperty();
+		visible = new SimpleBooleanProperty();
+	}
 	
 	private void applyChangeListeners() {
 		// Create changeListeners
@@ -66,6 +92,8 @@ public class Graph {
 			@Override
 			public void changed(ObservableValue<?> arg0, Object arg1, Object arg2) {
 				updateSeries();
+				
+				updateStyle();
 			}
 		};
 		ChangeListener<Trace> traceChangeListener = new ChangeListener<>() {
@@ -77,20 +105,22 @@ public class Graph {
 		
 		// Add listener to manage Trace <-> Graph link
 		trace.addListener(traceChangeListener);
-		
+
 		// Add listener to data-related properties
 		xData.addListener(dataChangeListener);
 		yData.addListener(dataChangeListener);
 		trace.addListener(dataChangeListener);
-		xData.addListener(dataChangeListener);
 		minX.addListener(dataChangeListener);
 		maxX.addListener(dataChangeListener);
 		minY.addListener(dataChangeListener);
 		maxY.addListener(dataChangeListener);
-		smooth.addListener(dataChangeListener);
+		color.addListener(dataChangeListener);
+		width.addListener(dataChangeListener);
 		detail.addListener(dataChangeListener);
 	}
+
 	
+	// Manage series
 	private List<Float> reduceList(List<Float> inputList, double n) {
 		n = (double) Math.round(n);
 		// Verify that reduction is necessary
@@ -111,7 +141,12 @@ public class Graph {
 		return outputList;
 	}
 	
-	public void updateSeries() {
+	public void updateGraph() {
+		updateSeries();
+		updateStyle();
+	}
+	
+	private void updateSeries() {
 		// Empty list used to build data set
 		dataList = new ArrayList<>();
 		
@@ -122,7 +157,7 @@ public class Graph {
 		// Break if any data sets are missing
 		if (rawXData == null  ||  rawYData == null) return;
 		
-		// Reduced lists
+		// Reduce lists
 		List<Float> reducedXData = reduceList(rawXData, getDetail());
 		List<Float> reducedYData = reduceList(rawYData, getDetail());
 		
@@ -132,34 +167,39 @@ public class Graph {
 		
 		// Update series
 		series.getData().setAll(dataList);
+		
+		// Update graph style
+		updateStyle();
 	}
 	
+	private void updateStyle() {
+//		String lineStyle = String.format("-fx-stroke: #%s; -fx-stroke-width: %s;", getHexColor(), getWidth());
+		String lineStyle = String.format("-fx-stroke: #%s; -fx-stroke-width: %s;", getHexColor(), getWidth());
+		getSeries().getNode().setStyle(lineStyle);
+	
+		
+		
+		
+		String nodeStyle = String.format("-fx-background-color: #%s, #FFFFFF; -fx-background-insets: 0, 2;", getHexColor());
+		
+		getSeries().getData().forEach(data -> data.getNode().setStyle(nodeStyle));
+	}
+	
+	
+	// Manage Trace <-> Graph link
 	public void updateTraceLink(Trace prevTrace, Trace currentTrace) {
 		prevTrace.removeGraph(this);
 		currentTrace.addGraph(this);
 	}
 	
-	private void initializeProperties() {
-		// Graph data properties
-		name = new SimpleStringProperty();
-		xData = new SimpleStringProperty();
-		yData = new SimpleStringProperty();
-		trace = new SimpleObjectProperty<>();
-		minX = new SimpleObjectProperty<>();
-		maxX = new SimpleObjectProperty<>();
-		minY = new SimpleObjectProperty<>();
-		maxY = new SimpleObjectProperty<>();
-		
-		// Graph layout properties
-		color = new SimpleObjectProperty<>();
-		stroke = new SimpleDoubleProperty();
-		detail = new SimpleDoubleProperty();
-		style = new SimpleObjectProperty<>();
-		smooth = new SimpleBooleanProperty();
-		points = new SimpleBooleanProperty();
-		visible = new SimpleBooleanProperty();
+	public void addTraceLink() {
+		getTrace().addGraph(this);
 	}
-
+	
+	public void removeTraceLink() {
+		getTrace().removeGraph(this);
+	}
+	
 
 	// Data getters
 	public Series<Number, Number> getSeries() {return series;}
@@ -174,11 +214,10 @@ public class Graph {
 
 	// Layout getters
 	public Color getColor() {return color.get();}
-	public Double getStroke() {return stroke.get();}
-	public Double getDetail() {return 10d / ((0.5d - detail.get())/100d + 1d) - 7;}
+	public String getHexColor() {return getColor().toString().substring(2, 8);}
+	public Double getWidth() {return width.get()* (6d/100d);}
 	public Style getStyle() {return style.get();}
-	public Boolean getSmooth() {return smooth.get();}
-	public Boolean getPoints() {return points.get();}
+	public Double getDetail() {return 10d / ((0.5d - detail.get())/100d + 1d) - 7;}
 	public Boolean getVisible() {return visible.get();}
 	
 	
@@ -194,11 +233,9 @@ public class Graph {
 	
 	// Layout setters
 	public void setColor(Color color) {this.color.set(color);}
-	public void setStroke(Double stroke) {this.stroke.set(stroke);}
-	public void setDetail(Double detail) {this.detail.set(detail);}
+	public void setWidth(Double width) {this.width.set(width);}
 	public void setStyle(Style style) {this.style.set(style);}
-	public void setSmooth(Boolean smooth) {this.smooth.set(smooth);}
-	public void setPoints(Boolean points) {this.points.set(points);}
+	public void setDetail(Double detail) {this.detail.set(detail);}
 	public void setVisible(Boolean visible) {this.visible.set(visible);}
 
 	
@@ -214,11 +251,9 @@ public class Graph {
 	
 	// Layout property getters
 	public ObjectProperty<Color> getColorProperty() {return color;}
-	public DoubleProperty getStrokeProperty() {return stroke;}
-	public DoubleProperty getDetailProperty() {return detail;}
+	public DoubleProperty getWidthProperty() {return width;}
 	public ObjectProperty<Style> getStyleProperty() {return style;}
-	public BooleanProperty getSmoothProperty() {return smooth;}
-	public BooleanProperty getPointsProperty() {return points;}
+	public DoubleProperty getDetailProperty() {return detail;}
 	public BooleanProperty getVisibleProperty() {return visible;}
 	
 	public void printDetails() {
@@ -230,11 +265,9 @@ public class Graph {
 				+ "MinX: %s\n"
 				+ "MaxX: %s\n"
 				+ "Color: %s\n"
-				+ "Stroke: %s\n"
+				+ "Stroke width: %s\n"
+				+ "Stroke style: %s\n"
 				+ "Detail: %s\n"
-				+ "Style: %s\n"
-				+ "Smooth: %s\n"
-				+ "Points: %s\n"
 				+ "Dataset length: %s\n"
 				+ "Requested length: %s\n"
 				+ "Trace xData length: %s\n"
@@ -247,36 +280,13 @@ public class Graph {
 				getMinX(),
 				getMaxX(),
 				getColor(),
-				getStroke(),
-				getDetail(),
+				getWidth(),
 				getStyle(),
-				getSmooth(),
-				getPoints(),
+				getDetail(),
 				dataList.size(),
 				getDetail(),
 				getTrace().getTraceMap().get(getXData()).size(),
 				getTrace().getTraceMap().get(getYData()).size());
-		
-		
-//		// Data getters
-//		public Series<Number, Number> getSeries() {return series;}
-//		public String getName() {return series.nameProperty().get();}
-//		public String getXData() {return xData.get();}
-//		public String getYData() {return yData.get();}
-//		public Trace getTrace() {return trace.get();}
-//		public Double getMinX() {return minX.get();}
-//		public Double getMaxX() {return maxX.get();}
-//		public Double getMinY() {return minY.get();}
-//		public Double getMaxY() {return maxY.get();}
-//
-//		// Layout getters
-//		public Color getColor() {return color.get();}
-//		public Double getStroke() {return stroke.get();}
-//		public Double getDetail() {return detail.get();}
-//		public Style getStyle() {return style.get();}
-//		public Boolean getSmooth() {return smooth.get();}
-//		public Boolean getPoints() {return points.get();}
-//		public Boolean getVisible() {return visible.get();}
 	}
 	
 	public String toString() {

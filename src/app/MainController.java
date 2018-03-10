@@ -5,6 +5,7 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXComboBox;
@@ -32,6 +33,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -96,13 +98,11 @@ public class MainController {
     @FXML private JFXTextField graphMinX;
     @FXML private JFXTextField graphMaxX;
     // Graph layout
+    @FXML private JFXColorPicker graphColor;
+    @FXML private JFXSlider graphDetail;
     @FXML private JFXComboBox<Style> graphStyle;
-    @FXML private JFXColorPicker graphColorPicker;
-    @FXML private JFXSlider graphDetailSlider;
-    @FXML private JFXToggleButton graphPointsToggleButton;
-    @FXML private JFXSlider graphStrokeSlider;
-    @FXML private JFXToggleButton graphSmoothToggleButton;
-    @FXML private JFXToggleButton graphVisibleToggleButton; 
+    @FXML private JFXSlider graphWidth;
+    @FXML private JFXToggleButton graphVisible; 
     
     //// NON-FXML FIELDS
     /**
@@ -200,7 +200,7 @@ public class MainController {
 		xAxis.setLabel("xAxis");
 		yAxis.setLabel("yAxis");
 		lineChart.setTitle("My Chart");
-		lineChart.setCreateSymbols(false);
+		lineChart.setCreateSymbols(true);
 		lineChart.setAnimated(false);
 		
 		// Add chart to GUI
@@ -299,6 +299,8 @@ public class MainController {
 		// Retrive selected list entry
 		selectedGraph = graphListView.getSelectionModel().getSelectedItem();
 		
+		System.out.println("Selected item: " + selectedGraph);
+		
 		// Unbind previous graph
 		if (prevGraph != null)
 			unbindGraph();
@@ -306,14 +308,49 @@ public class MainController {
 		// Cache selected graph
 		prevGraph = selectedGraph;
 		
+		// If there is no selected graph, break
+		if (selectedGraph == null) {
+			clearGraphView();
+			return;
+		}
+		
 		// Bind selected graph
 		bindGraph();
 		
 		// Prevent duplicate graphs
 		if (!lineChart.getData().contains(selectedGraph.getSeries()))
 			lineChart.getData().add(selectedGraph.getSeries());
+		
+		// Fix graph order
+		graphList.forEach(g -> g.getSeries().getNode().setViewOrder(graphList.indexOf(g)));
+    	
+    	// Update chart
+    	lineChart.getData().setAll(graphList.stream().map(graph -> graph.getSeries()).collect(Collectors.toList()));
+    	
+    	// Update graphs
+    	graphList.forEach(graph -> graph.updateGraph());
     }
 
+	
+	/**
+	 * Clears graph view if there are no graphs to display.
+	 */
+	private void clearGraphView() {
+		// Clear graph properties
+		graphName.setText(null);
+		graphXData.setValue(null);
+		graphYData.setValue(null);
+		graphTrace.setValue(null);
+		graphMinX.setText(null);
+		graphMaxX.setText(null);
+		
+		// Clear graph layout properties
+		graphStyle.setValue(null);
+		graphColor.setValue(Color.valueOf("#FFFFFF"));
+		graphDetail.setValue(50);
+		graphWidth.setValue(50);
+		graphVisible.setSelected(false);
+	}
 	
 	// Manage bindings
 	/**
@@ -327,7 +364,6 @@ public class MainController {
 	    traceInterpolation			.valueProperty().bindBidirectional(selectedTrace.getInterpolationProperty());
 	    traceInertia				.valueProperty().bindBidirectional(selectedTrace.getInertiaProperty());
 	    traceMass					.textProperty().bindBidirectional(selectedTrace.getMassProperty(), customStringConverter);
-//	    traceRadius					.textProperty().bindBidirectional(selectedTrace.getRadiusProperty(), customStringConverter);
 	    traceMinX					.textProperty().bindBidirectional(selectedTrace.getMinXProperty(), customStringConverter);
 	    traceMaxX					.textProperty().bindBidirectional(selectedTrace.getMaxXProperty(), customStringConverter);
 	    traceInitV					.textProperty().bindBidirectional(selectedTrace.getInitVProperty(), customStringConverter);
@@ -341,13 +377,6 @@ public class MainController {
 	    totalTimeLabel.textProperty().bind(selectedTrace.getTotalTimeProperty());
 	    computationTimeLabel.textProperty().bind(selectedTrace.getComputationTimeProperty());
 	    energyDifferenceLabel.textProperty().bind(selectedTrace.getEnergyDifferenceProperty());
-//		funcTypeLabel			.setText(selectedTrace.getInterpolationType() != null ? selectedTrace.getInterpolationType() : "-");
-//		integrationTypeLabel	.setText(selectedTrace.getIntegrationType() != null ? selectedTrace.getIntegrationType() : "-");
-//		stepSizeLabel			.setText(selectedTrace.getStepSize() != null ? selectedTrace.getStepSize() : "-");
-//		iterationsLabel			.setText(selectedTrace.getIterations() != null ? selectedTrace.getIterations() : "-");
-//		totalTimeLabel			.setText(selectedTrace.getTotalTime() != null ? selectedTrace.getTotalTime() : "-");
-//		computationTimeLabel	.setText(selectedTrace.getComputationTime() != null ? selectedTrace.getComputationTime() : "-");
-//		energyDifferenceLabel	.setText(selectedTrace.getEnergyDifference() != null ? selectedTrace.getEnergyDifference() : "-");
 	}
 	
 	/**
@@ -366,12 +395,10 @@ public class MainController {
 		
 		// Bind graph layout properties
 		graphStyle					.valueProperty().bindBidirectional(selectedGraph.getStyleProperty());
-		graphColorPicker			.valueProperty().bindBidirectional(selectedGraph.getColorProperty());
-		graphDetailSlider			.valueProperty().bindBidirectional(selectedGraph.getDetailProperty());
-		graphStrokeSlider			.valueProperty().bindBidirectional(selectedGraph.getStrokeProperty());
-		graphPointsToggleButton		.selectedProperty().bindBidirectional(selectedGraph.getPointsProperty());
-		graphSmoothToggleButton		.selectedProperty().bindBidirectional(selectedGraph.getSmoothProperty());
-		graphVisibleToggleButton	.selectedProperty().bindBidirectional(selectedGraph.getVisibleProperty());
+		graphColor					.valueProperty().bindBidirectional(selectedGraph.getColorProperty());
+		graphDetail					.valueProperty().bindBidirectional(selectedGraph.getDetailProperty());
+		graphWidth					.valueProperty().bindBidirectional(selectedGraph.getWidthProperty());
+		graphVisible				.selectedProperty().bindBidirectional(selectedGraph.getVisibleProperty());
 	}
 	
 	/**
@@ -385,7 +412,6 @@ public class MainController {
 		traceInterpolation		.valueProperty().unbindBidirectional(prevTrace.getInterpolationProperty());
 		traceInertia			.valueProperty().unbindBidirectional(prevTrace.getInertiaProperty());
 		traceMass				.textProperty().unbindBidirectional(prevTrace.getMassProperty());
-//		traceRadius				.textProperty().unbindBidirectional(prevTrace.getRadiusProperty());
 		traceMinX				.textProperty().unbindBidirectional(prevTrace.getMinXProperty());
 		traceMaxX				.textProperty().unbindBidirectional(prevTrace.getMaxXProperty());
 		traceInitV				.textProperty().unbindBidirectional(prevTrace.getInitVProperty());
@@ -406,12 +432,10 @@ public class MainController {
 		
 		// Unbind graph layout properties
 		graphStyle				.valueProperty().unbindBidirectional(prevGraph.getStyleProperty());
-		graphColorPicker		.valueProperty().unbindBidirectional(prevGraph.getColorProperty());
-		graphDetailSlider		.valueProperty().unbindBidirectional(prevGraph.getDetailProperty());
-		graphStrokeSlider		.valueProperty().unbindBidirectional(prevGraph.getStrokeProperty());
-		graphPointsToggleButton	.selectedProperty().unbindBidirectional(prevGraph.getPointsProperty());
-		graphSmoothToggleButton	.selectedProperty().unbindBidirectional(prevGraph.getSmoothProperty());
-		graphVisibleToggleButton.selectedProperty().unbindBidirectional(prevGraph.getVisibleProperty());
+		graphColor				.valueProperty().unbindBidirectional(prevGraph.getColorProperty());
+		graphDetail				.valueProperty().unbindBidirectional(prevGraph.getDetailProperty());
+		graphWidth				.valueProperty().unbindBidirectional(prevGraph.getWidthProperty());
+		graphVisible			.selectedProperty().unbindBidirectional(prevGraph.getVisibleProperty());
 	}
     
     
@@ -430,23 +454,19 @@ public class MainController {
     
     // Trace button handlers
     @FXML private void handleNewTraceClick(ActionEvent event) {
+    	// Add ned trace
     	traceList.add(new Trace());
+    	
+    	// Select new trace
+    	traceListView.getSelectionModel().selectLast();
+    	
+    	// Update
+    	updateTraceView();
     }
     
     @FXML private void handleDeleteTraceClick(ActionEvent event) {
-    	
-    	System.out.println(traceListView.getSelectionModel().getSelectedItem());
-    	System.out.printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
-    			selectedTrace.getName(),
-    			selectedTrace.getFile(),
-    			selectedTrace.getIntegration(),
-    			selectedTrace.getInterpolation(),
-    			selectedTrace.getInertia(),
-    			selectedTrace.getMass(),
-    			selectedTrace.getMinX(),
-    			selectedTrace.getMaxX(),
-    			selectedTrace.getInitV(),
-    			selectedTrace.getStep());
+    	// Update
+    	updateGraphView();
     }
     
     @FXML private void handleComputeClick(ActionEvent event) {
@@ -472,31 +492,97 @@ public class MainController {
     }
     
     @FXML private void handleTraceListClick(Event event) {
+    	// Update
     	updateTraceView();
     }
     
     
     // Graph button handlers
     @FXML private void handleNewGraphClick(ActionEvent event) {
+    	// Add new graph
     	graphList.add(new Graph(selectedTrace));
     	
+    	// Select new graph
     	graphListView.getSelectionModel().selectLast();
+    	
+    	// Update
     	updateGraphView();
     }
 
     @FXML private void handleDeleteGraphClick(ActionEvent event) {
-    	selectedGraph.getSeries().getNode().setStyle("-fx-stroke: #450000;");
+    	// If there is no selected graph, break
+    	if (selectedGraph == null) return;
+    	
+    	// Remove property bindings
+    	selectedGraph.removeTraceLink();
+    	
+    	// Remove graph from series
+    	if (lineChart.getData().contains(selectedGraph.getSeries()))
+    		lineChart.getData().remove(selectedGraph.getSeries());
+    	
+    	// Remove graph
+    	graphList.remove(selectedGraph);
+    	
+    	// Update
+    	updateGraphView();
     }
     
     @FXML private void handleGraphUpClick(ActionEvent event) {
-    	System.out.println(selectedGraph.getTrace());
+    	// Assign local variable
+    	Graph graph;
+    	int graphIndex;
+    	
+    	// If there is no selected graph, break
+    	if (selectedGraph == null) return;
+    	
+    	// Retrive graph index
+    	graphIndex = graphList.indexOf(selectedGraph);
+    	
+    	// If graph already has highest priority, break
+    	if (graphIndex == 0) return;
+    	
+    	// Remove graph from list
+    	graph = graphList.remove(graphIndex);
+    	
+    	// Add graph at new index
+    	graphList.add(graphIndex - 1, graph);
+    	
+    	// Reselect moved graph
+    	graphListView.getSelectionModel().select(graph);
+    	
+    	// Update
+    	updateGraphView();
     }
     
     @FXML private void handleGraphDownClick(ActionEvent event) {
-    	selectedGraph.printDetails();
+    	// Assign local variable
+    	Graph graph;
+    	int graphIndex;
+    	
+    	// If there is no selected graph, break
+    	if (selectedGraph == null) return;
+    	
+    	// Retrive graph index
+    	graphIndex = graphList.indexOf(selectedGraph);
+    	
+    	// If graph already has lowest priority, break
+    	if (graphIndex == graphList.size() - 1) return;
+    	
+    	// Remove graph from list
+    	graph = graphList.remove(graphIndex);
+    	
+    	// Add graph at new index
+    	graphList.add(graphIndex + 1, graph);
+    	
+    	// Reselect moved graph
+    	graphListView.getSelectionModel().select(graph);
+    	
+    	// Update
+    	updateGraphView();
     }
     
     @FXML private void handleGraphListClick(Event event) {
+    	// Update
     	updateGraphView();
     }
     

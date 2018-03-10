@@ -27,7 +27,7 @@ public class TraceProcessor implements Runnable {
 		System.out.println("Finished: " + trace.getName() + " on " + Thread.currentThread());
 		
 		//Perform GUI Updates in FX Application Thread
-		Platform.runLater(() -> trace.updateDetails());
+		Platform.runLater(() -> trace.updateTrace());
 	}
 
 }

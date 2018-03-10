@@ -6,18 +6,20 @@ import java.util.stream.Collectors;
 
 public enum Style {
 	// Object types
-	FULL_LINE	("-fx-dot-style", "――――――――――"),
-	PADDED_LINE	("-fx-dot-style", "----------"),
-	DOTTED_LINE	("-fx-dot-style", "··········");
+	FULL_LINE	("-fx-dot-style", "――――――――――", "Full line"),
+	PADDED_LINE	("-fx-dot-style", "----------", "Dashed line"),
+	DOTTED_LINE	("-fx-dot-style", "··········", "Dotted line");
 	
 	// Constants
 	public final String STYLE;
 	public final String DISPLAY;
+	public final String TEXT;
 	
 	// Constructor
-	private Style(String STYLE, String DISPLAY) {
+	private Style(String STYLE, String DISPLAY, String TEXT) {
 		this.STYLE = STYLE;
 		this.DISPLAY = DISPLAY;
+		this.TEXT = TEXT;
 	}
 
 	// List getters
@@ -28,6 +30,6 @@ public enum Style {
 	// toString - Values to be displayed in ComboBox
 	@Override
 	public String toString() {
-		return DISPLAY;
+		return TEXT;
 	}
 }
