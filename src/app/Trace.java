@@ -4,7 +4,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import enums.Inertia;
 import enums.Integration;
@@ -71,6 +75,11 @@ public class Trace {
 	private ObservableList<Float> kinList;
 	private ObservableList<Float> potList;
 	private ObservableList<Float> tList;
+	
+	//Raw data
+	private ObservableList<Float> tListRaw;
+	private ObservableList<Float> xListRaw;
+	private ObservableList<Float> yListRaw;
 	
 	//Associations
 	private HashSet<Graph> linkedGraphs;
@@ -182,6 +191,18 @@ public class Trace {
 			break;
 		}
 		
+		//Fill raw data collections
+		double[][] rawData = analysis.Interpolation.parseFile(getFile());
+		tListRaw.setAll(Arrays.stream(rawData[0])
+				.mapToObj(doub -> Float.valueOf((float) doub))
+				.collect(Collectors.toList()));
+		xListRaw.setAll(Arrays.stream(rawData[1])
+				.mapToObj(doub -> Float.valueOf((float) doub))
+				.collect(Collectors.toList()));
+		yListRaw.setAll(Arrays.stream(rawData[2])
+				.mapToObj(doub -> Float.valueOf((float) doub))
+				.collect(Collectors.toList()));
+		
 		//Set trace details
 		tempInterpolationType = getInterpolation().TEXT;
 		
@@ -202,6 +223,11 @@ public class Trace {
 		kinList = FXCollections.observableArrayList();
 		potList = FXCollections.observableArrayList();
 		tList = FXCollections.observableArrayList();
+		
+		//Initialize raw data collections
+		tListRaw = FXCollections.observableArrayList();
+		xListRaw = FXCollections.observableArrayList();
+		yListRaw = FXCollections.observableArrayList();
 		
 		// Fill map
 		traceMap.put("Acceleration", aList);

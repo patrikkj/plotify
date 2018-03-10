@@ -48,7 +48,7 @@ public class Interpolation {
 		double[][] fileData = parseFile(file);
 
 		//Perform interpolation
-		return polynomialSplineInterpolation(fileData[0], fileData[1]);
+		return polynomialSplineInterpolation(fileData[1], fileData[2]);
 	}
 	
 	
@@ -103,34 +103,35 @@ public class Interpolation {
 		double[][] fileData = parseFile(file);
 		
 		//Return coefficient array from interpolation
-		return polynomialInterpolation(fileData[0], fileData[1]);
+		return polynomialInterpolation(fileData[1], fileData[2]);
 	}
 	
 	
 	/*
-	 * Parses tracking data from filepath to two arrays of doubles.
+	 * Parses tracking data from filepath to three arrays of doubles.
 	 * Format: Trackers' default export (.txt)
-	 * Output [double[] x, double[] y]:
+	 * Output [double[] t, double[] x, double[] y]:
+	 *  - double[] x: array of time value in strictly increasing order
 	 *  - double[] x: array of x coordinates in strictly increasing order
 	 *  - double[] y: array of y coordinates at x coordinate specified in fist array
 	 */
-	private static double[][] parseFile(File file)  {
+	public static double[][] parseFile(File file)  {
 		//Local variables
-		Scanner input = null;
+		Scanner fileScanner = null;
 		StringBuilder stringBuilder = new StringBuilder();
 
 		//Try reading file
 		try { 
-			input = new Scanner(new FileReader(file));
+			fileScanner = new Scanner(new FileReader(file));
 		} 
 		catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 		
 		//Read file to StringBuilder object
-		while (input.hasNext())
-			stringBuilder.append(input.nextLine() + "\n");
-		input.close();
+		while (fileScanner.hasNextLine())
+			stringBuilder.append(fileScanner.nextLine() + "\n");
+		fileScanner.close();
 		
 		//Convert StringBuilder object to string
 		String fileString = stringBuilder.toString();
@@ -139,22 +140,27 @@ public class Interpolation {
 		String[] fileArray = fileString.split("\n");
 		
 		//Initialize output arrays
+		List<Double> outputT = new ArrayList<Double>();
 		List<Double> outputX = new ArrayList<Double>();
 		List<Double> outputY = new ArrayList<Double>();
 		
+		//Trim each string and split on any type of whitespace
 		for (int i = 2; i < fileArray.length; i++) {
-			String[] lineArray = fileArray[i].split("\t");
+			String[] lineArray = fileArray[i].trim().split("\\s++");
 			
 			//Append values to output arrays
+			outputT.add(Double.parseDouble(lineArray[0].replace(',', '.')));
 			outputX.add(Double.parseDouble(lineArray[1].replace(',', '.')));
 			outputY.add(Double.parseDouble(lineArray[2].replace(',', '.')));
 		}
 		
 		//Map to primitive type
+		
+		double[] primitiveT = outputT.stream().mapToDouble(doub -> doub.doubleValue()).toArray();
 		double[] primitiveX = outputX.stream().mapToDouble(doub -> doub.doubleValue()).toArray();
 		double[] primitiveY = outputY.stream().mapToDouble(doub -> doub.doubleValue()).toArray();
 		
-		return new double[][] { primitiveX, primitiveY };
+		return new double[][] { primitiveT, primitiveX, primitiveY };
 	}
 	
 	public static void main(String[] args) throws FileNotFoundException {
