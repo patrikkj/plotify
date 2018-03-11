@@ -5,6 +5,7 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.jfoenix.controls.JFXColorPicker;
@@ -26,9 +27,12 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.Label;
+import javafx.scene.control.Labeled;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.StackPane;
@@ -317,18 +321,21 @@ public class MainController {
 		// Bind selected graph
 		bindGraph();
 		
-		// Prevent duplicate graphs
-		if (!lineChart.getData().contains(selectedGraph.getSeries()))
-			lineChart.getData().add(selectedGraph.getSeries());
+//		// Prevent duplicate graphs
+//		if (!lineChart.getData().contains(selectedGraph.getSeries()))
+//			lineChart.getData().add(selectedGraph.getSeries());
 		
-		// Fix graph order
-		graphList.forEach(g -> g.getSeries().getNode().setViewOrder(graphList.indexOf(g)));
+//		// Fix graph order
+//		graphList.forEach(g -> g.getSeries().getNode().setViewOrder(graphList.indexOf(g)));
     	
     	// Update chart
     	lineChart.getData().setAll(graphList.stream().map(graph -> graph.getSeries()).collect(Collectors.toList()));
     	
     	// Update graphs
     	graphList.forEach(graph -> graph.updateGraph());
+    	
+    	// Update chart layout
+    	updateChartStyles();
     }
 
 	
@@ -438,7 +445,58 @@ public class MainController {
 		graphVisible			.selectedProperty().unbindBidirectional(prevGraph.getVisibleProperty());
 	}
     
-    
+	/**
+	 * Update chart layout in order to maintain dot colors
+	 */
+	private void updateChartStyles() {
+//		String nodeStyle = String.format("-fx-background-color: #%s, #FFFFFF; -fx-background-insets: 0, 2;", "ff0000");
+//		lineChart.lookupAll(".chart-legend-item").stream()
+		// chart-legend-item-symbol chart-line-symbol series0 default-color0
+//		.map(elem -> ((Labeled) elem).getGraphic());
+//		.forEach(elem -> ((Labeled) elem).getGraphic().getStyleClass().get(3));
+		
+		for (Node node : lineChart.lookupAll(".chart-legend-item")) {
+			Labeled labeledNode = (Labeled) node;
+			Node graphicNode = labeledNode.getGraphic();
+			String nodeSeries = graphicNode.getStyleClass().get(2);
+			int seriesIndex = Character.getNumericValue(nodeSeries.charAt(nodeSeries.length() - 1));
+			
+			String graphStyle =  String.format("-fx-background-color: #%s, #FFFFFF; -fx-background-insets: 0, 2;", graphList.get(seriesIndex).getHexColor());
+			
+			graphicNode.setStyle(graphStyle);
+		}
+		
+//		.forEach(elem -> ((Labeled) elem).getGraphic().setStyle(nodeStyle));
+//		String dotStyle = String.format("-fx-background-color: #%s;", graphList.get(i).getHexColor());
+//		System.out.println(nodeSet);
+//		nodeSet.forEach(item -> item.setStyle(String.format("-fx-background-color: #000000;")));
+//		List<Node> nodeList = nodeSet.stream()
+//				.filter(test -> ((Parent) test).getChildrenUnmodifiable().size() != 0)
+//				.map(parent -> ((Parent) parent).getChildrenUnmodifiable().get(0)).collect(Collectors.toList());
+		
+//		System.out.println("Series are: " + lineChart.getData() + " Size: " + lineChart.getData().size());
+//		System.out.println("Hei");
+//		ObservableList<Node> nodeList = treeTraversal(lineChart, 2).getChildrenUnmodifiable();
+////		Set<Node> nodelist = lineChart.lookupAll(".default-color0");
+////		System.out.println("Nodes found: " + nodelist + " Size: " + nodelist.size());
+//		System.out.println("Node found: " + nodeList);
+//		if (nodeList.size() == 2)
+//			System.out.println();;
+//			for (int i = 0; i < nodeList.size(); i++) {
+//				if (nodeList.get(i).lookup(".default-color0") != null)
+//					nodeList.get(i).lookup(".default-color0").setStyle("-fx-background-color: #000000;");
+//				System.out.println("Children: " + ((Parent) nodeList.get(i)).getChildrenUnmodifiable());
+//				
+//			}
+		
+//						.stream()
+////						.filter(node -> node instanceof Label)
+//						.forEach(node -> node.setStyle("-fx-background-color: #000000"));
+//			.forEach(elem -> System.out.println("Hei"));
+	}
+	private Parent treeTraversal(Parent parent, int index) {
+		return (Parent) parent.getChildrenUnmodifiable().get(index);
+	}
     //// Button handlers
     // Main menu button handlers
     @FXML private void handleNewProjectClick(ActionEvent event) {}

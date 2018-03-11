@@ -1,7 +1,10 @@
 package app;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import enums.Style;
 import javafx.beans.property.BooleanProperty;
@@ -15,10 +18,14 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.scene.Parent;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
+import javafx.scene.control.Labeled;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
 
 public class Graph {
 	// Graph data properties
@@ -157,9 +164,13 @@ public class Graph {
 		// Break if any data sets are missing
 		if (rawXData == null  ||  rawYData == null) return;
 		
+		// Set lower boundary based on data set sizes
+		double listSize = Math.min(rawXData.size(), rawYData.size());
+		double actualSize = Math.min(listSize, getDetail());
+		
 		// Reduce lists
-		List<Float> reducedXData = reduceList(rawXData, getDetail());
-		List<Float> reducedYData = reduceList(rawYData, getDetail());
+		List<Float> reducedXData = reduceList(rawXData, actualSize);
+		List<Float> reducedYData = reduceList(rawYData, actualSize);
 		
 		// Construct output list
 		for (int i = 0; i < reducedXData.size(); i++)
@@ -167,22 +178,21 @@ public class Graph {
 		
 		// Update series
 		series.getData().setAll(dataList);
-		
-		// Update graph style
-		updateStyle();
 	}
 	
 	private void updateStyle() {
-//		String lineStyle = String.format("-fx-stroke: #%s; -fx-stroke-width: %s;", getHexColor(), getWidth());
 		String lineStyle = String.format("-fx-stroke: #%s; -fx-stroke-width: %s;", getHexColor(), getWidth());
 		getSeries().getNode().setStyle(lineStyle);
-	
 		
-		
-		
-		String nodeStyle = String.format("-fx-background-color: #%s, #FFFFFF; -fx-background-insets: 0, 2;", getHexColor());
-		
+		String nodeStyle = String.format("-fx-background-color: #%s, #FFFFFF;"
+										+ "-fx-background-radius: 100, 100;"
+										+ "-fx-background-insets: %s, 2;", getHexColor(), 2d - getWidth());
 		getSeries().getData().forEach(data -> data.getNode().setStyle(nodeStyle));
+		System.out.println(getDetail());
+		// WORKING
+//		getSeries().getChart().lookupAll(".chart-legend-item").stream()
+////		.forEach(elem -> ((Labeled) elem).setGraphic(new Circle(3, Paint.valueOf("#FF0000"))));
+//		.forEach(elem -> ((Labeled) elem).getGraphic().setStyle(nodeStyle));
 	}
 	
 	

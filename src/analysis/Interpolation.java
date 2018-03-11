@@ -3,6 +3,7 @@ package analysis;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -69,8 +70,12 @@ public class Interpolation {
 			if (x[i] >= x[i+1])
 				throw new IllegalArgumentException("Values in array of x coordinates must be strictly increasing.");
 		
+		//Reduce arrays
+		double[] xReduced = reduceArray(x, 6);
+		double[] yReduced = reduceArray(y, 6);
+		
 		//Perform interpolation
-		PolynomialFunctionLagrangeForm rawPolynomial = new PolynomialFunctionLagrangeForm(x, y);
+		PolynomialFunctionLagrangeForm rawPolynomial = new PolynomialFunctionLagrangeForm(xReduced, yReduced);
 		
 		//Get disordered coefficients from polynomial
 		double[] coeffArrayDisordered = rawPolynomial.getCoefficients();
@@ -163,6 +168,28 @@ public class Interpolation {
 		return new double[][] { primitiveT, primitiveX, primitiveY };
 	}
 	
+	/**
+	 * Converts an array to a reduced array by picking n evenly spaced elements.
+	 */
+	private static double[] reduceArray(double[] inputArr, int n) {
+		// Verify that reduction is necessary
+		if (n >= inputArr.length)
+			return inputArr;
+		
+		// Create output list
+		double[] outputArr = new double[n];
+		
+		// Calculate step size
+		double step = ((double) inputArr.length - 1d)  /  ((double) n - 1d); 
+		
+		// Fill list
+		for (int i = 0; i < n; i++)
+				outputArr[i] = inputArr[(int) Math.round(step * (double) i)];
+		
+		// Return reduced list
+		System.out.println(outputArr.length);
+		return outputArr;
+	}
 	public static void main(String[] args) throws FileNotFoundException {
 		PolySpline polySpline = polynomialSplineInterpolation(new File("C:\\Users\\Patrik\\git\\Patrik-Forked\\Physics Plotter\\src\\imports\\mass_A.txt"));
 		

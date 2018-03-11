@@ -41,8 +41,7 @@ public class Trace {
 	private BooleanProperty initialized;
 	
 	// Trace Details (Setters & Getters)
-	private StringProperty 
-		integrationType,
+	private StringProperty integrationType,
 		interpolationType,
 		stepSize,
 		iterations,
@@ -51,8 +50,7 @@ public class Trace {
 		energyDifference;
 	
 	// Temporary fields to avoid multithread UI updates
-	private String 
-		tempIntegrationType,
+	private String tempIntegrationType,
 		tempInterpolationType,
 		tempStepSize,
 		tempIterations,
@@ -94,7 +92,10 @@ public class Trace {
 			"Time (s)",
 			"Total Energy",
 			"Kinetic Energy",
-			"Potential energy"};
+			"Potential energy",
+			"Raw (t)",
+			"Raw (x)",
+			"Raw (y)"};
 	
 	
 	//Constructors
@@ -185,23 +186,12 @@ public class Trace {
 		switch (getInterpolation()) {
 		case POLYNOMIAL:
 			func = analysis.Interpolation.polynomialInterpolation(getFile());
+			System.out.println(func.toString(true, true));
 			break;
 		case POLYNOMIAL_SPLINE:
 			func = analysis.Interpolation.polynomialSplineInterpolation(getFile());
 			break;
 		}
-		
-		//Fill raw data collections
-		double[][] rawData = analysis.Interpolation.parseFile(getFile());
-		tListRaw.setAll(Arrays.stream(rawData[0])
-				.mapToObj(doub -> Float.valueOf((float) doub))
-				.collect(Collectors.toList()));
-		xListRaw.setAll(Arrays.stream(rawData[1])
-				.mapToObj(doub -> Float.valueOf((float) doub))
-				.collect(Collectors.toList()));
-		yListRaw.setAll(Arrays.stream(rawData[2])
-				.mapToObj(doub -> Float.valueOf((float) doub))
-				.collect(Collectors.toList()));
 		
 		//Set trace details
 		tempInterpolationType = getInterpolation().TEXT;
@@ -238,6 +228,9 @@ public class Trace {
 		traceMap.put("Total Energy", totList);
 		traceMap.put("Kinetic Energy", kinList);
 		traceMap.put("Potential energy", potList);
+		traceMap.put("Raw (t)", tListRaw);
+		traceMap.put("Raw (x)", xListRaw);
+		traceMap.put("Raw (y)", yListRaw);
 	}
 	
 	//Updates
@@ -399,6 +392,12 @@ public class Trace {
 		// Clear logs if initialized
 		if (isInitialized())
 			initializeMap();
+		
+		//Fill raw data collections
+		double[][] rawData = analysis.Interpolation.parseFile(getFile());
+		Arrays.stream(rawData[0]).forEach(doub -> tListRaw.add(Float.valueOf((float) doub)));
+		Arrays.stream(rawData[1]).forEach(doub -> xListRaw.add(Float.valueOf((float) doub)));
+		Arrays.stream(rawData[2]).forEach(doub -> yListRaw.add(Float.valueOf((float) doub)));
 		
 		// Set initialized property
 		setInitialized(true);
