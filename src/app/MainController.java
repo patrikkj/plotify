@@ -296,9 +296,7 @@ public class MainController {
 		yAxisTickSize.textProperty().bindBidirectional(yAxis.tickUnitProperty(), customStringDoubleConverter);
 		yAxisMinRange.textProperty().bindBidirectional(yAxis.lowerBoundProperty(), customStringDoubleConverter);
 		yAxisMaxRange.textProperty().bindBidirectional(yAxis.upperBoundProperty(), customStringDoubleConverter);
-		yAxisTickSize.disableProperty().bindBidirectional(xAxisAutoRange.selectedProperty());
-		yAxisMinRange.disableProperty().bindBidirectional(yAxisAutoRange.selectedProperty());
-		yAxisMaxRange.disableProperty().bindBidirectional(yAxisAutoRange.selectedProperty());
+		yAxisTickSize.disableProperty().bindBidirectional(yAxisAutoRange.selectedProperty());
 		yAxisMinRange.disableProperty().bindBidirectional(yAxisAutoRange.selectedProperty());
 		yAxisMaxRange.disableProperty().bindBidirectional(yAxisAutoRange.selectedProperty());
 		yAxisAutoRange.selectedProperty().bindBidirectional(yAxis.autoRangingProperty());
