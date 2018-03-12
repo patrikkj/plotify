@@ -180,7 +180,7 @@ public class Interpolation {
 		double[] outputArr = new double[n];
 		
 		// Calculate step size
-		double step = ((double) inputArr.length - 1d)  /  ((double) n - 1d); 
+		double step = ((double) inputArr.length - 1d)  /  ((double) n - 1d);
 		
 		// Fill list
 		for (int i = 0; i < n; i++)

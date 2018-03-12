@@ -17,9 +17,16 @@ public class MainApp extends Application {
 	
 	@Override
 	public void start(Stage primaryStage) throws IOException {
-		Parent root = FXMLLoader.load(getClass().getResource("Main.fxml"));
-		Scene scene = new Scene(root);
+		//Load FXML
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("Main.fxml"));
 		Image titleIcon = new Image(getClass().getResourceAsStream("../resources/physics_main.png"));
+		Parent root = loader.load();
+		
+		//Controller used for later reference
+		MainController controller = loader.getController();
+
+		//Create scene based on FXML file
+		Scene scene = new Scene(root);
 		
 		//Transparency settings
 		scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
@@ -48,6 +55,9 @@ public class MainApp extends Application {
 		primaryStage.setTitle("Wolfram Beta");
 		primaryStage.getIcons().add(titleIcon);
 		primaryStage.show();
+		
+		//Set key listener
+		controller.postInitialize();
 	}
 
 	public static void main(String[] args) throws IOException {

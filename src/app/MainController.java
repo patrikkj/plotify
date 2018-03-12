@@ -5,7 +5,6 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.jfoenix.controls.JFXColorPicker;
@@ -28,7 +27,6 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.Label;
@@ -38,6 +36,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -91,8 +90,8 @@ public class MainController {
     @FXML private Label totalTimeLabel;
     @FXML private Label computationTimeLabel;
     @FXML private Label energyDifferenceLabel;
-    
-   // GRAPHS
+
+    // GRAPHS
     @FXML private JFXListView<Graph> graphListView;
     // Graph properties
     @FXML private JFXTextField graphName;
@@ -191,6 +190,35 @@ public class MainController {
     	updateTraceView();
 	}
 
+	static class StyleCell extends JFXListCell<Style>{
+		Line cellLine = new Line(0, 0, 90, 0);
+		StackPane cellPane = new StackPane(cellLine);
+		boolean isButtonCell = false;
+		
+		public StyleCell(boolean isButtonCell) {
+			super();
+			this.isButtonCell = isButtonCell;
+		}
+		
+		@Override
+		protected void updateItem(Style style, boolean empty) {
+			super.updateItem(style, empty);
+			
+			setText(null);
+			setGraphic(null);
+			
+			if (style != null && !empty) {
+				setGraphic(cellPane);
+				cellLine.getStrokeDashArray().setAll(style.getStroke());
+				
+				if (isSelected() && !isButtonCell)
+					cellLine.setStyle("-fx-stroke: #FFFFFF;");
+				else
+					cellLine.setStyle("-fx-stroke: #454545;");
+			}
+		}
+	}
+	
 	/**
 	 * Initializes chart, sets default chart and graph properties.
 	 */
@@ -204,7 +232,7 @@ public class MainController {
 		xAxis.setLabel("xAxis");
 		yAxis.setLabel("yAxis");
 		lineChart.setTitle("My Chart");
-		lineChart.setCreateSymbols(true);
+		lineChart.setCreateSymbols(false);
 		lineChart.setAnimated(false);
 		
 		// Add chart to GUI
@@ -223,7 +251,11 @@ public class MainController {
                 return cell;
             }
 		});
-
+		
+		// Set graph style cell factory
+		graphStyle.setCellFactory(cell -> new StyleCell(false));
+		graphStyle.setButtonCell(new StyleCell(true));
+		
 		// Add name listener
 		graphName.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
@@ -266,12 +298,19 @@ public class MainController {
     	traceIntegration.setItems(FXCollections.observableList(Integration.getElements()));
         traceInterpolation.setItems(FXCollections.observableList(Interpolation.getElements()));
         traceInertia.setItems(FXCollections.observableList(Inertia.getElements()));
-        
+
         // Fill graph choiceBoxes
         graphTrace.setItems(traceList);
         graphXData.setItems(dataList);
         graphYData.setItems(dataList);
         graphStyle.setItems(FXCollections.observableList(Style.getElements()));
+        
+//        graphStyle.setItems(FXCollections.observableList(Style.getElements()));
+    }
+    
+    protected void postInitialize() {
+    	graphStyle.lookup(".list-view").setStyle("-fx-pref-width: 120;");
+
     }
     
     
@@ -290,6 +329,9 @@ public class MainController {
 		
 		// Cache selected trace
 		prevTrace = selectedTrace;
+		
+		// Break if there is no selected trace
+		if (selectedTrace == null) return;
 		
 		// Bind selected trace
 		bindTrace();
@@ -321,12 +363,6 @@ public class MainController {
 		// Bind selected graph
 		bindGraph();
 		
-//		// Prevent duplicate graphs
-//		if (!lineChart.getData().contains(selectedGraph.getSeries()))
-//			lineChart.getData().add(selectedGraph.getSeries());
-		
-//		// Fix graph order
-//		graphList.forEach(g -> g.getSeries().getNode().setViewOrder(graphList.indexOf(g)));
     	
     	// Update chart
     	lineChart.getData().setAll(graphList.stream().map(graph -> graph.getSeries()).collect(Collectors.toList()));
@@ -336,6 +372,9 @@ public class MainController {
     	
     	// Update chart layout
     	updateChartStyles();
+    	
+    	System.out.println(graphStyle.lookupAll(".clipped-container"));
+
     }
 
 	
@@ -398,8 +437,6 @@ public class MainController {
 		graphMinX					.textProperty().bindBidirectional(selectedGraph.getMinXProperty(), customStringConverter);
 		graphMaxX					.textProperty().bindBidirectional(selectedGraph.getMaxXProperty(), customStringConverter);
 		
-
-		
 		// Bind graph layout properties
 		graphStyle					.valueProperty().bindBidirectional(selectedGraph.getStyleProperty());
 		graphColor					.valueProperty().bindBidirectional(selectedGraph.getColorProperty());
@@ -446,15 +483,13 @@ public class MainController {
 	}
     
 	/**
-	 * Update chart layout in order to maintain dot colors
+	 * Update chart layout in order to maintain label colors.
+	 * Iterates through every label to reapply styling.
+	 * This method must be called whenever there is a change
+	 * to the chart data structure, as the chart automatically 
+	 * refactors all node styling when any data is updated.
 	 */
 	private void updateChartStyles() {
-//		String nodeStyle = String.format("-fx-background-color: #%s, #FFFFFF; -fx-background-insets: 0, 2;", "ff0000");
-//		lineChart.lookupAll(".chart-legend-item").stream()
-		// chart-legend-item-symbol chart-line-symbol series0 default-color0
-//		.map(elem -> ((Labeled) elem).getGraphic());
-//		.forEach(elem -> ((Labeled) elem).getGraphic().getStyleClass().get(3));
-		
 		for (Node node : lineChart.lookupAll(".chart-legend-item")) {
 			Labeled labeledNode = (Labeled) node;
 			Node graphicNode = labeledNode.getGraphic();
@@ -465,39 +500,11 @@ public class MainController {
 			
 			graphicNode.setStyle(graphStyle);
 		}
-		
-//		.forEach(elem -> ((Labeled) elem).getGraphic().setStyle(nodeStyle));
-//		String dotStyle = String.format("-fx-background-color: #%s;", graphList.get(i).getHexColor());
-//		System.out.println(nodeSet);
-//		nodeSet.forEach(item -> item.setStyle(String.format("-fx-background-color: #000000;")));
-//		List<Node> nodeList = nodeSet.stream()
-//				.filter(test -> ((Parent) test).getChildrenUnmodifiable().size() != 0)
-//				.map(parent -> ((Parent) parent).getChildrenUnmodifiable().get(0)).collect(Collectors.toList());
-		
-//		System.out.println("Series are: " + lineChart.getData() + " Size: " + lineChart.getData().size());
-//		System.out.println("Hei");
-//		ObservableList<Node> nodeList = treeTraversal(lineChart, 2).getChildrenUnmodifiable();
-////		Set<Node> nodelist = lineChart.lookupAll(".default-color0");
-////		System.out.println("Nodes found: " + nodelist + " Size: " + nodelist.size());
-//		System.out.println("Node found: " + nodeList);
-//		if (nodeList.size() == 2)
-//			System.out.println();;
-//			for (int i = 0; i < nodeList.size(); i++) {
-//				if (nodeList.get(i).lookup(".default-color0") != null)
-//					nodeList.get(i).lookup(".default-color0").setStyle("-fx-background-color: #000000;");
-//				System.out.println("Children: " + ((Parent) nodeList.get(i)).getChildrenUnmodifiable());
-//				
-//			}
-		
-//						.stream()
-////						.filter(node -> node instanceof Label)
-//						.forEach(node -> node.setStyle("-fx-background-color: #000000"));
-//			.forEach(elem -> System.out.println("Hei"));
 	}
-	private Parent treeTraversal(Parent parent, int index) {
-		return (Parent) parent.getChildrenUnmodifiable().get(index);
-	}
-    //// Button handlers
+    
+	
+	
+	//// Button handlers
     // Main menu button handlers
     @FXML private void handleNewProjectClick(ActionEvent event) {}
     
@@ -523,7 +530,17 @@ public class MainController {
     }
     
     @FXML private void handleDeleteTraceClick(ActionEvent event) {
+    	// If there is no selected trace, break
+    	if (selectedTrace == null) return;
+    	
+    	// Delete all graphs connected to selected trace
+    	selectedTrace.linkedGraphs.forEach(graph -> deleteGraph(graph));
+    	
+    	// Remove trace
+    	traceList.remove(selectedTrace);
+    	
     	// Update
+    	updateTraceView();
     	updateGraphView();
     }
     
@@ -571,19 +588,20 @@ public class MainController {
     	// If there is no selected graph, break
     	if (selectedGraph == null) return;
     	
-    	// Remove property bindings
-    	selectedGraph.removeTraceLink();
-    	
-    	// Remove graph from series
-    	if (lineChart.getData().contains(selectedGraph.getSeries()))
-    		lineChart.getData().remove(selectedGraph.getSeries());
-    	
-    	// Remove graph
-    	graphList.remove(selectedGraph);
+    	// Delete graph
+    	deleteGraph(selectedGraph);
     	
     	// Update
     	updateGraphView();
     }
+
+	private void deleteGraph(Graph graph) {
+		// Remove property bindings
+		graph.removeTraceLink();
+    	
+    	// Remove graph
+    	graphList.remove(graph);
+	}
     
     @FXML private void handleGraphUpClick(ActionEvent event) {
     	// Assign local variable
@@ -661,6 +679,9 @@ public class MainController {
     	// Launch file chooser and retrive selected file
     	File selectedFile = fileChooser.showOpenDialog(mainStage);
     	
+    	// Break if no file was selected
+    	if (selectedFile == null) return;
+    	
     	// Add file to fileList and update trace file
     	fileList.add(selectedFile);
     	selectedTrace.setFile(selectedFile);
@@ -670,3 +691,46 @@ public class MainController {
     
     
 }
+
+//Dump code
+//.forEach(elem -> ((Labeled) elem).getGraphic().setStyle(nodeStyle));
+//String dotStyle = String.format("-fx-background-color: #%s;", graphList.get(i).getHexColor());
+//System.out.println(nodeSet);
+//nodeSet.forEach(item -> item.setStyle(String.format("-fx-background-color: #000000;")));
+//List<Node> nodeList = nodeSet.stream()
+//		.filter(test -> ((Parent) test).getChildrenUnmodifiable().size() != 0)
+//		.map(parent -> ((Parent) parent).getChildrenUnmodifiable().get(0)).collect(Collectors.toList());
+
+//System.out.println("Series are: " + lineChart.getData() + " Size: " + lineChart.getData().size());
+//System.out.println("Hei");
+//ObservableList<Node> nodeList = treeTraversal(lineChart, 2).getChildrenUnmodifiable();
+////Set<Node> nodelist = lineChart.lookupAll(".default-color0");
+////System.out.println("Nodes found: " + nodelist + " Size: " + nodelist.size());
+//System.out.println("Node found: " + nodeList);
+//if (nodeList.size() == 2)
+//	System.out.println();;
+//	for (int i = 0; i < nodeList.size(); i++) {
+//		if (nodeList.get(i).lookup(".default-color0") != null)
+//			nodeList.get(i).lookup(".default-color0").setStyle("-fx-background-color: #000000;");
+//		System.out.println("Children: " + ((Parent) nodeList.get(i)).getChildrenUnmodifiable());
+//		
+//	}
+
+//				.stream()
+////				.filter(node -> node instanceof Label)
+//				.forEach(node -> node.setStyle("-fx-background-color: #000000"));
+//	.forEach(elem -> System.out.println("Hei"));
+
+
+//// Prevent duplicate graphs
+//if (!lineChart.getData().contains(selectedGraph.getSeries()))
+//	lineChart.getData().add(selectedGraph.getSeries());
+
+//// Fix graph order
+//graphList.forEach(g -> g.getSeries().getNode().setViewOrder(graphList.indexOf(g)));
+
+//String nodeStyle = String.format("-fx-background-color: #%s, #FFFFFF; -fx-background-insets: 0, 2;", "ff0000");
+//lineChart.lookupAll(".chart-legend-item").stream()
+// chart-legend-item-symbol chart-line-symbol series0 default-color0
+//.map(elem -> ((Labeled) elem).getGraphic());
+//.forEach(elem -> ((Labeled) elem).getGraphic().getStyleClass().get(3));

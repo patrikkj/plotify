@@ -26,7 +26,10 @@
 .jfx-combo-box .input-focused-line {
 	-fx-background-color: #450000;
 }
-.jfx-combo-box .list-cell:hover {
+.jfx-combo-box .list-cell:selected .jfx-rippler{
+	-jfx-rippler-fill: #EEEEEE;
+}
+.jfx-combo-box .list-view .virtual-flow .clipped-container .sheet .list-cell:hover {
 	-fx-background-color: #A0A0A0;
 }
 .jfx-combo-box .list-view .virtual-flow .clipped-container .sheet .list-cell:selected {

@@ -18,3 +18,17 @@ exit, minimize button
 resize
 
 add real brachistochrone curve
+
+raw trace
+analytic trace
+
+use raw trace to estimate computation time, using progressbar (primary / secondary)
+
+set chart properties (quick)
+
+colormap default 8 colors (represented by byte % 8)
+setColor(map.get...)
+
+update label color
+
+optimize change listeners

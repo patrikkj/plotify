@@ -21,7 +21,7 @@ public class TraceProcessor implements Runnable {
 		System.out.println("Processing: " + trace.getName() + " on " + Thread.currentThread());
 		
 		//Do some heavy lifting bruh
-		trace.trace(false, false);
+		trace.trace();
 		
 		//Print finish to console
 		System.out.println("Finished: " + trace.getName() + " on " + Thread.currentThread());
