@@ -42,6 +42,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
+import javafx.util.converter.NumberStringConverter;
 
 public class MainController {
 	//// FXML fields
@@ -62,11 +63,13 @@ public class MainController {
     @FXML private JFXTextField xAxisTickSize;
     @FXML private JFXTextField xAxisMinRange;
     @FXML private JFXTextField xAxisMaxRange;
+    @FXML private JFXToggleButton xAxisAutoRange;
     // Y-Axis properties
     @FXML private JFXTextField yAxisName;
     @FXML private JFXTextField yAxisTickSize;
     @FXML private JFXTextField yAxisMinRange;
     @FXML private JFXTextField yAxisMaxRange;
+    @FXML private JFXToggleButton yAxisAutoRange;
     
     // TRACES
     @FXML private JFXListView<Trace> traceListView;
@@ -118,6 +121,7 @@ public class MainController {
      * <li>Returns null if Double is null.
      */
     private StringConverter<Double> customStringConverter;
+    private StringConverter<Number> customStringDoubleConverter;
     
     /*
      * Cached traces and graphs, used to manage property bindings.
@@ -155,7 +159,18 @@ public class MainController {
 			public String toString(Double arg0) {
 				return (arg0 == null) ? null : String.valueOf(arg0);}
 		};
-
+		
+		customStringDoubleConverter = new NumberStringConverter() {
+			@Override
+			public Number fromString(String arg0) {
+				return Double.valueOf(arg0.replace(',', '.'));
+			}
+			
+			@Override
+			public String toString(Number arg0) {
+				return String.valueOf(arg0);
+			}
+		};
     	initializeLists();
     	initializeTraceView();
     	initializeGraphView();
@@ -223,20 +238,7 @@ public class MainController {
 	 * Initializes chart, sets default chart and graph properties.
 	 */
 	private void initializeGraphView() {
-		// Initialize chart
-		xAxis = new NumberAxis();
-		yAxis = new NumberAxis();
-		lineChart = new LineChart<>(xAxis, yAxis);
-		
-		// Set chart properties
-		xAxis.setLabel("xAxis");
-		yAxis.setLabel("yAxis");
-		lineChart.setTitle("My Chart");
-		lineChart.setCreateSymbols(false);
-		lineChart.setAnimated(false);
-		
-		// Add chart to GUI
-		chartPane.getChildren().setAll(lineChart);
+		initializeChart();
 		
 		// Set default graph
 		graphList.add(new Graph(selectedTrace));
@@ -266,6 +268,59 @@ public class MainController {
 		
 		// Updaters
 		updateGraphView();
+	}
+
+	private void initializeChart() {
+		// Initialize chart
+		xAxis = new NumberAxis();
+		yAxis = new NumberAxis();
+		lineChart = new LineChart<>(xAxis, yAxis);
+		
+		// Bind chart properties
+		chartTitle.textProperty().bindBidirectional(lineChart.titleProperty());
+		chartWidth.textProperty().bindBidirectional(lineChart.prefWidthProperty(), customStringDoubleConverter);
+		chartHeight.textProperty().bindBidirectional(lineChart.prefHeightProperty(), customStringDoubleConverter);
+		
+		// Bind x-axis properties
+		xAxisName.textProperty().bindBidirectional(xAxis.labelProperty());
+		xAxisTickSize.textProperty().bindBidirectional(xAxis.tickUnitProperty(), customStringDoubleConverter);
+		xAxisMinRange.textProperty().bindBidirectional(xAxis.lowerBoundProperty(), customStringDoubleConverter);
+		xAxisMaxRange.textProperty().bindBidirectional(xAxis.upperBoundProperty(), customStringDoubleConverter);
+		xAxisTickSize.disableProperty().bindBidirectional(xAxisAutoRange.selectedProperty());
+		xAxisMinRange.disableProperty().bindBidirectional(xAxisAutoRange.selectedProperty());
+		xAxisMaxRange.disableProperty().bindBidirectional(xAxisAutoRange.selectedProperty());
+		xAxisAutoRange.selectedProperty().bindBidirectional(xAxis.autoRangingProperty());
+		
+		// Bind y-axis properties
+		yAxisName.textProperty().bindBidirectional(yAxis.labelProperty());
+		yAxisTickSize.textProperty().bindBidirectional(yAxis.tickUnitProperty(), customStringDoubleConverter);
+		yAxisMinRange.textProperty().bindBidirectional(yAxis.lowerBoundProperty(), customStringDoubleConverter);
+		yAxisMaxRange.textProperty().bindBidirectional(yAxis.upperBoundProperty(), customStringDoubleConverter);
+		yAxisTickSize.disableProperty().bindBidirectional(xAxisAutoRange.selectedProperty());
+		yAxisMinRange.disableProperty().bindBidirectional(yAxisAutoRange.selectedProperty());
+		yAxisMaxRange.disableProperty().bindBidirectional(yAxisAutoRange.selectedProperty());
+		yAxisMinRange.disableProperty().bindBidirectional(yAxisAutoRange.selectedProperty());
+		yAxisMaxRange.disableProperty().bindBidirectional(yAxisAutoRange.selectedProperty());
+		yAxisAutoRange.selectedProperty().bindBidirectional(yAxis.autoRangingProperty());
+		
+		// Set chart properties
+		xAxis.setLabel("xAxis");
+		yAxis.setLabel("yAxis");
+		lineChart.setTitle("My Chart");
+		lineChart.setCreateSymbols(false);
+		lineChart.setAnimated(false);
+		lineChart.minWidthProperty().bind(lineChart.prefWidthProperty());
+		lineChart.maxWidthProperty().bind(lineChart.prefWidthProperty());
+		lineChart.minHeightProperty().bind(lineChart.prefHeightProperty());
+		lineChart.maxHeightProperty().bind(lineChart.prefHeightProperty());
+		
+		xAxis.setAutoRanging(true);
+		xAxis.setAnimated(false);
+		yAxis.setAutoRanging(true);
+		yAxis.setAnimated(false);
+		
+		// Add chart to GUI
+		chartPane.getChildren().setAll(lineChart);
 	}
 	
 	/**
