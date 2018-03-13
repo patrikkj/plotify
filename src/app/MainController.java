@@ -20,6 +20,8 @@ import enums.Inertia;
 import enums.Integration;
 import enums.Interpolation;
 import enums.Style;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -45,7 +47,11 @@ import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 
 public class MainController {
-	//// FXML fields
+	
+	/////////////////////////
+	/////  FXML FIELDS  /////
+	/////////////////////////
+	
 	// ROOT 
     @FXML private VBox rootNode;
 
@@ -110,7 +116,12 @@ public class MainController {
     @FXML private JFXSlider graphWidth;
     @FXML private JFXToggleButton graphVisible; 
     
-    //// NON-FXML FIELDS
+    
+    
+	/////////////////////////////
+	/////  NON-FXML FIELDS  /////
+	/////////////////////////////
+    
     /**
      * Used in Bidirectional bindings to convert String <-> Double.
      * <dt>String to Double:</dt>
@@ -127,9 +138,12 @@ public class MainController {
      * Cached traces and graphs, used to manage property bindings.
      */
     private Trace selectedTrace;
-    private Trace prevTrace;
     private Graph selectedGraph;
-    private Graph prevGraph;
+    private ChangeListener<Trace> traceChangeListener;
+    private ChangeListener<Graph> graphChangeListener;
+    private ChangeListener<String> traceNameChangeListener;
+    private ChangeListener<String> graphNameChangeListener;
+    private ChangeListener<Color> graphColorChangeListener;
     
     /*
      * Observable lists used in ListViews and ChoiceBoxes
@@ -140,37 +154,23 @@ public class MainController {
     private ObservableList<String> dataList;
     
     /*
-     * Listener list for cells within choiceBox
+     * Alert list for cells within choiceBox
      */
     private List<ListCell<Trace>> listenerList = new ArrayList<>();
+    
+    
+    
+	/////////////////////
+	/////  METHODS  /////
+	/////////////////////
     
     // Initialization
     /**
      * Initializes application, called after FXML fields has been invoked.
      */
 	@FXML private void initialize() {    
-    	// Initialize converter (used for trace bindings)
-    	customStringConverter = new StringConverter<>() {
-			@Override
-			public Double fromString(String arg0) {
-				return (arg0.equals("")) ? null : Double.valueOf(arg0.replace(',', '.'));}
-			
-			@Override
-			public String toString(Double arg0) {
-				return (arg0 == null) ? null : String.valueOf(arg0);}
-		};
-		
-		customStringDoubleConverter = new NumberStringConverter() {
-			@Override
-			public Number fromString(String arg0) {
-				return Double.valueOf(arg0.replace(',', '.'));
-			}
-			
-			@Override
-			public String toString(Number arg0) {
-				return String.valueOf(arg0);
-			}
-		};
+    	initializeConverters();
+		initializeChangeListeners();
     	initializeLists();
     	initializeTraceView();
     	initializeGraphView();
@@ -178,60 +178,60 @@ public class MainController {
     }
 
 	/**
-	 * Initializes trace view and adds default trace to listView. 
+     * Initializes and binds ListViews, loads imported files and initializes ChoiceBoxes.
+     */
+    private void initializeLists() {
+    	// Initialize observable lists
+    	traceList = FXCollections.observableArrayList();
+    	graphList = FXCollections.observableArrayList();
+    	fileList = FXCollections.observableArrayList();
+    	dataList = FXCollections.observableList(Arrays.asList(Trace.MAP_KEYS));
+    	
+    	// Import tracker files from 'import'
+    	File importFolder = new File(getClass().getResource("../imports").getPath());
+    	FilenameFilter fileFilter = new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String filename) {
+				return filename.endsWith(".txt");
+			}
+		};
+    	for (File dataFile : importFolder.listFiles(fileFilter))
+    		fileList.add(dataFile);
+    	
+    	// Bind observable lists
+    	traceListView.setItems(traceList);
+    	graphListView.setItems(graphList);
+    	traceFile.setItems(fileList);
+    	
+    	// Apply change listeners to lists
+		traceListView.getSelectionModel().selectedItemProperty().addListener(traceChangeListener);
+		graphListView.getSelectionModel().selectedItemProperty().addListener(graphChangeListener);
+    	
+    	// Fill trace choiceBoxes
+    	traceIntegration.setItems(FXCollections.observableList(Integration.getElements()));
+        traceInterpolation.setItems(FXCollections.observableList(Interpolation.getElements()));
+        traceInertia.setItems(FXCollections.observableList(Inertia.getElements()));
+
+        // Fill graph choiceBoxes
+        graphTrace.setItems(traceList);
+        graphXData.setItems(dataList);
+        graphYData.setItems(dataList);
+        graphStyle.setItems(FXCollections.observableList(Style.getElements()));
+    }
+    
+	/**
+	 * Initializes trace view and adds default trace to listView.
 	 */
 	private void initializeTraceView() {
 		// Set default trace
     	traceList.add(new Trace());
     	traceListView.getSelectionModel().selectFirst();
     	
-    	// Add name listener
-		traceName.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent arg0) {
-				// Update ListView entries
-				traceListView.refresh();
-				
-				// Update choicebox entries
-				listenerList.stream()
-					.filter(cell -> cell != null)
-					.filter(cell -> cell.getItem() != null)
-					.forEach(cell -> cell.setText(cell.getItem().getName()));
-				graphTrace.getButtonCell().setText(selectedGraph.getTrace().getName());
-			}
-		});
-    	
+    	// Add name change listener
+		traceName.textProperty().addListener(traceNameChangeListener);
+		
     	// Updaters
     	updateTraceView();
-	}
-
-	static class StyleCell extends JFXListCell<Style>{
-		Line cellLine = new Line(0, 0, 90, 0);
-		StackPane cellPane = new StackPane(cellLine);
-		boolean isButtonCell = false;
-		
-		public StyleCell(boolean isButtonCell) {
-			super();
-			this.isButtonCell = isButtonCell;
-		}
-		
-		@Override
-		protected void updateItem(Style style, boolean empty) {
-			super.updateItem(style, empty);
-			
-			setText(null);
-			setGraphic(null);
-			
-			if (style != null && !empty) {
-				setGraphic(cellPane);
-				cellLine.getStrokeDashArray().setAll(style.getStroke());
-				
-				if (isSelected() && !isButtonCell)
-					cellLine.setStyle("-fx-stroke: #FFFFFF;");
-				else
-					cellLine.setStyle("-fx-stroke: #454545;");
-			}
-		}
 	}
 	
 	/**
@@ -241,7 +241,7 @@ public class MainController {
 		initializeChart();
 		
 		// Set default graph
-		graphList.add(new Graph(selectedTrace));
+		addGraph(new Graph(selectedTrace));
 		graphListView.getSelectionModel().selectFirst();
 		
 		// Set graph trace cell factory
@@ -259,17 +259,15 @@ public class MainController {
 		graphStyle.setButtonCell(new StyleCell(true));
 		
 		// Add name listener
-		graphName.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent arg0) {
-				graphListView.refresh();
-			}
-		});
+		graphName.textProperty().addListener(graphNameChangeListener);
 		
 		// Updaters
 		updateGraphView();
 	}
-
+	
+	/**
+	 * Initializes chart, set default values and binds chart properties.
+	 */
 	private void initializeChart() {
 		// Initialize chart
 		xAxis = new NumberAxis();
@@ -322,45 +320,105 @@ public class MainController {
 	}
 	
 	/**
-     * Initializes and binds ListViews, loads imported files and initializes ChoiceBoxes.
-     */
-    private void initializeLists() {
-    	// Initialize observable lists
-    	traceList = FXCollections.observableArrayList();
-    	graphList = FXCollections.observableArrayList();
-    	fileList = FXCollections.observableArrayList();
-    	dataList = FXCollections.observableList(Arrays.asList(Trace.MAP_KEYS));
-    	
-    	// Import tracker files from 'import'
-    	File importFolder = new File(getClass().getResource("../imports").getPath());
-    	FilenameFilter fileFilter = new FilenameFilter() {
+	 * Initializes change listeners.
+	 */
+	private void initializeChangeListeners() {
+		traceChangeListener = new ChangeListener<>() {
 			@Override
-			public boolean accept(File dir, String filename) {
-				return filename.endsWith(".txt");
+			public void changed(ObservableValue<? extends Trace> traceProperty, Trace oldTrace, Trace newTrace) {
+				// Unbind previous trace
+				if (oldTrace != null)
+					unbindTrace(oldTrace);
+					
+				// Bind new trace
+				if (newTrace != null) 
+					bindTrace(newTrace);
+				
+				// Set seleced trace
+				selectedTrace = newTrace;
 			}
 		};
-    	for (File dataFile : importFolder.listFiles(fileFilter))
-    		fileList.add(dataFile);
-    	
-    	// Bind observable lists
-    	traceListView.setItems(traceList);
-    	graphListView.setItems(graphList);
-    	traceFile.setItems(fileList);
-    	
-    	// Fill trace choiceBoxes
-    	traceIntegration.setItems(FXCollections.observableList(Integration.getElements()));
-        traceInterpolation.setItems(FXCollections.observableList(Interpolation.getElements()));
-        traceInertia.setItems(FXCollections.observableList(Inertia.getElements()));
+		
+		graphChangeListener = new ChangeListener<>() {
+			@Override
+			public void changed(ObservableValue<? extends Graph> graphProperty, Graph oldGraph, Graph newGraph) {
+				// Unbind previous graph
+				if (oldGraph != null)
+					unbindGraph(oldGraph);
+				
+				// Bind new graph or clear UI if there is no selected graph
+				if (newGraph != null)
+					bindGraph(newGraph);
+				else 
+					clearGraphView();
+				
+				// Set selected graph
+				selectedGraph = newGraph;
+			}
+		};
+		
+		traceNameChangeListener = new ChangeListener<>() {
+			@Override
+			public void changed(ObservableValue<? extends String> traceNameProperty, String oldName, String newName) {
+				// Update ListView entries
+				traceListView.refresh();
+				
+				// Update choicebox entries
+				listenerList.stream()
+					.filter(cell -> cell != null)
+					.filter(cell -> cell.getItem() != null)
+					.forEach(cell -> cell.setText(cell.getItem().getName()));
+				graphTrace.getButtonCell().setText(selectedGraph.getTrace().getName());
+			}
+		};
 
-        // Fill graph choiceBoxes
-        graphTrace.setItems(traceList);
-        graphXData.setItems(dataList);
-        graphYData.setItems(dataList);
-        graphStyle.setItems(FXCollections.observableList(Style.getElements()));
-        
-//        graphStyle.setItems(FXCollections.observableList(Style.getElements()));
-    }
-    
+		graphNameChangeListener = new ChangeListener<>() {
+			@Override
+			public void changed(ObservableValue<? extends String> graphNameProperty, String oldName, String newName) {
+				graphListView.refresh();
+			}
+		};
+	
+		graphColorChangeListener = new ChangeListener<>() {
+			@Override
+			public void changed(ObservableValue<? extends Color> colorProperty, Color oldColor, Color newColor) {
+				updateChartStyles();
+			}
+		};
+	}
+	
+	/**
+	 * Initializes converters.
+	 */
+	private void initializeConverters() {
+		// Initialize converter (used for trace bindings)
+    	customStringConverter = new StringConverter<>() {
+			@Override
+			public Double fromString(String arg0) {
+				return (arg0.equals("")) ? null : Double.valueOf(arg0.replace(',', '.'));}
+			
+			@Override
+			public String toString(Double arg0) {
+				return (arg0 == null) ? null : String.valueOf(arg0);}
+		};
+		
+		customStringDoubleConverter = new NumberStringConverter() {
+			@Override
+			public Number fromString(String arg0) {
+				return Double.valueOf(arg0.replace(',', '.'));
+			}
+			
+			@Override
+			public String toString(Number arg0) {
+				return String.valueOf(arg0);
+			}
+		};
+
+	}
+	
+    /**
+     * Runs any process that requires the scene to be loaded.
+     */
     protected void postInitialize() {
     	graphStyle.lookup(".list-view").setStyle("-fx-pref-width: 120;");
 
@@ -373,50 +431,14 @@ public class MainController {
      * Called when selected trace has been changed.
      */
 	private void updateTraceView() {
-		// Retrive selected list entry
-		selectedTrace = traceListView.getSelectionModel().getSelectedItem();
-		
-		// Unbind previous trace
-		if (prevTrace != null)
-			unbindTrace();
-		
-		// Cache selected trace
-		prevTrace = selectedTrace;
-		
-		// Break if there is no selected trace
-		if (selectedTrace == null) return;
-		
-		// Bind selected trace
-		bindTrace();
+		// Now replaced by traceChangeListener
     }
     
 	/**
-     * Manages graph bindings and updates graph details.
-     * Called when selected graph has been changed.
+     * Updates graph list ordering, chart and chart layout.
+     * Called upon when there is a change to graph order.
      */
 	private void updateGraphView() {
-		// Retrive selected list entry
-		selectedGraph = graphListView.getSelectionModel().getSelectedItem();
-		
-		System.out.println("Selected item: " + selectedGraph);
-		
-		// Unbind previous graph
-		if (prevGraph != null)
-			unbindGraph();
-		
-		// Cache selected graph
-		prevGraph = selectedGraph;
-		
-		// If there is no selected graph, break
-		if (selectedGraph == null) {
-			clearGraphView();
-			return;
-		}
-		
-		// Bind selected graph
-		bindGraph();
-		
-    	
     	// Update chart
     	lineChart.getData().setAll(graphList.stream().map(graph -> graph.getSeries()).collect(Collectors.toList()));
     	
@@ -425,14 +447,10 @@ public class MainController {
     	
     	// Update chart layout
     	updateChartStyles();
-    	
-    	System.out.println(graphStyle.lookupAll(".clipped-container"));
-
     }
-
 	
 	/**
-	 * Clears graph view if there are no graphs to display.
+	 * Clears  chart and graph view if there are no graphs to display.
 	 */
 	private void clearGraphView() {
 		// Clear graph properties
@@ -449,92 +467,10 @@ public class MainController {
 		graphDetail.setValue(50);
 		graphWidth.setValue(50);
 		graphVisible.setSelected(false);
-	}
-	
-	// Manage bindings
-	/**
-	 * Bind TraceView inputs to selected trace.
-	 */
-	private void bindTrace() {
-		// Bind trace properties
-		traceName					.textProperty().bindBidirectional(selectedTrace.getNameProperty());
-	    traceFile					.valueProperty().bindBidirectional(selectedTrace.getFileProperty());
-	    traceIntegration			.valueProperty().bindBidirectional(selectedTrace.getIntegrationProperty());
-	    traceInterpolation			.valueProperty().bindBidirectional(selectedTrace.getInterpolationProperty());
-	    traceInertia				.valueProperty().bindBidirectional(selectedTrace.getInertiaProperty());
-	    traceMass					.textProperty().bindBidirectional(selectedTrace.getMassProperty(), customStringConverter);
-	    traceMinX					.textProperty().bindBidirectional(selectedTrace.getMinXProperty(), customStringConverter);
-	    traceMaxX					.textProperty().bindBidirectional(selectedTrace.getMaxXProperty(), customStringConverter);
-	    traceInitV					.textProperty().bindBidirectional(selectedTrace.getInitVProperty(), customStringConverter);
-	    traceStep					.textProperty().bindBidirectional(selectedTrace.getStepProperty(), customStringConverter);
 		
-		// Set trace details
-	    funcTypeLabel.textProperty().bind(selectedTrace.getInterpolationTypeProperty());
-	    integrationTypeLabel.textProperty().bind(selectedTrace.getIntegrationTypeProperty());
-	    stepSizeLabel.textProperty().bind(selectedTrace.getStepSizeProperty());
-	    iterationsLabel.textProperty().bind(selectedTrace.getIterationsProperty());
-	    totalTimeLabel.textProperty().bind(selectedTrace.getTotalTimeProperty());
-	    computationTimeLabel.textProperty().bind(selectedTrace.getComputationTimeProperty());
-	    energyDifferenceLabel.textProperty().bind(selectedTrace.getEnergyDifferenceProperty());
-	}
-	
-	/**
-	 * Bind GraphView inputs to selected graph.
-	 */
-	private void bindGraph() {
-		// Bind graph properties
-		graphName					.textProperty().bindBidirectional(selectedGraph.getNameProperty());
-		graphXData					.valueProperty().bindBidirectional(selectedGraph.getXDataProperty());
-		graphYData					.valueProperty().bindBidirectional(selectedGraph.getYDataProperty());
-		graphTrace					.valueProperty().bindBidirectional(selectedGraph.getTraceProperty());
-		graphMinX					.textProperty().bindBidirectional(selectedGraph.getMinXProperty(), customStringConverter);
-		graphMaxX					.textProperty().bindBidirectional(selectedGraph.getMaxXProperty(), customStringConverter);
 		
-		// Bind graph layout properties
-		graphStyle					.valueProperty().bindBidirectional(selectedGraph.getStyleProperty());
-		graphColor					.valueProperty().bindBidirectional(selectedGraph.getColorProperty());
-		graphDetail					.valueProperty().bindBidirectional(selectedGraph.getDetailProperty());
-		graphWidth					.valueProperty().bindBidirectional(selectedGraph.getWidthProperty());
-		graphVisible				.selectedProperty().bindBidirectional(selectedGraph.getVisibleProperty());
 	}
-	
-	/**
-	 * Unbinds TraceView inputs from previously selected trace.
-	 */
-	private void unbindTrace() {
-		// Unbind trace properties
-		traceName				.textProperty().unbindBidirectional(prevTrace.getNameProperty());
-		traceFile				.valueProperty().unbindBidirectional(prevTrace.getFileProperty());
-		traceIntegration		.valueProperty().unbindBidirectional(prevTrace.getIntegrationProperty());
-		traceInterpolation		.valueProperty().unbindBidirectional(prevTrace.getInterpolationProperty());
-		traceInertia			.valueProperty().unbindBidirectional(prevTrace.getInertiaProperty());
-		traceMass				.textProperty().unbindBidirectional(prevTrace.getMassProperty());
-		traceMinX				.textProperty().unbindBidirectional(prevTrace.getMinXProperty());
-		traceMaxX				.textProperty().unbindBidirectional(prevTrace.getMaxXProperty());
-		traceInitV				.textProperty().unbindBidirectional(prevTrace.getInitVProperty());
-		traceStep				.textProperty().unbindBidirectional(prevTrace.getStepProperty());
-	}
-	
-	/**
-	 * Unbinds GraphView inputs from previously selected graph.
-	 */
-	private void unbindGraph() {
-		// Unbind graph properties
-		graphName				.textProperty().unbindBidirectional(prevGraph.getNameProperty());
-		graphXData				.valueProperty().unbindBidirectional(prevGraph.getXDataProperty());
-		graphYData				.valueProperty().unbindBidirectional(prevGraph.getYDataProperty());
-		graphTrace				.valueProperty().unbindBidirectional(prevGraph.getTraceProperty());
-		graphMinX				.textProperty().unbindBidirectional(prevGraph.getMinXProperty());
-		graphMaxX				.textProperty().unbindBidirectional(prevGraph.getMaxXProperty());
-		
-		// Unbind graph layout properties
-		graphStyle				.valueProperty().unbindBidirectional(prevGraph.getStyleProperty());
-		graphColor				.valueProperty().unbindBidirectional(prevGraph.getColorProperty());
-		graphDetail				.valueProperty().unbindBidirectional(prevGraph.getDetailProperty());
-		graphWidth				.valueProperty().unbindBidirectional(prevGraph.getWidthProperty());
-		graphVisible			.selectedProperty().unbindBidirectional(prevGraph.getVisibleProperty());
-	}
-    
+
 	/**
 	 * Update chart layout in order to maintain label colors.
 	 * Iterates through every label to reapply styling.
@@ -556,9 +492,121 @@ public class MainController {
 	}
     
 	
+	// Bindings
+	/**
+	 * Bind TraceView inputs to selected trace.
+	 */
+	private void bindTrace(Trace trace) {
+		// Bind trace properties
+		traceName					.textProperty().bindBidirectional(trace.getNameProperty());
+	    traceFile					.valueProperty().bindBidirectional(trace.getFileProperty());
+	    traceIntegration			.valueProperty().bindBidirectional(trace.getIntegrationProperty());
+	    traceInterpolation			.valueProperty().bindBidirectional(trace.getInterpolationProperty());
+	    traceInertia				.valueProperty().bindBidirectional(trace.getInertiaProperty());
+	    traceMass					.textProperty().bindBidirectional(trace.getMassProperty(), customStringConverter);
+	    traceMinX					.textProperty().bindBidirectional(trace.getMinXProperty(), customStringConverter);
+	    traceMaxX					.textProperty().bindBidirectional(trace.getMaxXProperty(), customStringConverter);
+	    traceInitV					.textProperty().bindBidirectional(trace.getInitVProperty(), customStringConverter);
+	    traceStep					.textProperty().bindBidirectional(trace.getStepProperty(), customStringConverter);
+		
+		// Set trace details
+	    funcTypeLabel.textProperty().bind(trace.getInterpolationTypeProperty());
+	    integrationTypeLabel.textProperty().bind(trace.getIntegrationTypeProperty());
+	    stepSizeLabel.textProperty().bind(trace.getStepSizeProperty());
+	    iterationsLabel.textProperty().bind(trace.getIterationsProperty());
+	    totalTimeLabel.textProperty().bind(trace.getTotalTimeProperty());
+	    computationTimeLabel.textProperty().bind(trace.getComputationTimeProperty());
+	    energyDifferenceLabel.textProperty().bind(trace.getEnergyDifferenceProperty());
+	}
 	
-	//// Button handlers
-    // Main menu button handlers
+	/**
+	 * Bind GraphView inputs to selected graph.
+	 */
+	private void bindGraph(Graph graph) {
+		// Bind graph properties
+		graphName					.textProperty().bindBidirectional(graph.getNameProperty());
+		graphXData					.valueProperty().bindBidirectional(graph.getXDataProperty());
+		graphYData					.valueProperty().bindBidirectional(graph.getYDataProperty());
+		graphTrace					.valueProperty().bindBidirectional(graph.getTraceProperty());
+		graphMinX					.textProperty().bindBidirectional(graph.getMinXProperty(), customStringConverter);
+		graphMaxX					.textProperty().bindBidirectional(graph.getMaxXProperty(), customStringConverter);
+		
+		// Bind graph layout properties
+		graphStyle					.valueProperty().bindBidirectional(graph.getStyleProperty());
+		graphColor					.valueProperty().bindBidirectional(graph.getColorProperty());
+		graphDetail					.valueProperty().bindBidirectional(graph.getDetailProperty());
+		graphWidth					.valueProperty().bindBidirectional(graph.getWidthProperty());
+		graphVisible				.selectedProperty().bindBidirectional(graph.getVisibleProperty());
+	}
+	
+	/**
+	 * Unbinds TraceView inputs from previously selected trace.
+	 */
+	private void unbindTrace(Trace trace) {
+		// Unbind trace properties
+		traceName				.textProperty().unbindBidirectional(trace.getNameProperty());
+		traceFile				.valueProperty().unbindBidirectional(trace.getFileProperty());
+		traceIntegration		.valueProperty().unbindBidirectional(trace.getIntegrationProperty());
+		traceInterpolation		.valueProperty().unbindBidirectional(trace.getInterpolationProperty());
+		traceInertia			.valueProperty().unbindBidirectional(trace.getInertiaProperty());
+		traceMass				.textProperty().unbindBidirectional(trace.getMassProperty());
+		traceMinX				.textProperty().unbindBidirectional(trace.getMinXProperty());
+		traceMaxX				.textProperty().unbindBidirectional(trace.getMaxXProperty());
+		traceInitV				.textProperty().unbindBidirectional(trace.getInitVProperty());
+		traceStep				.textProperty().unbindBidirectional(trace.getStepProperty());
+	}
+	
+	/**
+	 * Unbinds GraphView inputs from previously selected graph.
+	 */
+	private void unbindGraph(Graph graph) {
+		// Unbind graph properties
+		graphName				.textProperty().unbindBidirectional(graph.getNameProperty());
+		graphXData				.valueProperty().unbindBidirectional(graph.getXDataProperty());
+		graphYData				.valueProperty().unbindBidirectional(graph.getYDataProperty());
+		graphTrace				.valueProperty().unbindBidirectional(graph.getTraceProperty());
+		graphMinX				.textProperty().unbindBidirectional(graph.getMinXProperty());
+		graphMaxX				.textProperty().unbindBidirectional(graph.getMaxXProperty());
+		
+		// Unbind graph layout properties
+		graphStyle				.valueProperty().unbindBidirectional(graph.getStyleProperty());
+		graphColor				.valueProperty().unbindBidirectional(graph.getColorProperty());
+		graphDetail				.valueProperty().unbindBidirectional(graph.getDetailProperty());
+		graphWidth				.valueProperty().unbindBidirectional(graph.getWidthProperty());
+		graphVisible			.selectedProperty().unbindBidirectional(graph.getVisibleProperty());
+	}
+    
+	
+	// Helpers
+	/**
+	 * Adds a new graph to graph list and applies change listeners.
+	 */
+	private void addGraph(Graph graph) {
+		// Add graph to graph list
+		graphList.add(graph);
+		
+		// Apply change listeners
+		graph.getColorProperty().addListener(graphColorChangeListener);
+	}
+	
+	/**
+	 * Unbinds and removes specified graph.
+	 */
+	private void deleteGraph(Graph graph) {
+		// Remove property bindings
+		graph.removeTraceLink();
+    	
+    	// Remove graph
+    	graphList.remove(graph);
+	}
+	
+	
+	
+	/////////////////////////////
+	/////  ACTION HANDLERS  /////
+	/////////////////////////////
+	
+    // Main menu 
     @FXML private void handleNewProjectClick(ActionEvent event) {}
     
     @FXML private void handleSaveClick(ActionEvent event) {}
@@ -623,12 +671,34 @@ public class MainController {
     	// Update
     	updateTraceView();
     }
+
+    @FXML private void handleFileOpenClick(ActionEvent event) {
+    	// Retrive parent for file chooser
+    	Stage mainStage = (Stage) rootNode.getScene().getWindow();
+    	
+    	// Construct file chooser
+    	FileChooser fileChooser = new FileChooser();
+    	fileChooser.setTitle("Open Data File");
+    	fileChooser.getExtensionFilters().addAll(
+    	         new ExtensionFilter("Tracker file (*.txt)", "*.txt"),
+    	         new ExtensionFilter("All Files", "*.*"));
+    	
+    	// Launch file chooser and retrive selected file
+    	File selectedFile = fileChooser.showOpenDialog(mainStage);
+    	
+    	// Break if no file was selected
+    	if (selectedFile == null) return;
+    	
+    	// Add file to fileList and update trace file
+    	fileList.add(selectedFile);
+    	selectedTrace.setFile(selectedFile);
+    }
     
     
     // Graph button handlers
     @FXML private void handleNewGraphClick(ActionEvent event) {
     	// Add new graph
-    	graphList.add(new Graph(selectedTrace));
+    	addGraph(new Graph(selectedTrace));
     	
     	// Select new graph
     	graphListView.getSelectionModel().selectLast();
@@ -648,14 +718,6 @@ public class MainController {
     	updateGraphView();
     }
 
-	private void deleteGraph(Graph graph) {
-		// Remove property bindings
-		graph.removeTraceLink();
-    	
-    	// Remove graph
-    	graphList.remove(graph);
-	}
-    
     @FXML private void handleGraphUpClick(ActionEvent event) {
     	// Assign local variable
     	Graph graph;
@@ -716,33 +778,41 @@ public class MainController {
     }
     
     
-    // Other
-    // Trace file opener
-    @FXML private void handleFileOpenClick(ActionEvent event) {
-    	// Retrive parent for file chooser
-    	Stage mainStage = (Stage) rootNode.getScene().getWindow();
-    	
-    	// Construct file chooser
-    	FileChooser fileChooser = new FileChooser();
-    	fileChooser.setTitle("Open Data File");
-    	fileChooser.getExtensionFilters().addAll(
-    	         new ExtensionFilter("Tracker file (*.txt)", "*.txt"),
-    	         new ExtensionFilter("All Files", "*.*"));
-    	
-    	// Launch file chooser and retrive selected file
-    	File selectedFile = fileChooser.showOpenDialog(mainStage);
-    	
-    	// Break if no file was selected
-    	if (selectedFile == null) return;
-    	
-    	// Add file to fileList and update trace file
-    	fileList.add(selectedFile);
-    	selectedTrace.setFile(selectedFile);
-    }
     
     
+	/////////////////////////////
+	/////  PRIVATE CLASSES  /////
+	/////////////////////////////
     
-    
+    // Custom JFXListCell used to respresent line styles
+    private static class StyleCell extends JFXListCell<Style>{
+		Line cellLine = new Line(0, 0, 90, 0);
+		StackPane cellPane = new StackPane(cellLine);
+		boolean isButtonCell = false;
+		
+		public StyleCell(boolean isButtonCell) {
+			super();
+			this.isButtonCell = isButtonCell;
+		}
+		
+		@Override
+		protected void updateItem(Style style, boolean empty) {
+			super.updateItem(style, empty);
+			
+			setText(null);
+			setGraphic(null);
+			
+			if (style != null && !empty) {
+				setGraphic(cellPane);
+				cellLine.getStrokeDashArray().setAll(style.getStroke());
+				
+				if (isSelected() && !isButtonCell)
+					cellLine.setStyle("-fx-stroke: #FFFFFF;");
+				else
+					cellLine.setStyle("-fx-stroke: #454545;");
+			}
+		}
+	}
 }
 
 //Dump code
