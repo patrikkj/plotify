@@ -32,7 +32,9 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -41,6 +43,7 @@ import javafx.scene.control.Labeled;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -151,6 +154,9 @@ public class MainController {
     private ChangeListener<String> traceNameChangeListener;
     private ChangeListener<String> graphNameChangeListener;
     private ChangeListener<Color> graphColorChangeListener;
+    private ChangeListener<String> chartWidthChangeListener;
+    private ChangeListener<String> chartHeightChangeListener;
+    private ChangeListener<Bounds> boundsListener;
     
     /*
      * Observable lists used in ListViews and ChoiceBoxes
@@ -164,6 +170,7 @@ public class MainController {
      * Alert list for cells within choiceBox
      */
     private List<ListCell<Trace>> listenerList = new ArrayList<>();
+
     
     
     
@@ -227,9 +234,6 @@ public class MainController {
     	traceList.add(new Trace());
     	traceListView.getSelectionModel().selectFirst();
     	
-    	// Add name change listener
-		traceName.textProperty().addListener(traceNameChangeListener);
-		
     	// Updaters
     	updateTraceView();
 	}
@@ -257,9 +261,6 @@ public class MainController {
 		// Set graph style cell factory
 		graphStyle.setCellFactory(cell -> new StyleCell(false));
 		graphStyle.setButtonCell(new StyleCell(true));
-		
-		// Add name listener
-		graphName.textProperty().addListener(graphNameChangeListener);
 		
 		// Updaters
 		updateGraphView();
@@ -315,6 +316,10 @@ public class MainController {
 		yAxis.setAutoRanging(true);
 		yAxis.setAnimated(false);
 		
+		// Add chart property change listeners
+//		chartWidth.textProperty().addListener(chartWidthChangeListener);
+//		chartHeight.textProperty().addListener(chartHeightChangeListener);
+		
 		// Add chart to GUI
 		chartPane.getChildren().setAll(lineChart);
 	}
@@ -330,9 +335,11 @@ public class MainController {
 				if (oldTrace != null)
 					unbindTrace(oldTrace);
 					
-				// Bind new trace
+				// Bind new trace or clear UI if there is no selected trace
 				if (newTrace != null) 
 					bindTrace(newTrace);
+				else 
+					clearTraceView();
 				
 				// Set seleced trace
 				selectedTrace = newTrace;
@@ -368,7 +375,8 @@ public class MainController {
 					.filter(cell -> cell != null)
 					.filter(cell -> cell.getItem() != null)
 					.forEach(cell -> cell.setText(cell.getItem().getName()));
-				graphTrace.getButtonCell().setText(selectedGraph.getTrace().getName());
+				if (selectedGraph != null  && selectedGraph.getTrace() != null)
+					graphTrace.getButtonCell().setText(selectedGraph.getTrace().getName());
 			}
 		};
 
@@ -386,6 +394,30 @@ public class MainController {
 				updateChartStyles();
 			}
 		};
+		
+		boundsListener = new ChangeListener<>() {
+			@Override
+			public void changed(ObservableValue<? extends Bounds> arg0, Bounds arg1, Bounds arg2) {
+				rootNode.getScene().getWindow().setWidth(rootNode.getLayoutBounds().getWidth());
+				rootNode.getScene().getWindow().setHeight(rootNode.getLayoutBounds().getHeight());
+			}
+		};
+//		chartWidthChangeListener = new ChangeListener<>() {
+//			@Override
+//			public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
+//				System.out.println(rootNode.boundsInParentProperty().addListener(boundsListener));
+////				rootNode.getScene().getWindow().setWidth(rootNode.getScene().getWidth());
+//			}
+//		};
+//		
+//		chartHeightChangeListener = new ChangeListener<>() {
+//			@Override
+//			public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//		};
+		
 	}
 	
 	/**
@@ -396,7 +428,7 @@ public class MainController {
     	customStringConverter = new StringConverter<>() {
 			@Override
 			public Double fromString(String arg0) {
-				return (arg0.equals("")) ? null : Double.valueOf(arg0.replace(',', '.'));}
+				return (arg0.equals("")) ? Double.NaN : Double.valueOf(arg0.replace(',', '.'));}
 			
 			@Override
 			public String toString(Double arg0) {
@@ -422,7 +454,7 @@ public class MainController {
      */
     protected void postInitialize() {
     	graphStyle.lookup(".list-view").setStyle("-fx-pref-width: 120;");
-
+    	rootNode.boundsInParentProperty().addListener(boundsListener);
     }
     
     
@@ -455,12 +487,12 @@ public class MainController {
 	 */
 	private void clearGraphView() {
 		// Clear graph properties
-		graphName.setText(null);
+		graphName.setText("");
 		graphXData.setValue(null);
 		graphYData.setValue(null);
 		graphTrace.setValue(null);
-		graphMinX.setText(null);
-		graphMaxX.setText(null);
+		graphMinX.setText("");
+		graphMaxX.setText("");
 		
 		// Clear graph layout properties
 		graphStyle.setValue(null);
@@ -468,8 +500,32 @@ public class MainController {
 		graphDetail.setValue(50);
 		graphWidth.setValue(50);
 		graphVisible.setSelected(false);
-		
-		
+	}
+	
+	/**
+	 * Clears trace view if there are no traces to display.
+	 */
+	private void clearTraceView() {
+		// Clear trace properties
+		traceName.setText("");
+	    traceFile.setValue(null);
+	    traceIntegration.setValue(null);
+	    traceInterpolation.setValue(null);
+	    traceInertia.setValue(null);
+	    traceMass.setText("");
+	    traceMinX.setText("");
+	    traceMaxX.setText("");
+	    traceInitV.setText("");
+	    traceStep.setText("");
+				
+		// Clear trace details
+	    funcTypeLabel.setText("");
+	    integrationTypeLabel.setText("");
+	    stepSizeLabel.setText("");
+	    iterationsLabel.setText("");
+	    totalTimeLabel.setText("");
+	    computationTimeLabel.setText("");
+	    energyDifferenceLabel.setText("");
 	}
 
 	/**
@@ -518,6 +574,9 @@ public class MainController {
 	    totalTimeLabel.textProperty().bind(trace.getTotalTimeProperty());
 	    computationTimeLabel.textProperty().bind(trace.getComputationTimeProperty());
 	    energyDifferenceLabel.textProperty().bind(trace.getEnergyDifferenceProperty());
+	    
+	    // Add change listeners
+	 	trace.getNameProperty().addListener(traceNameChangeListener);
 	}
 	
 	/**
@@ -538,6 +597,11 @@ public class MainController {
 		graphDetail					.valueProperty().bindBidirectional(graph.getDetailProperty());
 		graphWidth					.valueProperty().bindBidirectional(graph.getWidthProperty());
 		graphVisible				.selectedProperty().bindBidirectional(graph.getVisibleProperty());
+		
+		// Add change listeners
+		graph.getNameProperty().addListener(graphNameChangeListener);
+		graph.getColorProperty().addListener(graphColorChangeListener);
+
 	}
 	
 	/**
@@ -555,6 +619,18 @@ public class MainController {
 		traceMaxX				.textProperty().unbindBidirectional(trace.getMaxXProperty());
 		traceInitV				.textProperty().unbindBidirectional(trace.getInitVProperty());
 		traceStep				.textProperty().unbindBidirectional(trace.getStepProperty());
+		
+		// Unbind trace details
+	    funcTypeLabel.textProperty().unbind();
+	    integrationTypeLabel.textProperty().unbind();
+	    stepSizeLabel.textProperty().unbind();
+	    iterationsLabel.textProperty().unbind();
+	    totalTimeLabel.textProperty().unbind();
+	    computationTimeLabel.textProperty().unbind();
+	    energyDifferenceLabel.textProperty().unbind();
+		
+		// Remove change listeners
+		trace.getNameProperty().removeListener(traceNameChangeListener);
 	}
 	
 	/**
@@ -575,6 +651,10 @@ public class MainController {
 		graphDetail				.valueProperty().unbindBidirectional(graph.getDetailProperty());
 		graphWidth				.valueProperty().unbindBidirectional(graph.getWidthProperty());
 		graphVisible			.selectedProperty().unbindBidirectional(graph.getVisibleProperty());
+		
+		// Remove change listeners
+		graph.getNameProperty().removeListener(graphNameChangeListener);
+		graph.getColorProperty().removeListener(graphColorChangeListener);
 	}
     
 	
@@ -609,9 +689,6 @@ public class MainController {
 	private void addGraph(Graph graph) {
 		// Add graph to graph list
 		graphList.add(graph);
-		
-		// Apply change listeners
-		graph.getColorProperty().addListener(graphColorChangeListener);
 	}
 	
 	/**
@@ -619,7 +696,7 @@ public class MainController {
 	 */
 	private void deleteGraph(Graph graph) {
 		// Remove property bindings
-		graph.removeTraceLink();
+		graph.setTrace(null);
     	
     	// Remove graph
     	graphList.remove(graph);
@@ -683,6 +760,9 @@ public class MainController {
     	
     	// Delete all graphs connected to selected trace
     	selectedTrace.linkedGraphs.forEach(graph -> deleteGraph(graph));
+    	
+    	// Unbind trace
+    	unbindTrace(selectedTrace);
     	
     	// Remove trace
     	traceList.remove(selectedTrace);

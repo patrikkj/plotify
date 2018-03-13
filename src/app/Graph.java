@@ -54,6 +54,17 @@ public class Graph {
 		series = new XYChart.Series<>();
 		series.nameProperty().bindBidirectional(name);
 
+		// Set default values
+		setDefault(initTrace);
+		
+		// Add trace link
+		updateTraceLink(null, initTrace);
+		
+		// Apply change listener
+		applyChangeListeners();
+	}
+
+	private void setDefault(Trace initTrace) {
 		// Set default data properties
 		setName("New graph");
 		setXData("Position (x)");
@@ -68,12 +79,6 @@ public class Graph {
 		setWidth(50d);
 		setDetail(100d);
 		setVisible(true);
-		
-		// Add trace link
-		addTraceLink();
-		
-		// Apply change listener
-		applyChangeListeners();
 	}
 	
 	// Initialization
@@ -232,19 +237,11 @@ public class Graph {
 	
 	// Manage Trace <-> Graph link
 	public void updateTraceLink(Trace prevTrace, Trace currentTrace) {
-		prevTrace.removeGraph(this);
+		if (prevTrace != null)
+			prevTrace.removeGraph(this);
 		if (currentTrace != null)
 			currentTrace.addGraph(this);
 	}
-	
-	public void addTraceLink() {
-		getTrace().addGraph(this);
-	}
-	
-	public void removeTraceLink() {
-		getTrace().removeGraph(this);
-	}
-	
 
 	// Data getters
 	public Series<Number, Number> getSeries() {return series;}
