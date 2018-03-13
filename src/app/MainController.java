@@ -38,6 +38,7 @@ import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.ListCell;
@@ -154,8 +155,7 @@ public class MainController {
     private ChangeListener<String> traceNameChangeListener;
     private ChangeListener<String> graphNameChangeListener;
     private ChangeListener<Color> graphColorChangeListener;
-    private ChangeListener<String> chartWidthChangeListener;
-    private ChangeListener<String> chartHeightChangeListener;
+    private ChangeListener<Object> chartSeriersChangeListener;
     private ChangeListener<Bounds> boundsListener;
     
     /*
@@ -262,6 +262,10 @@ public class MainController {
 		graphStyle.setCellFactory(cell -> new StyleCell(false));
 		graphStyle.setButtonCell(new StyleCell(true));
 		
+		// Add name listener
+		lineChart.dataProperty().addListener(chartSeriersChangeListener);
+		graphName.textProperty().addListener(graphNameChangeListener);
+		
 		// Updaters
 		updateGraphView();
 	}
@@ -315,10 +319,6 @@ public class MainController {
 		xAxis.setAnimated(false);
 		yAxis.setAutoRanging(true);
 		yAxis.setAnimated(false);
-		
-		// Add chart property change listeners
-//		chartWidth.textProperty().addListener(chartWidthChangeListener);
-//		chartHeight.textProperty().addListener(chartHeightChangeListener);
 		
 		// Add chart to GUI
 		chartPane.getChildren().setAll(lineChart);
@@ -380,6 +380,14 @@ public class MainController {
 			}
 		};
 
+		chartSeriersChangeListener = new ChangeListener<>() {
+			@Override
+			public void changed(ObservableValue<? extends Object> arg0, Object arg1, Object arg2) {
+				updateGraphView();
+				System.out.println("Dataset changed");
+			}
+		};
+		
 		graphNameChangeListener = new ChangeListener<>() {
 			@Override
 			public void changed(ObservableValue<? extends String> graphNameProperty, String oldName, String newName) {
@@ -402,22 +410,6 @@ public class MainController {
 				rootNode.getScene().getWindow().setHeight(rootNode.getLayoutBounds().getHeight());
 			}
 		};
-//		chartWidthChangeListener = new ChangeListener<>() {
-//			@Override
-//			public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-//				System.out.println(rootNode.boundsInParentProperty().addListener(boundsListener));
-////				rootNode.getScene().getWindow().setWidth(rootNode.getScene().getWidth());
-//			}
-//		};
-//		
-//		chartHeightChangeListener = new ChangeListener<>() {
-//			@Override
-//			public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//		};
-		
 	}
 	
 	/**
