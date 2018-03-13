@@ -1,11 +1,6 @@
-Whitespace split parseFile
 Windows DPI settings
 check mac
-TAB gui integration
 clip validation tracker
-check for infinite loops interpolation
-animations
-theme color support
 terminate calculations
 multiselect listview
 graph for kinetic roll energy
@@ -19,16 +14,12 @@ resize
 
 add real brachistochrone curve
 
-raw trace
-analytic trace
-
 use raw trace to estimate computation time, using progressbar (primary / secondary)
 
-set chart properties (quick)
 
 colormap default 8 colors (represented by byte % 8)
 setColor(map.get...)
 
-update label color
 
 optimize change listeners
+check for infinite loops interpolation (QUICK)

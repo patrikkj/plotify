@@ -510,6 +510,7 @@ public class Trace {
 		System.out.println(String.format("Raw: %.3f seconds", (double) Duration.between(start, end).toMillis()/1000).replace(',', '.'));
 	}
 	
+	
 	//Other
 	/**
 	 * Prints an overview of trace results.
@@ -540,7 +541,6 @@ public class Trace {
 		return getName();
 	}
 
-	
 	
 
 	/*

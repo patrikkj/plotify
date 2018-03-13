@@ -41,6 +41,10 @@ public class Graph {
 	List<Data<Number, Number>> dataList; 
 
 	
+	/////////////////////////////
+	/////  ADD COMMENTS :)  /////
+	/////////////////////////////
+	
 	// Constructor
 	public Graph(Trace initTrace) {
 		// Initialize graph properties
