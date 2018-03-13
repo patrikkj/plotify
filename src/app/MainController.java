@@ -2,10 +2,13 @@ package app;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.imageio.ImageIO;
 
 import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXComboBox;
@@ -24,20 +27,24 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -188,15 +195,8 @@ public class MainController {
     	dataList = FXCollections.observableList(Arrays.asList(Trace.MAP_KEYS));
     	
     	// Import tracker files from 'import'
-    	File importFolder = new File(getClass().getResource("../imports").getPath());
-    	FilenameFilter fileFilter = new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String filename) {
-				return filename.endsWith(".txt");
-			}
-		};
-    	for (File dataFile : importFolder.listFiles(fileFilter))
-    		fileList.add(dataFile);
+    	File folder = new File(getClass().getResource("../imports").getPath());
+    	importFolder(folder);
     	
     	// Bind observable lists
     	traceListView.setItems(traceList);
@@ -273,7 +273,7 @@ public class MainController {
 		xAxis = new NumberAxis();
 		yAxis = new NumberAxis();
 		lineChart = new LineChart<>(xAxis, yAxis);
-		
+
 		// Bind chart properties
 		chartTitle.textProperty().bindBidirectional(lineChart.titleProperty());
 		chartWidth.textProperty().bindBidirectional(lineChart.prefWidthProperty(), customStringDoubleConverter);
@@ -376,6 +376,7 @@ public class MainController {
 			@Override
 			public void changed(ObservableValue<? extends String> graphNameProperty, String oldName, String newName) {
 				graphListView.refresh();
+				updateChartStyles();
 			}
 		};
 	
@@ -577,6 +578,30 @@ public class MainController {
 	}
     
 	
+	//File IO
+	/**
+	 * Imports all text files in specified folder.
+	 */
+	private void importFolder(File folder) {
+    	// Import tracker files from 'import'
+    	FilenameFilter fileFilter = new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String filename) {
+				return filename.endsWith(".txt");
+			}
+		};
+    	for (File dataFile : folder.listFiles(fileFilter))
+    		fileList.add(dataFile);
+	}
+	
+	/**
+	 * Imports all text files from list of files.
+	 */
+	private void importFiles(List<File> files) {
+		files.forEach(file -> fileList.add(file));
+	}
+	
+	
 	// Helpers
 	/**
 	 * Adds a new graph to graph list and applies change listeners.
@@ -615,7 +640,29 @@ public class MainController {
     
     @FXML private void handleImportClick(ActionEvent event) {}
     
-    @FXML private void handleExportClick(ActionEvent event) {}
+    @FXML private void handleExportClick(ActionEvent event) throws IOException {
+    	// Retrive parent for file chooser
+    	Stage mainStage = (Stage) rootNode.getScene().getWindow();
+    	
+    	// Construct file chooser
+    	FileChooser fileChooser = new FileChooser();
+    	fileChooser.setTitle("Export chart");
+    	fileChooser.getExtensionFilters().addAll(
+    	         new ExtensionFilter("Image file (*.png)", "*.png"),
+    	         new ExtensionFilter("All Files", "*.*"));
+    	
+    	// Launch file chooser and retrive selected file
+    	File selectedFile = fileChooser.showSaveDialog(mainStage);
+    	
+    	// Break if no file has been selected
+    	if (selectedFile == null) return;
+    	
+    	// Write chart image to file
+    	SnapshotParameters snapshotParameters = new SnapshotParameters();
+    	snapshotParameters.setFill(Paint.valueOf("#EEEEEE"));
+    	WritableImage image = lineChart.snapshot(snapshotParameters, null);
+    	ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", selectedFile);
+    }
     
     
     // Trace button handlers
@@ -684,14 +731,18 @@ public class MainController {
     	         new ExtensionFilter("All Files", "*.*"));
     	
     	// Launch file chooser and retrive selected file
-    	File selectedFile = fileChooser.showOpenDialog(mainStage);
+    	List<File> selectedFiles = fileChooser.showOpenMultipleDialog(mainStage);
     	
-    	// Break if no file was selected
-    	if (selectedFile == null) return;
+    	// Break if no files was selected
+    	if (selectedFiles == null) return;
     	
-    	// Add file to fileList and update trace file
-    	fileList.add(selectedFile);
-    	selectedTrace.setFile(selectedFile);
+    	// Import and select file(s)
+    	if (selectedFiles.size() == 1) {
+    		fileList.add(selectedFiles.get(0));
+    		selectedTrace.setFile(selectedFiles.get(0));
+    	} else {
+    		importFiles(selectedFiles);
+    	}
     }
     
     

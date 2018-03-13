@@ -32,7 +32,7 @@
          <children>
             <HBox id="mainMenu" style="-fx-background-color: #450000;">
                <children>
-                  <JFXButton focusTraversable="false" onAction="#handleNewProjectClick" text="New project" textFill="#eeeeee">
+                  <JFXButton disable="true" focusTraversable="false" onAction="#handleNewProjectClick" text="New project" textFill="#eeeeee">
                      <font>
                         <Font name="System Bold" size="14.0" />
                      </font>
@@ -40,7 +40,7 @@
                         <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
                      </padding>
                   </JFXButton>
-                  <JFXButton focusTraversable="false" onAction="#handleSaveClick" text="Save" textFill="#eeeeee">
+                  <JFXButton disable="true" focusTraversable="false" onAction="#handleSaveClick" text="Save" textFill="#eeeeee">
                      <font>
                         <Font name="System Bold" size="14.0" />
                      </font>
@@ -48,7 +48,7 @@
                         <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
                      </padding>
                   </JFXButton>
-                  <JFXButton focusTraversable="false" onAction="#handleLoadClick" text="Load" textFill="#eeeeee">
+                  <JFXButton disable="true" focusTraversable="false" onAction="#handleLoadClick" text="Load" textFill="#eeeeee">
                      <font>
                         <Font name="System Bold" size="14.0" />
                      </font>
@@ -56,7 +56,7 @@
                         <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
                      </padding>
                   </JFXButton>
-                  <JFXButton focusTraversable="false" onAction="#handleImportClick" text="Import" textFill="#eeeeee">
+                  <JFXButton disable="true" focusTraversable="false" onAction="#handleImportClick" text="Import" textFill="#eeeeee">
                      <font>
                         <Font name="System Bold" size="14.0" />
                      </font>
@@ -64,7 +64,7 @@
                         <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
                      </padding>
                   </JFXButton>
-                  <JFXButton focusTraversable="false" onAction="#handleExportClick" text="Export" textFill="#eeeeee">
+                  <JFXButton focusTraversable="false" onAction="#handleExportClick" text="Export chart" textFill="#eeeeee">
                      <font>
                         <Font name="System Bold" size="14.0" />
                      </font>
