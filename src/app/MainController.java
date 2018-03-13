@@ -36,6 +36,7 @@ import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.ListCell;
@@ -151,6 +152,7 @@ public class MainController {
     private ChangeListener<String> traceNameChangeListener;
     private ChangeListener<String> graphNameChangeListener;
     private ChangeListener<Color> graphColorChangeListener;
+    private ChangeListener<Object> chartSeriersChangeListener;
     
     /*
      * Observable lists used in ListViews and ChoiceBoxes
@@ -259,6 +261,7 @@ public class MainController {
 		graphStyle.setButtonCell(new StyleCell(true));
 		
 		// Add name listener
+		lineChart.dataProperty().addListener(chartSeriersChangeListener);
 		graphName.textProperty().addListener(graphNameChangeListener);
 		
 		// Updaters
@@ -372,6 +375,14 @@ public class MainController {
 			}
 		};
 
+		chartSeriersChangeListener = new ChangeListener<>() {
+			@Override
+			public void changed(ObservableValue<? extends Object> arg0, Object arg1, Object arg2) {
+				updateGraphView();
+				System.out.println("Dataset changed");
+			}
+		};
+		
 		graphNameChangeListener = new ChangeListener<>() {
 			@Override
 			public void changed(ObservableValue<? extends String> graphNameProperty, String oldName, String newName) {

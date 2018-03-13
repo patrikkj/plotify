@@ -59,7 +59,7 @@ public class MainApp extends Application {
 		//Set key listener
 		controller.postInitialize();
 	}
-
+	
 	public static void main(String[] args) throws IOException {
 		// DPI issues ?? :)
 //		Runtime.getRuntime().exec("REG ADD \"HKCU\\Software\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Layers\" /V %cd%\\WorkstationInstaller.exe /T REG_SZ /D HIGHDPIAWARE /F");
