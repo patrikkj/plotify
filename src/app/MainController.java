@@ -34,17 +34,16 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.image.WritableImage;
-import javafx.scene.layout.Pane;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -53,6 +52,7 @@ import javafx.scene.shape.Line;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
@@ -65,6 +65,10 @@ public class MainController {
 	
 	// ROOT 
     @FXML private VBox rootNode;
+    @FXML private Region topRegion;
+    @FXML private Region bottomRegion;
+    @FXML private Region leftRegion;
+    @FXML private Region rightRegion;
 
     // CHART
     @FXML private StackPane chartPane;
@@ -156,7 +160,7 @@ public class MainController {
     private ChangeListener<String> graphNameChangeListener;
     private ChangeListener<Color> graphColorChangeListener;
     private ChangeListener<Object> chartSeriersChangeListener;
-    private ChangeListener<Bounds> boundsListener;
+//    private ChangeListener<Bounds> boundsListener;
     
     /*
      * Observable lists used in ListViews and ChoiceBoxes
@@ -171,6 +175,10 @@ public class MainController {
      */
     private List<ListCell<Trace>> listenerList = new ArrayList<>();
 
+    /*
+     * Used for resizing
+     */
+    private double initHeight, initWidth, initX, initY;
     
     
     
@@ -188,6 +196,7 @@ public class MainController {
     	initializeLists();
     	initializeTraceView();
     	initializeGraphView();
+    	initializeResize();
     	
     }
 
@@ -383,7 +392,7 @@ public class MainController {
 		chartSeriersChangeListener = new ChangeListener<>() {
 			@Override
 			public void changed(ObservableValue<? extends Object> arg0, Object arg1, Object arg2) {
-				updateGraphView();
+//				updateGraphView();
 				System.out.println("Dataset changed");
 			}
 		};
@@ -403,13 +412,13 @@ public class MainController {
 			}
 		};
 		
-		boundsListener = new ChangeListener<>() {
-			@Override
-			public void changed(ObservableValue<? extends Bounds> arg0, Bounds arg1, Bounds arg2) {
-				rootNode.getScene().getWindow().setWidth(rootNode.getLayoutBounds().getWidth());
-				rootNode.getScene().getWindow().setHeight(rootNode.getLayoutBounds().getHeight());
-			}
-		};
+//		boundsListener = new ChangeListener<>() {
+//			@Override
+//			public void changed(ObservableValue<? extends Bounds> arg0, Bounds arg1, Bounds arg2) {
+//				rootNode.getScene().getWindow().setWidth(rootNode.getParent().getBoundsInParent().getWidth());
+//				rootNode.getScene().getWindow().setHeight(rootNode.getParent().getBoundsInParent().getHeight());
+//			}
+//		};
 	}
 	
 	/**
@@ -441,12 +450,53 @@ public class MainController {
 
 	}
 	
+	/**
+	 * Initialize EventHandlers to allow window resizing.
+	 */
+	private void initializeResize() {
+		//Set mouse pressed
+        bottomRegion.setOnMousePressed(new EventHandler<MouseEvent>() {
+           @Override
+           public void handle(MouseEvent event) {
+               initHeight = bottomRegion.getScene().getWindow().getHeight();
+               initY = event.getScreenY();
+           }});
+        
+        //Set mouse drag
+        bottomRegion.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+            	Window stage = bottomRegion.getScene().getWindow();
+            	double reqHeight = initHeight + (event.getScreenY() - initY);
+            	if (reqHeight >= rootNode.getPrefHeight())
+            		stage.setHeight(reqHeight);
+            }});
+
+        //Set mouse pressed
+        rightRegion.setOnMousePressed(new EventHandler<MouseEvent>() {
+        	@Override
+        	public void handle(MouseEvent event) {
+        		initWidth = rightRegion.getScene().getWindow().getWidth();
+        		initX = event.getScreenX();
+        	}});
+        
+        //Set mouse drag
+        rightRegion.setOnMouseDragged(new EventHandler<MouseEvent>() {
+        	@Override
+        	public void handle(MouseEvent event) {
+        		Window stage = rightRegion.getScene().getWindow();
+        		double reqWidth = initWidth + (event.getScreenX() - initX);
+            	if (reqWidth >= rootNode.getPrefWidth())
+            		stage.setWidth(reqWidth);
+        	}});
+	}
+	
     /**
      * Runs any process that requires the scene to be loaded.
      */
     protected void postInitialize() {
     	graphStyle.lookup(".list-view").setStyle("-fx-pref-width: 120;");
-    	rootNode.boundsInParentProperty().addListener(boundsListener);
+//    	rootNode.boundsInParentProperty().addListener(boundsListener);
     }
     
     
@@ -528,6 +578,8 @@ public class MainController {
 	 * refactors all node styling when any data is updated.
 	 */
 	private void updateChartStyles() {
+		if (graphList.size() == 0) return;
+		
 		for (Node node : lineChart.lookupAll(".chart-legend-item")) {
 			Labeled labeledNode = (Labeled) node;
 			Node graphicNode = labeledNode.getGraphic();
