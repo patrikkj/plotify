@@ -67,8 +67,8 @@ public class Graph {
 	private void setDefault(Trace initTrace) {
 		// Set default data properties
 		setName("New graph");
-		setXData("Position (x)");
-		setYData("Velocity");
+		setXData("Raw (x)");
+		setYData("Raw (y)");
 		setTrace(initTrace);
 		setMinX(Double.NEGATIVE_INFINITY);
 		setMaxX(Double.POSITIVE_INFINITY);

@@ -17,6 +17,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
@@ -60,6 +62,8 @@ public class Trace {
 	private ObservableList<Double> aList, vList, xList, yList, totList, kinList, potList, tList;
 	private ObservableList<Double> tListRaw, xListRaw, yListRaw;
 	public HashSet<Graph> linkedGraphs;
+	//Change listeners
+	private ChangeListener<File> fileChangeListener;
 	//Constants
 	public static final int SIZE_LIMIT = 10000;
 	public static final double G = 9.82814;
@@ -87,10 +91,13 @@ public class Trace {
 		
 		//Initialize map
 		initializeCollections();
+
+		//Initialize change listeners
+		initializeChangeListeners();
 		
 		//Set default data values
 		setName("New trace");
-		setFile(new File("C:\\Users\\Patrik\\git\\Patrik-Forked\\Physics\\src\\imports\\mass_B.txt"));
+//		setFile(new File("C:\\Users\\Patrik\\git\\Patrik-Forked\\Physics\\src\\imports\\mass_B.txt"));
 		setIntegration(Integration.EULER_METHOD);
 		setInterpolation(Interpolation.POLYNOMIAL_SPLINE);
 		setInertia(Inertia.POINT_OF_MASS);
@@ -113,6 +120,9 @@ public class Trace {
 		
 		//Initialize collections
 		initializeCollections();
+		
+		//Initialize change listeners
+		initializeChangeListeners();
 		
 		//Assign values
 		setName(name);
@@ -158,18 +168,15 @@ public class Trace {
 	 * Initializes all trace collections.
 	 */
 	private void initializeCollections() {
+		// Initialize map
+		traceMap = FXCollections.observableHashMap();
+
 		// Initialize collections
 		initializeLists();
 		initializeRawLists();
 
 		//Initialize linked graph container
 		linkedGraphs = new HashSet<>();
-		
-		// Initialize map
-		traceMap = FXCollections.observableHashMap();
-		
-		// Fill map
-		fillMap();
 	}
 
 	/**
@@ -181,7 +188,7 @@ public class Trace {
 		tListRaw = FXCollections.observableArrayList();
 		xListRaw = FXCollections.observableArrayList();
 		yListRaw = FXCollections.observableArrayList();
-		
+
 		//Fill raw data collections
 		if (getFile() != null) {
 			double[][] rawData = analysis.Interpolation.parseFile(getFile());
@@ -189,6 +196,11 @@ public class Trace {
 			Arrays.stream(rawData[1]).forEach(doub -> xListRaw.add(Double.valueOf(doub)));
 			Arrays.stream(rawData[2]).forEach(doub -> yListRaw.add(Double.valueOf(doub)));
 		}
+		
+		//Fill map
+		traceMap.put("Raw (t)", tListRaw);
+		traceMap.put("Raw (x)", xListRaw);
+		traceMap.put("Raw (y)", yListRaw);
 	}
 	
 	/**
@@ -204,12 +216,7 @@ public class Trace {
 		kinList = FXCollections.observableArrayList();
 		potList = FXCollections.observableArrayList();
 		tList = FXCollections.observableArrayList();
-	}
 
-	/**
-	 * Links map to data collections.
-	 */
-	private void fillMap() {
 		// Fill map
 		traceMap.put("Acceleration", aList);
 		traceMap.put("Velocity", vList);
@@ -219,11 +226,25 @@ public class Trace {
 		traceMap.put("Total Energy", totList);
 		traceMap.put("Kinetic Energy", kinList);
 		traceMap.put("Potential energy", potList);
-		traceMap.put("Raw (t)", tListRaw);
-		traceMap.put("Raw (x)", xListRaw);
-		traceMap.put("Raw (y)", yListRaw);
 	}
-
+	
+	/**
+	 * Change listener for selected file, updating raw data sets
+	 */
+	private void initializeChangeListeners() {
+		fileChangeListener = new ChangeListener<>() {
+			@Override
+			public void changed(ObservableValue<? extends File> arg0, File arg1, File arg2) {
+				initializeRawLists();
+				
+				//Update subscribing graphs if trace is run from GUI
+				if (linkedGraphs != null)  
+					linkedGraphs.forEach(graph -> graph.updateGraph());
+			}
+		};
+		
+		file.addListener(fileChangeListener);
+	}
 	
 	// Helpers
 	/**
@@ -245,7 +266,6 @@ public class Trace {
 	private void clearCollections() {
 		initializeLists();
 		initializeRawLists();
-		fillMap();
 	}
 	
 	/**
