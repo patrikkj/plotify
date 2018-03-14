@@ -38,6 +38,7 @@ public class Graph {
 	private DoubleProperty width;
 	private DoubleProperty detail;
 	private BooleanProperty visible;
+	private BooleanProperty points;
 	List<Data<Number, Number>> dataList; 
 
 	
@@ -97,6 +98,7 @@ public class Graph {
 		style = new SimpleObjectProperty<>();
 		detail = new SimpleDoubleProperty();
 		visible = new SimpleBooleanProperty();
+		points = new SimpleBooleanProperty();
 	}
 	
 	private void applyChangeListeners() {
@@ -144,6 +146,7 @@ public class Graph {
 		if (getWidth() == null) return false;
 		if (getDetail() == null) return false;
 		if (getVisible() == null) return false;
+		if (getPoints() == null) return false;
 		
 		return true;
 	}
@@ -223,15 +226,19 @@ public class Graph {
 			
 		getSeries().getNode().setStyle(lineStyle);
 		
-	//		String nodeStyle = String.format("-fx-background-color: #%s, #FFFFFF;"
-	//										+ "-fx-background-radius: 100, 100;"
-	//										+ "-fx-background-insets: %s, 2;", getHexColor(), 2d - getWidth());
-	//		getSeries().getData().forEach(data -> data.getNode().setStyle(nodeStyle));
-		// WORKING
-	//		getSeries().getChart().lookupAll(".chart-legend-item").stream()
-	////		.forEach(elem -> ((Labeled) elem).setGraphic(new Circle(3, Paint.valueOf("#FF0000"))));
-	//		.forEach(elem -> ((Labeled) elem).getGraphic().setStyle(nodeStyle));
+		if (getVisible() && getPoints()) {
+			
+			nodeStyle = String.format("-fx-background-color: #%s, #FFFFFF;"
+											+ "-fx-background-radius: 100, 100;"
+											+ "-fx-background-insets: %s, 2;", getHexColor(), 2d - getWidth());
+			
+			getSeries().getData().forEach(data -> data.getNode().setStyle(nodeStyle));
+//		 WORKING
+//			getSeries().getChart().lookupAll(".chart-legend-item").stream()
+//	//		.forEach(elem -> ((Labeled) elem).setGraphic(new Circle(3, Paint.valueOf("#FF0000"))));
+//			.forEach(elem -> ((Labeled) elem).getGraphic().setStyle(nodeStyle));
 	
+		}
 	}
 	
 	
@@ -259,6 +266,7 @@ public class Graph {
 	public Style getStyle() {return style.get();}
 	public Double getDetail() {return 10d / ((0.5d - detail.get())/100d + 1d) - 7;}
 	public Boolean getVisible() {return visible.get();}
+	public Boolean getPoints() {return points.get();}
 	
 	
 	// Data setters
@@ -275,6 +283,7 @@ public class Graph {
 	public void setStyle(Style style) {this.style.set(style);}
 	public void setDetail(Double detail) {this.detail.set(detail);}
 	public void setVisible(Boolean visible) {this.visible.set(visible);}
+	public void setPoints(Boolean points) {this.points.set(points);}
 
 	
 	// Data property getters
@@ -291,6 +300,7 @@ public class Graph {
 	public ObjectProperty<Style> getStyleProperty() {return style;}
 	public DoubleProperty getDetailProperty() {return detail;}
 	public BooleanProperty getVisibleProperty() {return visible;}
+	public BooleanProperty getPointsProperty() {return points;}
 	
 	public void printDetails() {
 		System.out.printf("\nSeries: %s\n"

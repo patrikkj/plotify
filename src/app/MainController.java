@@ -79,6 +79,7 @@ public class MainController {
     @FXML private JFXTextField chartTitle;
     @FXML private JFXTextField chartWidth;
     @FXML private JFXTextField chartHeight;
+    @FXML private JFXToggleButton chartPoints;
     // X-Axis properties
     @FXML private JFXTextField xAxisName;
     @FXML private JFXTextField xAxisTickSize;
@@ -160,6 +161,7 @@ public class MainController {
     private ChangeListener<String> graphNameChangeListener;
     private ChangeListener<Color> graphColorChangeListener;
     private ChangeListener<Object> chartSeriersChangeListener;
+    private ChangeListener<Boolean> chartPointsChangeListener;
 //    private ChangeListener<Bounds> boundsListener;
     
     /*
@@ -273,6 +275,7 @@ public class MainController {
 		
 		// Add name listener
 		lineChart.dataProperty().addListener(chartSeriersChangeListener);
+		lineChart.createSymbolsProperty().addListener(chartPointsChangeListener);
 		graphName.textProperty().addListener(graphNameChangeListener);
 		
 		// Updaters
@@ -292,6 +295,7 @@ public class MainController {
 		chartTitle.textProperty().bindBidirectional(lineChart.titleProperty());
 		chartWidth.textProperty().bindBidirectional(lineChart.prefWidthProperty(), customStringDoubleConverter);
 		chartHeight.textProperty().bindBidirectional(lineChart.prefHeightProperty(), customStringDoubleConverter);
+		chartPoints.selectedProperty().bindBidirectional(lineChart.createSymbolsProperty());
 		
 		// Bind x-axis properties
 		xAxisName.textProperty().bindBidirectional(xAxis.labelProperty());
@@ -412,6 +416,14 @@ public class MainController {
 			}
 		};
 		
+		chartPointsChangeListener = new ChangeListener<>() {
+
+			@Override
+			public void changed(ObservableValue<? extends Boolean> arg0, Boolean arg1, Boolean arg2) {
+				updateGraphView();
+//				updateChartStyles();
+			}
+		};
 //		boundsListener = new ChangeListener<>() {
 //			@Override
 //			public void changed(ObservableValue<? extends Bounds> arg0, Bounds arg1, Bounds arg2) {
@@ -731,6 +743,9 @@ public class MainController {
 	 * Adds a new graph to graph list and applies change listeners.
 	 */
 	private void addGraph(Graph graph) {
+		// Bind property for drawing points
+		graph.getPointsProperty().bind(chartPoints.selectedProperty());
+		
 		// Add graph to graph list
 		graphList.add(graph);
 	}
