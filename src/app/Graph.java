@@ -3,6 +3,7 @@ package app;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import enums.Style;
@@ -40,7 +41,16 @@ public class Graph {
 	private BooleanProperty visible;
 	private BooleanProperty points;
 	List<Data<Number, Number>> dataList; 
-
+	
+	// Initial color selection
+	public static int initColorID;
+	public static Color[] initColors = new Color[] {
+		Color.valueOf("#BB0000"),
+		Color.valueOf("#0060AA"),
+		Color.valueOf("#206020"),
+		Color.valueOf("#105060"),
+		Color.valueOf("#450000")
+	};
 	
 	/////////////////////////////
 	/////  ADD COMMENTS :)  /////
@@ -75,7 +85,7 @@ public class Graph {
 		setMaxX(Double.POSITIVE_INFINITY);
 		
 		// Set default layout properties
-		setColor(Color.valueOf("#454545"));
+		setColor(initColors[initColorID++ % initColors.length]);
 		setStyle(Style.FULL_LINE);
 		setWidth(50d);
 		setDetail(100d);

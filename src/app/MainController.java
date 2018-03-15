@@ -18,6 +18,7 @@ import com.jfoenix.controls.JFXSlider;
 import com.jfoenix.controls.JFXTabPane;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.controls.JFXToggleButton;
+import com.jfoenix.skins.JFXColorPickerSkin;
 
 import enums.Inertia;
 import enums.Integration;
@@ -366,6 +367,10 @@ public class MainController {
 				if (oldGraph != null)
 					unbindGraph(oldGraph);
 				
+				// Update colorpicker values
+				if (newGraph != null)
+					graphColor.setValue(newGraph.getColor());
+				
 				// Bind new graph or clear UI if there is no selected graph
 				if (newGraph != null)
 					bindGraph(newGraph);
@@ -649,10 +654,13 @@ public class MainController {
 		
 		// Bind graph layout properties
 		graphStyle					.valueProperty().bindBidirectional(graph.getStyleProperty());
-		graphColor					.valueProperty().bindBidirectional(graph.getColorProperty());
+//		graphColor					.valueProperty().bindBidirectional(graph.getColorProperty());
 		graphDetail					.valueProperty().bindBidirectional(graph.getDetailProperty());
 		graphWidth					.valueProperty().bindBidirectional(graph.getWidthProperty());
 		graphVisible				.selectedProperty().bindBidirectional(graph.getVisibleProperty());
+		
+		// Unidirectional color binding
+		graph.getColorProperty().bind(graphColor.valueProperty());
 		
 		// Add change listeners
 		graph.getNameProperty().addListener(graphNameChangeListener);
@@ -703,10 +711,13 @@ public class MainController {
 		
 		// Unbind graph layout properties
 		graphStyle				.valueProperty().unbindBidirectional(graph.getStyleProperty());
-		graphColor				.valueProperty().unbindBidirectional(graph.getColorProperty());
+//		graphColor				.valueProperty().unbindBidirectional(graph.getColorProperty());
 		graphDetail				.valueProperty().unbindBidirectional(graph.getDetailProperty());
 		graphWidth				.valueProperty().unbindBidirectional(graph.getWidthProperty());
 		graphVisible			.selectedProperty().unbindBidirectional(graph.getVisibleProperty());
+		
+		// Unbind unidirectional bindings
+		graph.getColorProperty().unbind();
 		
 		// Remove change listeners
 		graph.getNameProperty().removeListener(graphNameChangeListener);
