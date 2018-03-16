@@ -113,9 +113,8 @@ public class Trace {
 		
 		//Set default data values
 		setName("New trace");
-//		setFile(new File("C:\\Users\\Patrik\\git\\Patrik-Forked\\Physics\\src\\imports\\mass_B.txt"));
 		setIntegration(Integration.EULER_METHOD);
-		setInterpolation(Interpolation.POLYNOMIAL_SPLINE);
+		setInterpolation(Interpolation.POLYNOMIAL);
 		setInertia(Inertia.POINT_OF_MASS);
 		setMass(1d);
 		setMinX(Double.NEGATIVE_INFINITY);
@@ -273,6 +272,7 @@ public class Trace {
 		
 		file.addListener(fileChangeListener);
 	}
+	
 	
 	// Helpers
 	/**

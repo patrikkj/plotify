@@ -47,11 +47,11 @@ public class Graph {
 	// Initial color selection
 	public static int initColorID;
 	public static Color[] initColors = new Color[] {
-		Color.valueOf("#BB0000"),
+		Color.valueOf("#450000"),
 		Color.valueOf("#0060AA"),
 		Color.valueOf("#206020"),
 		Color.valueOf("#105060"),
-		Color.valueOf("#450000")
+		Color.valueOf("#BB0000")
 	};
 	
 	/////////////////////////////
@@ -95,6 +95,9 @@ public class Graph {
 	}
 	
 	// Initialization
+	/**
+	 * Initialize all data and layout properties.
+	 */
 	private void initializeProperties() {
 		// Graph data properties
 		name = new SimpleStringProperty();
@@ -113,6 +116,9 @@ public class Graph {
 		points = new SimpleBooleanProperty();
 	}
 	
+	/**
+	 * Apply change listeners to dynamic data.
+	 */
 	private void applyChangeListeners() {
 		// Create changeListeners
 		ChangeListener<Object> dataChangeListener = new ChangeListener<>() {
@@ -145,6 +151,9 @@ public class Graph {
 	}
 
 	// Validation
+	/**
+	 * Returns {@code true} if graph is valid, else {@code false}.
+	 */
 	private boolean isValidGraph() {
 		if (getName() == null) return false;
 		if (getSeries() == null) return false;
