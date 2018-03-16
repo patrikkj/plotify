@@ -18,7 +18,6 @@ import com.jfoenix.controls.JFXSlider;
 import com.jfoenix.controls.JFXTabPane;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.controls.JFXToggleButton;
-import com.jfoenix.skins.JFXColorPickerSkin;
 
 import enums.Inertia;
 import enums.Integration;
@@ -33,7 +32,6 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.LineChart;
@@ -829,7 +827,7 @@ public class MainController {
     	if (selectedTrace == null) return;
     	
     	// Delete all graphs connected to selected trace
-    	selectedTrace.linkedGraphs.forEach(graph -> deleteGraph(graph));
+    	selectedTrace.getGraphs().forEach(graph -> deleteGraph(graph));
     	
     	// Unbind trace
     	unbindTrace(selectedTrace);

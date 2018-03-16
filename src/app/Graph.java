@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.math3.ml.distance.ChebyshevDistance;
+
 import enums.Style;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -78,8 +80,8 @@ public class Graph {
 	private void setDefault(Trace initTrace) {
 		// Set default data properties
 		setName("New graph");
-		setXData("Raw (x)");
-		setYData("Raw (y)");
+		setXData("Raw data (x)");
+		setYData("Raw data (y)");
 		setTrace(initTrace);
 		setMinX(Double.NEGATIVE_INFINITY);
 		setMaxX(Double.POSITIVE_INFINITY);
@@ -183,17 +185,12 @@ public class Graph {
 	}
 	
 	public void updateGraph() {
-		Instant start = Instant.now();
-		
 		// Break if graph is invalid
 		if (!isValidGraph()) return;
 		
 		// Update graph
 		updateSeries();
 		updateStyle();
-		System.out.println(getSeries().getData().size());
-		Instant end = Instant.now();
-		System.out.println(String.format("%.3f seconds", (double) Duration.between(start, end).toMillis()/1000).replace(',', '.'));
 	}
 	
 	private void updateSeries() {
@@ -210,6 +207,9 @@ public class Graph {
 		// Set lower boundary based on data set sizes
 		double listSize = Math.min(rawXData.size(), rawYData.size());
 		double actualSize = Math.min(listSize, getDetail());
+		
+		// Chebyshev indecies
+		
 		
 		// Reduce lists
 		List<Double> reducedXData = reduceList(rawXData, actualSize);

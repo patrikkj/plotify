@@ -10,10 +10,13 @@ import java.util.HashSet;
 import enums.Inertia;
 import enums.Integration;
 import enums.Interpolation;
-import functions.Differentiable;
+import functions.AbstractDifferentiable;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -45,6 +48,8 @@ public class Trace {
 	private StringProperty totalTime;
 	private StringProperty computationTime;
 	private StringProperty energyDifference;
+	// Progress bar
+	private IntegerProperty progress;
 	// Temporary fields to avoid multithread UI updates
 	private String tempIntegrationType;
 	private String tempInterpolationType;
@@ -54,14 +59,18 @@ public class Trace {
 	private String tempComputationTime;
 	private String tempEnergyDifference;
 	//Function
-	private Differentiable func;
+	private AbstractDifferentiable func;
 	private double[] domain;
 	private double rawIterations;
+	private double min, max;
 	//Collections
 	private ObservableMap<String, ObservableList<Double>> traceMap;
-	private ObservableList<Double> aList, vList, xList, yList, totList, kinList, potList, tList;
+	private ObservableList<Double> aList, vList, xList, yList, tList;
+	private ObservableList<Double> totList, kinList, potList;
+	private ObservableList<Double> normForceList, fricForceList;
+	private ObservableList<Double> slopeAngleList, slopeAngleDegList, radCurvatureList;
 	private ObservableList<Double> tListRaw, xListRaw, yListRaw;
-	public HashSet<Graph> linkedGraphs;
+	private HashSet<Graph> linkedGraphs;
 	//Change listeners
 	private ChangeListener<File> fileChangeListener;
 	//Constants
@@ -73,13 +82,20 @@ public class Trace {
 			"Position (x)",
 			"Position (y)",
 			"Time (s)",
-			"Total Energy",
-			"Kinetic Energy",
+			"Total energy",
+			"Kinetic energy",
 			"Potential energy",
-			"Raw (t)",
-			"Raw (x)",
-			"Raw (y)"};
+			"Raw data (t)",
+			"Raw data (x)",
+			"Raw data (y)",
+			"Normal force",
+			"Friction force",
+			"Slope angle (Rad)",
+			"Slope angle (Deg)",
+			"Radius of Curvature"};
 	
+	int listSize = 0;
+
 	
 	//Constructors
     /**
@@ -162,6 +178,8 @@ public class Trace {
 		totalTime = new SimpleStringProperty();
 		computationTime = new SimpleStringProperty();
 		energyDifference = new SimpleStringProperty();
+		
+		progress = new SimpleIntegerProperty();
 	}
 
 	/**
@@ -198,9 +216,9 @@ public class Trace {
 		}
 		
 		//Fill map
-		traceMap.put("Raw (t)", tListRaw);
-		traceMap.put("Raw (x)", xListRaw);
-		traceMap.put("Raw (y)", yListRaw);
+		traceMap.put("Raw data (t)", tListRaw);
+		traceMap.put("Raw data (x)", xListRaw);
+		traceMap.put("Raw data (y)", yListRaw);
 	}
 	
 	/**
@@ -212,10 +230,15 @@ public class Trace {
 		vList = FXCollections.observableArrayList();
 		xList = FXCollections.observableArrayList();
 		yList = FXCollections.observableArrayList();
+		tList = FXCollections.observableArrayList();
 		totList = FXCollections.observableArrayList();
 		kinList = FXCollections.observableArrayList();
 		potList = FXCollections.observableArrayList();
-		tList = FXCollections.observableArrayList();
+		normForceList = FXCollections.observableArrayList();
+		fricForceList = FXCollections.observableArrayList();
+		slopeAngleList = FXCollections.observableArrayList();
+		slopeAngleDegList = FXCollections.observableArrayList();
+		radCurvatureList = FXCollections.observableArrayList();
 
 		// Fill map
 		traceMap.put("Acceleration", aList);
@@ -223,9 +246,14 @@ public class Trace {
 		traceMap.put("Position (x)", xList);
 		traceMap.put("Position (y)", yList);
 		traceMap.put("Time (s)", tList);
-		traceMap.put("Total Energy", totList);
-		traceMap.put("Kinetic Energy", kinList);
+		traceMap.put("Total energy", totList);
+		traceMap.put("Kinetic energy", kinList);
 		traceMap.put("Potential energy", potList);
+		traceMap.put("Normal force", normForceList);
+		traceMap.put("Friction force", fricForceList);
+		traceMap.put("Slope angle (Rad)", slopeAngleList);
+		traceMap.put("Slope angle (Deg)", slopeAngleDegList);
+		traceMap.put("Radius of Curvature", radCurvatureList);
 	}
 	
 	/**
@@ -250,7 +278,7 @@ public class Trace {
 	/**
 	 * Returns {@code true} if Trace is runnable, else {@code false}.
 	 */
-	public void validateTrace() {
+	private void validateTrace() {
 		//Validate mass
 		if (getMass() <= 0)
 			throw new IllegalArgumentException("Mass must be positive.");
@@ -305,10 +333,10 @@ public class Trace {
 		//Set trace details
 		tempInterpolationType = getInterpolation().TEXT;
 		
-		//Set domain and x-range
+		//Set domain
 		domain = func.getDomain();
-		setMinX(Math.max(getMinX(), domain[0]));
-		setMaxX(Math.min(getMaxX(), domain[1]));
+		min = Math.max(getMinX(), domain[0]);
+		max = Math.min(getMaxX(), domain[1]);
 	}
 	
 	/**
@@ -360,7 +388,7 @@ public class Trace {
 	/**
 	 * Evaluates the acceleration at given x-coordinate.
 	 */
-	public double getAccel(double x) {
+	private double getAccel(double x) {
 		// Evaluates the slope angle α(x) 
 		double angle = func.slopeAngle(x);
 		
@@ -380,22 +408,47 @@ public class Trace {
 	/**
 	 * Returns the kinetic energy for a given velocity.
 	 */
-	public double getKineticEnergy(double v) {
+	private double getKineticEnergy(double v) {
 		return 0.5*getMass()*v*v  +  0.5*getMass()*getInertia().VALUE*v*v;
    	}
 	
 	/**
 	 * Returns the potential energy for a given x-coordinate.
 	 */
-	public double getPotentialEnergy(double x) {
+	private double getPotentialEnergy(double x) {
 		return getMass() * Trace.G * func.eval(x);
 	}
 	
 	/**
 	 * Returns the total energy for a given velocity and x-coordinate.
 	 */
-	public double getTotalEnergy(double v, double x) {
+	private double getTotalEnergy(double x, double v) {
 		return getKineticEnergy(v) + getPotentialEnergy(x);
+	}
+	
+	/**
+	 * Returns the fricton force for a given x-coordinate.
+	 * Explanation:
+	 *  -> SUM(F_x) = Parallel - Friction
+	 *  -> Friction = SUM(F_x) - Parallel
+	 */
+	private double getFrictionForce(double x) {
+		return getMass() * (G * Math.sin(func.slopeAngle(x)) - getAccel(x));
+	}
+	
+	/**
+	 * Returns the normal force for a given velocity and x-coordinate.
+	 * This is equivalent to the sum of the normal and the centripetal force.
+	 */
+	private double getNormalForce(double x, double v) {
+		// Normal force
+		double normal = getMass() * G * Math.cos(func.slopeAngle(x));
+		
+		// Centripetal force
+		double centripetal = (getMass()*v*v) / func.radiusOfCurvature(x);
+		
+//		System.out.printf("x: %s\tv: %s\tNormal: %s\tCentripetal: %s\t Total: %s%n", x, v, normal, centripetal, normal + centripetal);
+		return normal + centripetal;
 	}
 	
 	
@@ -404,6 +457,9 @@ public class Trace {
 	 * Performs a trace of the experiment.
 	 */
 	public void trace() {
+		// Reset progress bar
+		resetProgress();
+		
 		// Validate instance variables
 		validateTrace();
 		
@@ -428,6 +484,10 @@ public class Trace {
 	 * Performs trace using separate thread.
 	 */
 	public void parallelTrace() {
+		// Reset progress bar
+		resetProgress();
+		listSize = 0;
+		
 		//Perform trace
 		new Thread(new TraceProcessor(this)).start();
 	}
@@ -436,22 +496,16 @@ public class Trace {
 	 * Trace performed using Eulers method.
 	 */
 	private void eulerTrace() {
+		//Used to compute simulation time
+		Instant start = Instant.now();
+		
 		// Calibrate using raw trace
 		rawEulerTrace();
 		
 		// Set initial parameters
-		double x = getMinX(); 
+		double x = min; 
 		double v = getInitV();
 		double a = getAccel(x);	
-		double eKin = getKineticEnergy(v);
-		double ePot = getPotentialEnergy(x);
-		double eTot = getTotalEnergy(v, x);
-		
-		//Save initial energy for comparison
-		double initTotEnergy = eTot;
-		
-		//Used to compute simulation time
-		Instant start = Instant.now();
 		
 		//Keeps track of iterations
 		int iter = 0;
@@ -466,19 +520,28 @@ public class Trace {
 		
 		
 		//Iterate until track is complete (x has reached its' end value)
-		while (x < getMaxX()) {
+		while (x < max) {
 			if (indexSet.contains(iter++)) {
 				aList.add(a);
 				vList.add(v);
 				xList.add(x);
 				yList.add(func.eval(x));
 				tList.add(iter*getStep());
-				totList.add(eTot);
-				kinList.add(eKin);
-				potList.add(ePot);
-				eTot = getTotalEnergy(v, x);
-				eKin = getKineticEnergy(v);
-				ePot = getPotentialEnergy(x);
+				totList.add(getTotalEnergy(x, v));
+				kinList.add(getKineticEnergy(v));
+				potList.add(getPotentialEnergy(x));
+				normForceList.add(getNormalForce(x, v));
+				fricForceList.add(getFrictionForce(x));
+				slopeAngleList.add(func.slopeAngle(x));
+				slopeAngleDegList.add(func.slopeAngleDegrees(x));
+//				radCurvatureList.add(func.radiusOfCurvature(x) == Double.POSITIVE_INFINITY ? 0 : func.radiusOfCurvature(x));
+				radCurvatureList.add(func.radiusOfCurvature(x));
+				
+				//Perform GUI Updates in FX Application Thread
+				if (listSize++ % 100 == 0) {
+					Platform.runLater(() -> incrementProgress());
+//					System.out.println(getProgress());
+				}
 			}
 				
 			a = getAccel(x);	
@@ -495,13 +558,16 @@ public class Trace {
 		Instant end = Instant.now();
 
 		// Update trace details
-		tempEnergyDifference = String.format("%.9f %%", ((initTotEnergy - eTot)/eTot)*100);
+		tempEnergyDifference = String.format("%.9f %%", ((
+				getTotalEnergy(min, getInitV()) - 
+				getTotalEnergy(xList.get(xList.size() - 1), vList.get(vList.size() - 1)))/
+				getTotalEnergy(xList.get(xList.size() - 1), vList.get(vList.size() - 1)))*100);
 		tempIterations = String.valueOf(iter * 2);
 		tempIterations = String.format("%,d", iter*2).replace(',', ' ');
 		tempStepSize = String.valueOf(getStep());
 		tempTotalTime = String.format("%f", iter * getStep()).replace(',', '.');
 		tempComputationTime = String.format("%.3f seconds", (double) Duration.between(start, end).toMillis()/1000).replace(',', '.');
-		System.out.println("Full: " + tempComputationTime);
+		System.out.println(func.toString());
 	}
 	
 	/**
@@ -510,24 +576,17 @@ public class Trace {
 	private void rawEulerTrace() {
 		// Set initial parameters
 		double i = 0;
-		double x = getMinX(); 
+		double x = min; 
 		double v = getInitV();
 		double step = getStep();
-		double maxX = getMaxX();
 
-		Instant start = Instant.now();
-		
-		while (x < maxX) {
+		while (x < max) {
 			v += getAccel(x) * step;
 			x += v * Math.cos(func.slopeAngle(x)) * step;
 			i++;
 		}
 		
-		Instant end = Instant.now();
-		
 		rawIterations = i;
-		
-		System.out.println(String.format("Raw: %.3f seconds", (double) Duration.between(start, end).toMillis()/1000).replace(',', '.'));
 	}
 	
 	
@@ -586,6 +645,8 @@ public class Trace {
 	public StringProperty getTotalTimeProperty() {return totalTime;}
 	public StringProperty getComputationTimeProperty() {return computationTime;}
 	public StringProperty getEnergyDifferenceProperty() {return energyDifference;}
+	// Progress bar
+	public IntegerProperty getProgressProperty() {return progress;}
 
 	/*
 	 * Getters
@@ -611,6 +672,8 @@ public class Trace {
 	public String getTotalTime() {return totalTime.get();}
 	public String getComputationTime() {return computationTime.get();}
 	public String getEnergyDifference() {return energyDifference.get();}
+	// Progress bar
+	public Integer getProgress() {return progress.get();}
 	
 	/*
 	 * Setters
@@ -635,6 +698,9 @@ public class Trace {
 	public void setTotalTime(String totalTime) { this.totalTime.set(totalTime);}
 	public void setComputationTime(String computationTime) { this.computationTime.set(computationTime);}
 	public void setEnergyDifference(String energyDifference) { this.energyDifference.set(energyDifference);}
+	// Progress bar
+	public void incrementProgress() {this.progress.set(progress.get() + 1);}
+	public void resetProgress() {this.progress.set(0);}
 	
 	public static void main(String[] args) throws FileNotFoundException {
 		// Initial parameters

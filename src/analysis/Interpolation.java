@@ -3,7 +3,6 @@ package analysis;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,6 +16,7 @@ import functions.Polynomial;
 
 
 public class Interpolation {
+	
 	/*
 	 * Returns a PolySpline object representing a set of third degree polynomials,
 	 * replicating a best-fit curve to the given set of coordinates.
@@ -33,6 +33,11 @@ public class Interpolation {
 		for (int i = 0; i < x.length - 1; i++)
 			if (x[i] >= x[i+1])
 				throw new IllegalArgumentException("Values in array of x coordinates must be strictly increasing.");
+		
+//		//Reduce array
+//		x = reduceArray(x, 8);
+//		y = reduceArray(y, 8);
+//		
 		
 		//Perform interpolation
 		return new PolySpline(new SplineInterpolator().interpolate(x, y));
@@ -70,9 +75,11 @@ public class Interpolation {
 			if (x[i] >= x[i+1])
 				throw new IllegalArgumentException("Values in array of x coordinates must be strictly increasing.");
 		
+		//Reduced indecies
+		int[] indecies = chebyshevIndexies(x, 10);
 		//Reduce arrays
-		double[] xReduced = reduceArray(x, 6);
-		double[] yReduced = reduceArray(y, 6);
+		double[] xReduced = reduceArray(x, indecies);
+		double[] yReduced = reduceArray(y, indecies);
 		
 		//Perform interpolation
 		PolynomialFunctionLagrangeForm rawPolynomial = new PolynomialFunctionLagrangeForm(xReduced, yReduced);
@@ -169,9 +176,11 @@ public class Interpolation {
 	}
 	
 	/**
-	 * Converts an array to a reduced array by picking n evenly spaced elements.
+	 * Converts an array to a reduced array by picking n evenly indexed elements.
 	 */
 	private static double[] reduceArray(double[] inputArr, int n) {
+		chebyshevIndexies(inputArr, n);
+		
 		// Verify that reduction is necessary
 		if (n >= inputArr.length)
 			return inputArr;
@@ -187,9 +196,88 @@ public class Interpolation {
 				outputArr[i] = inputArr[(int) Math.round(step * (double) i)];
 		
 		// Return reduced list
+		return outputArr;
+	}
+	
+	/**
+	 * Reduces array using an array of integers.
+	 */
+	private static double[] reduceArray(double[] inputArr, int[] indecies) {
+		// Create output list
+		double[] outputArr = new double[indecies.length];
+		
+		// Fill list
+		for (int i = 0; i < indecies.length; i++)
+				outputArr[i] = inputArr[indecies[i]];
+		
+		// Return reduced list
 		System.out.println(outputArr.length);
 		return outputArr;
 	}
+	
+	
+	
+	/**
+	 * Returns an array containing the indecies for n equidistant elements in input array.
+	 */
+	private static double[] equidistantIndecies(double[] inputArr, int n) {
+		// Verify that reduction is necessary
+		if (n >= inputArr.length)
+			return inputArr;
+		
+		// Create output list
+		double[] outputArr = new double[n];
+		
+		// Calculate step size
+		double firstVal = inputArr[0];
+		double lastVal = inputArr[inputArr.length - 1];
+		double step = (lastVal - firstVal) / ((double) n - 1d);
+		
+//		// Fill list
+//		for (int i = 0; i < n; i++)
+//			for (double d : inputArr)
+//			outputArr[i] = Arrays.stream(inputArr).filter(elem -> (elem >= step * i)).findFirst().getAsDouble();
+		
+		// Return reduced list
+		System.out.println(outputArr.length);
+		return outputArr;
+	}
+	
+	/**
+	 * Returns a list of Chebyshev node indecies for the given array. To be used in Polynomial interpolation.
+	 * Elements must be in strictly increasing order.
+	 */
+	private static int[] chebyshevIndexies(double[] inputArr, int n) {
+		// Output array
+		int[] indecies = new int[n];
+		
+		// Endpoints
+		double a = inputArr[0];
+		double b = inputArr[inputArr.length - 1];
+		
+		// Create list of actual chebyshev values
+		double[] chebyshevValues = new double[n];
+		for (int k = 1; k <= n; k++)
+			chebyshevValues[k - 1] = (1d/2d)*(a+b) + (1d/2d)*(a-b) * Math.cos((((double)(2*k - 1d)) / (2*n)) * Math.PI);
+		
+		// Loop for index generation
+		for (int i = 0; i < n; i++) {
+			// Value to find in input array
+			double currentVal = chebyshevValues[i];
+			
+			// Loop through input array to find index
+			for (int j = 0; j < inputArr.length; j++) {
+				if (inputArr[j] >= currentVal) {
+					indecies[i] = j;
+					break;
+				}
+			}
+		}
+		
+		return indecies;
+	}
+
+	
 	public static void main(String[] args) throws FileNotFoundException {
 		PolySpline polySpline = polynomialSplineInterpolation(new File("C:\\Users\\Patrik\\git\\Patrik-Forked\\Physics Plotter\\src\\imports\\mass_A.txt"));
 		
@@ -197,8 +285,8 @@ public class Interpolation {
 			System.out.printf("x: %.3f \t\t y: %s\n", x, polySpline.eval(x));
 		}
 		
-		System.out.println(polySpline.toString(true, true));
-		System.out.println(polySpline.derivative().toString(true, true));
+		System.out.println(polySpline.toString());
+		System.out.println(polySpline.derivative().toString());
 		
 	}
 }

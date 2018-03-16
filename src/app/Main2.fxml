@@ -1,0 +1,922 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXColorPicker?>
+<?import com.jfoenix.controls.JFXComboBox?>
+<?import com.jfoenix.controls.JFXListView?>
+<?import com.jfoenix.controls.JFXProgressBar?>
+<?import com.jfoenix.controls.JFXSlider?>
+<?import com.jfoenix.controls.JFXTabPane?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import com.jfoenix.controls.JFXToggleButton?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.effect.Glow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<StackPane xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.MainController">
+   <children>
+      <VBox fx:id="rootNode" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="1100.0" style="-fx-background-color: #EEEEEE;">
+         <children>
+            <HBox id="mainMenu" style="-fx-background-color: #450000;">
+               <children>
+                  <JFXButton disable="true" focusTraversable="false" onAction="#handleNewProjectClick" text="New project" textFill="#eeeeee">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                     </padding>
+                  </JFXButton>
+                  <JFXButton disable="true" focusTraversable="false" onAction="#handleSaveClick" text="Save" textFill="#eeeeee">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                     </padding>
+                  </JFXButton>
+                  <JFXButton disable="true" focusTraversable="false" onAction="#handleLoadClick" text="Load" textFill="#eeeeee">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                     </padding>
+                  </JFXButton>
+                  <JFXButton disable="true" focusTraversable="false" onAction="#handleImportClick" text="Import" textFill="#eeeeee">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                     </padding>
+                  </JFXButton>
+                  <JFXButton focusTraversable="false" onAction="#handleExportClick" text="Export chart" textFill="#eeeeee">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                     </padding>
+                  </JFXButton>
+               </children>
+               <padding>
+                  <Insets left="10.0" right="10.0" />
+               </padding>
+            </HBox>
+            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
+               <children>
+                  <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
+                     <children>
+                        <StackPane fx:id="chartPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+                           <HBox.margin>
+                              <Insets />
+                           </HBox.margin>
+                        </StackPane>
+                        <StackPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" HBox.hgrow="NEVER">
+                           <children>
+                              <JFXTabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="250.0" stylesheets="@../resources/tabPane.css" tabMaxWidth="80.0" tabMinWidth="80.0">
+                                 <tabs>
+                                    <Tab closable="false" text="Chart">
+                                       <content>
+                                          <AnchorPane>
+                                             <children>
+                                                <Label layoutX="62.0" layoutY="68.0" text="Label" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="10.0" />
+                                             </children>
+                                          </AnchorPane>
+                                       </content>
+                                       <content>
+                                          <AnchorPane>
+                                             <children>
+                                                <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0">
+                                                   <children>
+                                                      <GridPane maxHeight="1.7976931348623157E308" maxWidth="-Infinity">
+                                                         <columnConstraints>
+                                                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                                         </columnConstraints>
+                                                         <rowConstraints>
+                                                            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="30.0" vgrow="NEVER" />
+                                                            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="30.0" vgrow="NEVER" />
+                                                            <RowConstraints maxHeight="-Infinity" minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                                                            <RowConstraints maxHeight="-Infinity" minHeight="10.0" vgrow="NEVER" />
+                                                         </rowConstraints>
+                                                         <children>
+                                                            <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Title:" />
+                                                            <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Width:" GridPane.rowIndex="1" />
+                                                            <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Height:" GridPane.rowIndex="2" />
+                                                            <JFXTextField fx:id="chartTitle" alignment="BOTTOM_CENTER" prefWidth="100.0" GridPane.columnIndex="1">
+                                                               <GridPane.margin>
+                                                                  <Insets left="10.0" right="10.0" />
+                                                               </GridPane.margin>
+                                                            </JFXTextField>
+                                                            <JFXTextField fx:id="chartWidth" alignment="BOTTOM_CENTER" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                                               <GridPane.margin>
+                                                                  <Insets left="10.0" right="10.0" />
+                                                               </GridPane.margin>
+                                                            </JFXTextField>
+                                                            <JFXTextField fx:id="chartHeight" alignment="BOTTOM_CENTER" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                                               <GridPane.margin>
+                                                                  <Insets left="10.0" right="10.0" />
+                                                               </GridPane.margin>
+                                                            </JFXTextField>
+                                                            <JFXToggleButton fx:id="chartPoints" contentDisplay="RIGHT" focusTraversable="false" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" selected="true" text="Show Data" toggleColor="#450000" toggleLineColor="#45000066" GridPane.columnSpan="2" GridPane.rowIndex="3">
+                                                               <font>
+                                                                  <Font name="System Bold" size="12.0" />
+                                                               </font>
+                                                            </JFXToggleButton>
+                                                         </children>
+                                                      </GridPane>
+                                                   </children>
+                                                </StackPane>
+                                             </children>
+                                          </AnchorPane>
+                                       </content>
+                                    </Tab>
+                                    <Tab closable="false" text="X-axis">
+                                       <content>
+                                          <AnchorPane>
+                                             <children>
+                                                <StackPane layoutX="43.0" layoutY="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0">
+                                                   <children>
+                                                      <GridPane maxHeight="1.7976931348623157E308" maxWidth="-Infinity">
+                                                         <columnConstraints>
+                                                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                                         </columnConstraints>
+                                                         <rowConstraints>
+                                                            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="30.0" vgrow="NEVER" />
+                                                            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="30.0" vgrow="NEVER" />
+                                                            <RowConstraints maxHeight="-Infinity" minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                                                            <RowConstraints maxHeight="-Infinity" minHeight="10.0" vgrow="NEVER" />
+                                                         </rowConstraints>
+                                                         <children>
+                                                            <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Label:" />
+                                                            <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Tick size:" GridPane.rowIndex="1" />
+                                                            <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Range:" GridPane.rowIndex="2" />
+                                                            <JFXTextField alignment="BOTTOM_CENTER" prefWidth="100.0" GridPane.columnIndex="1" GridPane.columnSpan="2" fx:id="xAxisName">
+                                                               <GridPane.margin>
+                                                                  <Insets left="10.0" right="10.0" />
+                                                               </GridPane.margin>
+                                                            </JFXTextField>
+                                                            <JFXTextField alignment="BOTTOM_CENTER" prefWidth="100.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1" fx:id="xAxisTickSize">
+                                                               <GridPane.margin>
+                                                                  <Insets left="10.0" right="10.0" />
+                                                               </GridPane.margin>
+                                                            </JFXTextField>
+                                                            <JFXTextField alignment="BOTTOM_CENTER" disable="true" prefWidth="50.0" promptText="-" GridPane.columnIndex="1" GridPane.rowIndex="2" fx:id="xAxisMinRange">
+                                                               <GridPane.margin>
+                                                                  <Insets left="10.0" right="5.0" />
+                                                               </GridPane.margin>
+                                                            </JFXTextField>
+                                                            <JFXTextField alignment="BOTTOM_CENTER" disable="true" prefWidth="50.0" promptText="-" GridPane.columnIndex="2" GridPane.rowIndex="2" fx:id="xAxisMaxRange">
+                                                               <GridPane.margin>
+                                                                  <Insets left="5.0" right="10.0" />
+                                                               </GridPane.margin>
+                                                            </JFXTextField>
+                                                            <JFXToggleButton contentDisplay="RIGHT" focusTraversable="false" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" selected="true" text="Auto range" toggleColor="#450000" toggleLineColor="#45000066" GridPane.columnSpan="3" GridPane.rowIndex="3" fx:id="xAxisAutoRange">
+                                                               <font>
+                                                                  <Font name="System Bold" size="12.0" />
+                                                               </font>
+                                                               <GridPane.margin>
+                                                                  <Insets />
+                                                               </GridPane.margin>
+                                                            </JFXToggleButton>
+                                                         </children>
+                                                      </GridPane>
+                                                   </children>
+                                                </StackPane>
+                                             </children>
+                                          </AnchorPane>
+                                       </content>
+                                    </Tab>
+                                    <Tab closable="false" text="Y-axis">
+                                       <content>
+                                          <AnchorPane>
+                                             <children>
+                                                <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0">
+                                                   <children>
+                                                      <GridPane maxHeight="1.7976931348623157E308" maxWidth="-Infinity">
+                                                         <columnConstraints>
+                                                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                                         </columnConstraints>
+                                                         <rowConstraints>
+                                                            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="30.0" vgrow="NEVER" />
+                                                            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="30.0" vgrow="NEVER" />
+                                                            <RowConstraints maxHeight="-Infinity" minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                                                            <RowConstraints maxHeight="-Infinity" minHeight="10.0" vgrow="NEVER" />
+                                                         </rowConstraints>
+                                                         <children>
+                                                            <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Label:" />
+                                                            <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Tick size:" GridPane.rowIndex="1" />
+                                                            <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Range:" GridPane.rowIndex="2" />
+                                                            <JFXTextField fx:id="yAxisName" alignment="BOTTOM_CENTER" prefWidth="100.0" GridPane.columnIndex="1" GridPane.columnSpan="2">
+                                                               <GridPane.margin>
+                                                                  <Insets left="10.0" right="10.0" />
+                                                               </GridPane.margin>
+                                                            </JFXTextField>
+                                                            <JFXTextField fx:id="yAxisTickSize" alignment="BOTTOM_CENTER" prefWidth="100.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1">
+                                                               <GridPane.margin>
+                                                                  <Insets left="10.0" right="10.0" />
+                                                               </GridPane.margin>
+                                                            </JFXTextField>
+                                                            <JFXTextField fx:id="yAxisMinRange" alignment="BOTTOM_CENTER" disable="true" prefWidth="50.0" promptText="-" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                                               <GridPane.margin>
+                                                                  <Insets left="10.0" right="5.0" />
+                                                               </GridPane.margin>
+                                                            </JFXTextField>
+                                                            <JFXTextField fx:id="yAxisMaxRange" alignment="BOTTOM_CENTER" disable="true" prefWidth="50.0" promptText="-" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                                                               <GridPane.margin>
+                                                                  <Insets left="5.0" right="10.0" />
+                                                               </GridPane.margin>
+                                                            </JFXTextField>
+                                                            <JFXToggleButton fx:id="yAxisAutoRange" contentDisplay="RIGHT" focusTraversable="false" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" selected="true" text="Auto range" toggleColor="#450000" toggleLineColor="#45000066" GridPane.columnSpan="3" GridPane.rowIndex="3">
+                                                               <font>
+                                                                  <Font name="System Bold" size="12.0" />
+                                                               </font>
+                                                               <GridPane.margin>
+                                                                  <Insets />
+                                                               </GridPane.margin>
+                                                            </JFXToggleButton>
+                                                         </children>
+                                                      </GridPane>
+                                                   </children>
+                                                </StackPane>
+                                             </children>
+                                          </AnchorPane>
+                                       </content>
+                                    </Tab>
+                                 </tabs>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                              </JFXTabPane>
+                           </children>
+                           <HBox.margin>
+                              <Insets />
+                           </HBox.margin>
+                           <padding>
+                              <Insets left="50.0" right="50.0" />
+                           </padding>
+                        </StackPane>
+                     </children>
+                     <VBox.margin>
+                        <Insets left="20.0" right="20.0" top="20.0" />
+                     </VBox.margin>
+                  </HBox>
+                  <HBox maxHeight="-Infinity" prefHeight="320.0" prefWidth="1200.0" stylesheets="@../resources/tabPane.css">
+                     <children>
+                        <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label alignment="CENTER" maxWidth="1.7976931348623157E308" text="Traces" textAlignment="CENTER" VBox.vgrow="ALWAYS">
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                                 <effect>
+                                    <Glow />
+                                 </effect>
+                                 <padding>
+                                    <Insets bottom="3.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </Label>
+                              <Region maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="2.0" style="-fx-background-color: #450000;">
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                              </Region>
+                              <HBox VBox.vgrow="ALWAYS">
+                                 <children>
+                                    <JFXListView fx:id="traceListView" focusTraversable="false" maxHeight="-Infinity" minWidth="110.0" onKeyPressed="#handleTraceListClick" onMouseClicked="#handleTraceListClick" prefHeight="195.0" HBox.hgrow="ALWAYS">
+                                       <HBox.margin>
+                                          <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                                       </HBox.margin>
+                                    </JFXListView>
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <AnchorPane>
+                                       <children>
+                                          <JFXTabPane fx:id="traceTabPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="195.0" prefWidth="360.0" stylesheets="@../resources/tabPane.css" tabMinWidth="175.0" AnchorPane.bottomAnchor="20.0" AnchorPane.topAnchor="20.0">
+                                             <tabs>
+                                                <Tab closable="false" text="Properties">
+                                                   <content>
+                                                      <AnchorPane>
+                                                         <children>
+                                                            <GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" AnchorPane.topAnchor="10.0">
+                                                               <columnConstraints>
+                                                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" />
+                                                                  <ColumnConstraints />
+                                                               </columnConstraints>
+                                                               <rowConstraints>
+                                                                  <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="30.0" vgrow="NEVER" />
+                                                                  <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="30.0" vgrow="NEVER" />
+                                                                  <RowConstraints maxHeight="-Infinity" minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                                                                  <RowConstraints maxHeight="-Infinity" minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                                                                  <RowConstraints maxHeight="-Infinity" minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                                                               </rowConstraints>
+                                                               <children>
+                                                                  <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Name:">
+                                                                     <font>
+                                                                        <Font size="10.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Tracker file:" GridPane.rowIndex="1">
+                                                                     <font>
+                                                                        <Font size="10.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Integration:" GridPane.rowIndex="2">
+                                                                     <font>
+                                                                        <Font size="10.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Interpolation:" GridPane.rowIndex="3">
+                                                                     <font>
+                                                                        <Font size="10.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Inertia:" GridPane.rowIndex="4">
+                                                                     <font>
+                                                                        <Font size="10.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Mass:" GridPane.columnIndex="2">
+                                                                     <font>
+                                                                        <Font size="10.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Init. velocity:" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                                                     <font>
+                                                                        <Font size="10.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Step size:" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                                                                     <font>
+                                                                        <Font size="10.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Start X:" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                                                                     <font>
+                                                                        <Font size="10.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="End X:" GridPane.columnIndex="2" GridPane.rowIndex="4">
+                                                                     <font>
+                                                                        <Font size="10.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <JFXTextField fx:id="traceName" alignment="BOTTOM_CENTER" prefWidth="130.0" GridPane.columnIndex="1">
+                                                                     <GridPane.margin>
+                                                                        <Insets left="10.0" right="10.0" />
+                                                                     </GridPane.margin>
+                                                                     <font>
+                                                                        <Font size="11.0" />
+                                                                     </font>
+                                                                  </JFXTextField>
+                                                                  <HBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                                                     <GridPane.margin>
+                                                                        <Insets />
+                                                                     </GridPane.margin>
+                                                                     <children>
+                                                                        <JFXComboBox fx:id="traceFile" maxWidth="1.7976931348623157E308" prefWidth="90.0" HBox.hgrow="ALWAYS">
+                                                                           <HBox.margin>
+                                                                              <Insets left="10.0" right="5.0" />
+                                                                           </HBox.margin>
+                                                                        </JFXComboBox>
+                                                                        <JFXButton alignment="CENTER" contentDisplay="GRAPHIC_ONLY" focusTraversable="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onAction="#handleFileOpenClick" prefHeight="23.0" prefWidth="23.0" ripplerFill="#450000" translateY="4.0">
+                                                                           <graphic>
+                                                                              <ImageView fitHeight="23.0" fitWidth="23.0" pickOnBounds="true" preserveRatio="true">
+                                                                                 <image>
+                                                                                    <Image url="@../resources/file_chooser_open.png" />
+                                                                                 </image>
+                                                                              </ImageView>
+                                                                           </graphic>
+                                                                           <HBox.margin>
+                                                                              <Insets right="10.0" />
+                                                                           </HBox.margin>
+                                                                        </JFXButton>
+                                                                     </children>
+                                                                  </HBox>
+                                                                  <JFXComboBox fx:id="traceIntegration" prefWidth="130.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                                                     <GridPane.margin>
+                                                                        <Insets left="10.0" right="10.0" />
+                                                                     </GridPane.margin>
+                                                                  </JFXComboBox>
+                                                                  <JFXComboBox fx:id="traceInterpolation" prefWidth="130.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                                                     <GridPane.margin>
+                                                                        <Insets left="10.0" right="10.0" />
+                                                                     </GridPane.margin>
+                                                                  </JFXComboBox>
+                                                                  <JFXComboBox fx:id="traceInertia" prefWidth="130.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                                                     <GridPane.margin>
+                                                                        <Insets left="10.0" right="10.0" />
+                                                                     </GridPane.margin>
+                                                                  </JFXComboBox>
+                                                                  <JFXTextField fx:id="traceMass" alignment="BOTTOM_CENTER" prefWidth="60.0" GridPane.columnIndex="3">
+                                                                     <GridPane.margin>
+                                                                        <Insets left="10.0" right="10.0" />
+                                                                     </GridPane.margin>
+                                                                     <font>
+                                                                        <Font size="11.0" />
+                                                                     </font>
+                                                                  </JFXTextField>
+                                                                  <JFXTextField fx:id="traceInitV" alignment="BOTTOM_CENTER" prefWidth="60.0" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                                                                     <GridPane.margin>
+                                                                        <Insets left="10.0" right="10.0" />
+                                                                     </GridPane.margin>
+                                                                     <font>
+                                                                        <Font size="11.0" />
+                                                                     </font>
+                                                                  </JFXTextField>
+                                                                  <JFXTextField fx:id="traceStep" alignment="BOTTOM_CENTER" prefWidth="60.0" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                                                     <GridPane.margin>
+                                                                        <Insets left="10.0" right="10.0" />
+                                                                     </GridPane.margin>
+                                                                     <font>
+                                                                        <Font size="11.0" />
+                                                                     </font>
+                                                                  </JFXTextField>
+                                                                  <JFXTextField fx:id="traceMinX" alignment="BOTTOM_CENTER" prefWidth="60.0" GridPane.columnIndex="3" GridPane.rowIndex="3">
+                                                                     <GridPane.margin>
+                                                                        <Insets left="10.0" right="10.0" />
+                                                                     </GridPane.margin>
+                                                                     <font>
+                                                                        <Font size="11.0" />
+                                                                     </font>
+                                                                  </JFXTextField>
+                                                                  <JFXTextField fx:id="traceMaxX" alignment="BOTTOM_CENTER" prefWidth="60.0" GridPane.columnIndex="3" GridPane.rowIndex="4">
+                                                                     <font>
+                                                                        <Font size="11.0" />
+                                                                     </font>
+                                                                     <GridPane.margin>
+                                                                        <Insets left="10.0" right="10.0" />
+                                                                     </GridPane.margin>
+                                                                  </JFXTextField>
+                                                               </children>
+                                                            </GridPane>
+                                                         </children>
+                                                      </AnchorPane>
+                                                   </content>
+                                                </Tab>
+                                                <Tab closable="false" text="Details">
+                                                   <content>
+                                                      <AnchorPane style="-fx-background-color: #EEEEEE;">
+                                                         <children>
+                                                            <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="15.0">
+                                                              <columnConstraints>
+                                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                              </columnConstraints>
+                                                              <rowConstraints>
+                                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                  <RowConstraints minHeight="10.0" prefHeight="20.0" vgrow="SOMETIMES" />
+                                                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                              </rowConstraints>
+                                                               <children>
+                                                                  <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Function type:" textFill="GREY">
+                                                                     <padding>
+                                                                        <Insets right="20.0" />
+                                                                     </padding>
+                                                                     <font>
+                                                                        <Font name="System Bold" size="11.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Integration type:" textFill="GREY" GridPane.rowIndex="1">
+                                                                     <padding>
+                                                                        <Insets right="20.0" />
+                                                                     </padding>
+                                                                     <font>
+                                                                        <Font name="System Bold" size="11.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Step size (Δt):" textFill="GREY" GridPane.rowIndex="2">
+                                                                     <font>
+                                                                        <Font name="System Bold" size="11.0" />
+                                                                     </font>
+                                                                     <padding>
+                                                                        <Insets right="20.0" />
+                                                                     </padding>
+                                                                  </Label>
+                                                                  <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Iterations:" textFill="GREY" GridPane.rowIndex="3">
+                                                                     <font>
+                                                                        <Font name="System Bold" size="11.0" />
+                                                                     </font>
+                                                                     <padding>
+                                                                        <Insets right="20.0" />
+                                                                     </padding>
+                                                                  </Label>
+                                                                  <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Total time:" textFill="GREY" GridPane.rowIndex="4">
+                                                                     <font>
+                                                                        <Font name="System Bold" size="11.0" />
+                                                                     </font>
+                                                                     <padding>
+                                                                        <Insets right="20.0" />
+                                                                     </padding>
+                                                                  </Label>
+                                                                  <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Computation time:" textFill="#aaaaaa" GridPane.rowIndex="6">
+                                                                     <font>
+                                                                        <Font name="System Bold Italic" size="11.0" />
+                                                                     </font>
+                                                                     <padding>
+                                                                        <Insets right="20.0" />
+                                                                     </padding>
+                                                                  </Label>
+                                                                  <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Energy difference:" textFill="#aaaaaa" GridPane.rowIndex="7">
+                                                                     <font>
+                                                                        <Font name="System Bold Italic" size="11.0" />
+                                                                     </font>
+                                                                     <padding>
+                                                                        <Insets right="20.0" />
+                                                                     </padding>
+                                                                  </Label>
+                                                                  <Label fx:id="funcTypeLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Polynomial Spline" textFill="GREY" GridPane.columnIndex="1">
+                                                                     <font>
+                                                                        <Font size="11.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label fx:id="integrationTypeLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Eulers' method" textFill="GREY" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                                                     <font>
+                                                                        <Font size="11.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label fx:id="stepSizeLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="0.000001 seconds" textFill="GREY" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                                                     <font>
+                                                                        <Font size="11.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label fx:id="iterationsLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="1 412 584" textFill="GREY" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                                                     <font>
+                                                                        <Font size="11.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label fx:id="totalTimeLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="1.4125839 seconds" textFill="GREY" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                                                     <font>
+                                                                        <Font size="11.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label fx:id="computationTimeLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="13.029 seconds" textFill="#aaaaaa" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                                                                     <font>
+                                                                        <Font name="System Italic" size="11.0" />
+                                                                     </font>
+                                                                     <padding>
+                                                                        <Insets right="20.0" />
+                                                                     </padding>
+                                                                  </Label>
+                                                                  <Label fx:id="energyDifferenceLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="99.9999781 %" textFill="#aaaaaa" GridPane.columnIndex="1" GridPane.rowIndex="7">
+                                                                     <font>
+                                                                        <Font name="System Italic" size="11.0" />
+                                                                     </font>
+                                                                     <padding>
+                                                                        <Insets right="20.0" />
+                                                                     </padding>
+                                                                  </Label>
+                                                               </children>
+                                                            </GridPane>
+                                                         </children>
+                                                      </AnchorPane>
+                                                   </content>
+                                                </Tab>
+                                             </tabs>
+                                             <opaqueInsets>
+                                                <Insets />
+                                             </opaqueInsets>
+                                          </JFXTabPane>
+                                       </children>
+                                    </AnchorPane>
+                                    <Region HBox.hgrow="ALWAYS" />
+                                 </children>
+                              </HBox>
+                              <HBox>
+                                 <children>
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <JFXButton buttonType="RAISED" onAction="#handleNewTraceClick" prefWidth="100.0" style="-fx-background-color: #450000;" text="New trace" textFill="#eeeeee">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                    </JFXButton>
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <JFXButton buttonType="RAISED" onAction="#handleDeleteTraceClick" prefWidth="100.0" style="-fx-background-color: #450000;" text="Delete" textFill="#eeeeee">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                    </JFXButton>
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <JFXButton buttonType="RAISED" onAction="#handleComputeClick" prefWidth="100.0" style="-fx-background-color: #450000;" text="Compute" textFill="#eeeeee">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                    </JFXButton>
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <JFXButton buttonType="RAISED" onAction="#handleComputeAllClick" prefWidth="100.0" style="-fx-background-color: #450000;" text="Compute all" textFill="#eeeeee">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                    </JFXButton>
+                                    <Region prefWidth="10.0" HBox.hgrow="ALWAYS" />
+                                 </children>
+                              </HBox>
+                              <JFXProgressBar prefHeight="6.0" prefWidth="441.0" secondaryProgress="0.3" />
+                           </children>
+                           <padding>
+                              <Insets bottom="20.0" left="20.0" right="20.0" />
+                           </padding>
+                        </VBox>
+                        <Region maxWidth="-Infinity" minWidth="-Infinity" opacity="0.33" prefWidth="1.0" style="-fx-background-color: #909090;">
+                           <HBox.margin>
+                              <Insets bottom="30.0" top="60.0" />
+                           </HBox.margin>
+                        </Region>
+                        <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label alignment="CENTER" maxWidth="1.7976931348623157E308" text="Graphs" textAlignment="CENTER" VBox.vgrow="ALWAYS">
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                                 <effect>
+                                    <Glow />
+                                 </effect>
+                                 <padding>
+                                    <Insets bottom="3.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </Label>
+                              <Region maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="2.0" style="-fx-background-color: #450000;">
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                              </Region>
+                              <HBox VBox.vgrow="ALWAYS">
+                                 <children>
+                                    <JFXListView fx:id="graphListView" focusTraversable="false" maxHeight="-Infinity" minWidth="110.0" onKeyPressed="#handleGraphListClick" onMouseClicked="#handleGraphListClick" prefHeight="195.0" HBox.hgrow="ALWAYS">
+                                       <HBox.margin>
+                                          <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                                       </HBox.margin>
+                                    </JFXListView>
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <AnchorPane>
+                                       <children>
+                                          <VBox layoutY="20.0" spacing="5.0" AnchorPane.topAnchor="20.0">
+                                             <children>
+                                                <JFXTabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="155.0" prefWidth="360.0" stylesheets="@../resources/tabPane.css" tabMaxWidth="175.0" tabMinWidth="175.0">
+                                                   <tabs>
+                                                      <Tab closable="false" text="Properties">
+                                                         <content>
+                                                            <AnchorPane>
+                                                               <children>
+                                                                  <GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="360.0" AnchorPane.topAnchor="15.0">
+                                                                     <columnConstraints>
+                                                                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                                                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                                                        <ColumnConstraints />
+                                                                     </columnConstraints>
+                                                                     <rowConstraints>
+                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" vgrow="NEVER" />
+                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" vgrow="NEVER" />
+                                                                        <RowConstraints maxHeight="-Infinity" minHeight="10.0" prefHeight="40.0" vgrow="NEVER" />
+                                                                     </rowConstraints>
+                                                                     <children>
+                                                                        <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Name:">
+                                                                           <font>
+                                                                              <Font size="11.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                        <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="X Data:" GridPane.rowIndex="2">
+                                                                           <font>
+                                                                              <Font size="11.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                        <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Y Data:" GridPane.rowIndex="1">
+                                                                           <font>
+                                                                              <Font size="11.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                        <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Trace:" GridPane.columnIndex="2">
+                                                                           <font>
+                                                                              <Font size="11.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                        <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Min X:" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                                                           <font>
+                                                                              <Font size="11.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                        <JFXTextField fx:id="graphName" alignment="BOTTOM_CENTER" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="130.0" GridPane.columnIndex="1">
+                                                                           <GridPane.margin>
+                                                                              <Insets left="10.0" right="10.0" />
+                                                                           </GridPane.margin>
+                                                                           <font>
+                                                                              <Font size="11.0" />
+                                                                           </font>
+                                                                        </JFXTextField>
+                                                                        <JFXComboBox fx:id="graphXData" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="130.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                                                           <GridPane.margin>
+                                                                              <Insets left="10.0" right="10.0" />
+                                                                           </GridPane.margin>
+                                                                        </JFXComboBox>
+                                                                        <JFXComboBox fx:id="graphYData" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="130.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                                                           <GridPane.margin>
+                                                                              <Insets left="10.0" right="10.0" />
+                                                                           </GridPane.margin>
+                                                                        </JFXComboBox>
+                                                                        <JFXComboBox fx:id="graphTrace" prefWidth="100.0" GridPane.columnIndex="3" GridPane.columnSpan="2">
+                                                                           <GridPane.margin>
+                                                                              <Insets left="10.0" right="10.0" />
+                                                                           </GridPane.margin>
+                                                                        </JFXComboBox>
+                                                                        <JFXTextField fx:id="graphMinX" alignment="BOTTOM_CENTER" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                                                                           <font>
+                                                                              <Font size="11.0" />
+                                                                           </font>
+                                                                           <GridPane.margin>
+                                                                              <Insets left="10.0" right="10.0" />
+                                                                           </GridPane.margin>
+                                                                        </JFXTextField>
+                                                                        <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Max X:" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                                                                           <font>
+                                                                              <Font size="11.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                        <JFXTextField fx:id="graphMaxX" alignment="BOTTOM_CENTER" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                                                           <font>
+                                                                              <Font size="11.0" />
+                                                                           </font>
+                                                                           <GridPane.margin>
+                                                                              <Insets left="10.0" right="10.0" />
+                                                                           </GridPane.margin>
+                                                                        </JFXTextField>
+                                                                     </children>
+                                                                  </GridPane>
+                                                               </children>
+                                                            </AnchorPane>
+                                                         </content>
+                                                      </Tab>
+                                                      <Tab closable="false" text="Layout">
+                                                         <content>
+                                                            <AnchorPane>
+                                                               <children>
+                                                                  <GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="360.0" AnchorPane.topAnchor="15.0">
+                                                                     <columnConstraints>
+                                                                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                                                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                                                        <ColumnConstraints />
+                                                                     </columnConstraints>
+                                                                     <rowConstraints>
+                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" vgrow="NEVER" />
+                                                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" vgrow="NEVER" />
+                                                                     </rowConstraints>
+                                                                     <children>
+                                                                        <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Style:" GridPane.columnIndex="2">
+                                                                           <font>
+                                                                              <Font size="11.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                        <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Color:">
+                                                                           <font>
+                                                                              <Font size="11.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                        <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Detail:" GridPane.rowIndex="1">
+                                                                           <font>
+                                                                              <Font size="11.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                        <JFXComboBox fx:id="graphStyle" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="120.0" GridPane.columnIndex="3">
+                                                                           <GridPane.margin>
+                                                                              <Insets left="10.0" right="10.0" />
+                                                                           </GridPane.margin>
+                                                                        </JFXComboBox>
+                                                                        <JFXColorPicker fx:id="graphColor" editable="true" focusTraversable="false" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="120.0" GridPane.columnIndex="1">
+                                                                           <GridPane.margin>
+                                                                              <Insets left="10.0" right="10.0" />
+                                                                           </GridPane.margin>
+                                                                        </JFXColorPicker>
+                                                                        <JFXSlider fx:id="graphDetail" blockIncrement="1.0" majorTickUnit="1.0" maxWidth="-Infinity" minWidth="-Infinity" minorTickCount="0" prefWidth="120.0" snapToTicks="true" value="50.0" viewOrder="-2.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                                                           <GridPane.margin>
+                                                                              <Insets left="10.0" right="10.0" />
+                                                                           </GridPane.margin>
+                                                                        </JFXSlider>
+                                                                        <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Width:" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                                                           <font>
+                                                                              <Font size="11.0" />
+                                                                           </font>
+                                                                        </Label>
+                                                                        <JFXSlider fx:id="graphWidth" blockIncrement="1.0" majorTickUnit="20.0" maxWidth="-Infinity" minWidth="-Infinity" minorTickCount="0" prefWidth="120.0" value="50.0" viewOrder="-1.0" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                                                                           <GridPane.margin>
+                                                                              <Insets left="10.0" right="10.0" />
+                                                                           </GridPane.margin>
+                                                                        </JFXSlider>
+                                                                     </children>
+                                                                  </GridPane>
+                                                               </children>
+                                                            </AnchorPane>
+                                                         </content>
+                                                      </Tab>
+                                                   </tabs>
+                                                   <opaqueInsets>
+                                                      <Insets />
+                                                   </opaqueInsets>
+                                                </JFXTabPane>
+                                                <JFXToggleButton fx:id="graphVisible" contentDisplay="RIGHT" focusTraversable="false" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="40.0" selected="true" text="Visible" toggleColor="#450000" toggleLineColor="#45000066">
+                                                   <font>
+                                                      <Font name="System Bold" size="12.0" />
+                                                   </font>
+                                                </JFXToggleButton>
+                                             </children>
+                                          </VBox>
+                                       </children>
+                                    </AnchorPane>
+                                    <Region HBox.hgrow="ALWAYS" />
+                                 </children>
+                              </HBox>
+                              <HBox>
+                                 <children>
+                                    <Region maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+                                    <JFXButton buttonType="RAISED" onAction="#handleNewGraphClick" prefWidth="100.0" style="-fx-background-color: #450000;" text="New graph" textFill="#eeeeee">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                    </JFXButton>
+                                    <Region layoutX="10.0" layoutY="10.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+                                    <JFXButton buttonType="RAISED" onAction="#handleDeleteGraphClick" prefWidth="100.0" style="-fx-background-color: #450000;" text="Delete" textFill="#eeeeee">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                    </JFXButton>
+                                    <Region layoutX="10.0" layoutY="10.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+                                    <JFXButton buttonType="RAISED" onAction="#handleGraphUpClick" prefWidth="100.0" style="-fx-background-color: #450000;" text="Up" textFill="#eeeeee">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                    </JFXButton>
+                                    <Region layoutX="10.0" layoutY="10.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+                                    <JFXButton buttonType="RAISED" onAction="#handleGraphDownClick" prefWidth="100.0" style="-fx-background-color: #450000;" text="Down" textFill="#eeeeee">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                    </JFXButton>
+                                    <Region layoutX="10.0" layoutY="10.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+                                 </children>
+                              </HBox>
+                           </children>
+                           <padding>
+                              <Insets bottom="20.0" left="20.0" right="20.0" />
+                           </padding>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+         </children>
+         <stylesheets>
+            <URL value="@../resources/stylesheet.css" />
+            <URL value="@../resources/tabPane.css" />
+         </stylesheets>
+      </VBox>
+      <Region fx:id="leftRegion" maxWidth="3.0" opacity="0.0" style="-fx-background-color: #DDDDDD;" StackPane.alignment="CENTER_LEFT">
+         <cursor>
+            <Cursor fx:constant="W_RESIZE" />
+         </cursor>
+      </Region>
+      <Region fx:id="rightRegion" layoutX="10.0" layoutY="10.0" maxWidth="3.0" opacity="0.0" style="-fx-background-color: #DDDDDD;" StackPane.alignment="CENTER_RIGHT">
+         <cursor>
+            <Cursor fx:constant="E_RESIZE" />
+         </cursor>
+      </Region>
+      <Region fx:id="topRegion" layoutX="1110.0" layoutY="10.0" maxHeight="3.0" opacity="0.0" style="-fx-background-color: #DDDDDD;" StackPane.alignment="TOP_CENTER">
+         <cursor>
+            <Cursor fx:constant="N_RESIZE" />
+         </cursor>
+      </Region>
+      <Region fx:id="bottomRegion" layoutX="10.0" layoutY="10.0" maxHeight="3.0" opacity="0.0" style="-fx-background-color: #DDDDDD;" StackPane.alignment="BOTTOM_CENTER">
+         <cursor>
+            <Cursor fx:constant="S_RESIZE" />
+         </cursor>
+      </Region>
+   </children>
+</StackPane>
