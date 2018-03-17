@@ -25,6 +25,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
+import parsers.Data;
 
 
 public class Trace {
@@ -208,7 +209,7 @@ public class Trace {
 
 		//Fill raw data collections
 		if (getFile() != null) {
-			double[][] rawData = analysis.Interpolation.parseFile(getFile());
+			double[][] rawData = Data.parseFile(getFile());
 			Arrays.stream(rawData[0]).forEach(doub -> tListRaw.add(Double.valueOf(doub)));
 			Arrays.stream(rawData[1]).forEach(doub -> xListRaw.add(Double.valueOf(doub)));
 			Arrays.stream(rawData[2]).forEach(doub -> yListRaw.add(Double.valueOf(doub)));

@@ -11,7 +11,7 @@ import java.util.Scanner;
  * Class for manipulating data collections.
  */
 public class Data {
-
+	// File parsing
 	/*
 	 * Parses tracking data from filepath to three arrays of doubles.
 	 * Format: Trackers' default export (.txt)
@@ -68,84 +68,152 @@ public class Data {
 		return new double[][] { primitiveT, primitiveX, primitiveY };
 	}
 	
+	
+	// Array reduction
 	/**
 	 * Converts an array to a reduced array by picking n evenly indexed elements.
 	 */
-	private static double[] reduceArray(double[] inputArr, int n) {
-		chebyshevIndexies(inputArr, n);
-		
+	public static double[] reduceArray(double[] inputArr, int n) {
 		// Verify that reduction is necessary
 		if (n >= inputArr.length)
 			return inputArr;
 		
-		// Create output list
-		double[] outputArr = new double[n];
+		double[] output = new double[n];
+		double step = ((double) inputArr.length - 1d)  /  ((double) n - 1d);
+		
+		// Fill output
+		for (int i = 0; i < n; i++)
+				output[i] = inputArr[(int) Math.round(step * (double) i)];
+		
+		return output;
+	}
+	
+	/**
+	 * Reduces array using an array of integers.
+	 */
+	public static double[] reduceArray(double[] inputArr, int[] indices) {
+		// Verify that reduction is necessary / possible
+		if (indices[indices.length - 1] >= inputArr.length)
+			return inputArr;
+		
+		double[] output = new double[indices.length];
+		
+		// Fill list
+		for (int i = 0; i < indices.length; i++)
+				output[i] = inputArr[indices[i]];
+		
+		return output;
+	}
+	
+	/**
+	 * Reduces array using given node distribution and size.
+	 */
+	public static double[] reduceArray(double[] inputArr, Nodes nodes, int n) {
+		// Verify that reduction is necessary
+		if (n >= inputArr.length)
+			return inputArr;		
+		
+		int[] indices = new int[n];
+		double[] output = new double[n];
+		
+		switch (nodes) {
+		case UNIFORM:
+			indices = uniformIndices(inputArr, n);
+			break;
+		case EQUIDISTANT:
+			indices = equidistantIndices(inputArr, n);
+			break;
+		case CHEBYSHEV:
+			indices = chebyshevIndices(inputArr, n);
+			break;
+		}
+		
+		// Fill output
+		for (int i = 0; i < indices.length; i++)
+				output[i] = inputArr[indices[i]];
+		
+		return output;
+	}
+	
+	
+	// List reduction
+	/**
+	 * Reduces a list using an array of integers.
+	 */
+	public static List<Double> reduceList(List<Double> inputList, int[] indices) {
+		// Verify that reduction is necessary / possible
+		if (indices[indices.length - 1] >= inputList.size())
+			return inputList;
+		
+		List<Double> output = new ArrayList<>();
+		
+		// Fill list
+		for (int i = 0; i < indices.length; i++)
+				output.add(inputList.get(indices[i]));
+		
+		return output;
+	}
+	
+	
+	// Node distribution
+	/**
+	 * Returns n uniformy distributed indices from input array.
+	 */
+	public static int[] uniformIndices(double[] inputArr, int n) {
+		int[] indices = new int[n];
 		
 		// Calculate step size
 		double step = ((double) inputArr.length - 1d)  /  ((double) n - 1d);
 		
 		// Fill list
 		for (int i = 0; i < n; i++)
-				outputArr[i] = inputArr[(int) Math.round(step * (double) i)];
+				indices[i] = (int) Math.round(step * (double) i);
 		
-		// Return reduced list
-		return outputArr;
+		return indices;
 	}
 	
 	/**
-	 * Reduces array using an array of integers.
+	 * Returns the indices for n equidistant elements from input array.
 	 */
-	private static double[] reduceArray(double[] inputArr, int[] indecies) {
-		// Create output list
-		double[] outputArr = new double[indecies.length];
+	public static int[] equidistantIndices(double[] inputArr, int n) {
+		int[] indices = new int[n];
 		
-		// Fill list
-		for (int i = 0; i < indecies.length; i++)
-				outputArr[i] = inputArr[indecies[i]];
+		// Endpoints
+		double a = inputArr[0];
+		double b = inputArr[inputArr.length - 1];
+		double step = (b - a) / ((double) n - 1d);
 		
-		// Return reduced list
-		System.out.println(outputArr.length);
-		return outputArr;
-	}
-	
-	
-	// Node patterns
-	
-	
-	
-	/**
-	 * Returns an array containing the indecies for n equidistant elements in input array.
-	 */
-	private static double[] equidistantIndecies(double[] inputArr, int n) {
-		// Verify that reduction is necessary
-		if (n >= inputArr.length)
-			return inputArr;
+		// Create array of equidistant values
+		double[] equidistantValues = new double[n];
+		for (int k = 0; k < n; k++)
+			equidistantValues[k] = a + k * step;
 		
-		// Create output list
-		double[] outputArr = new double[n];
-		
-		// Calculate step size
-		double firstVal = inputArr[0];
-		double lastVal = inputArr[inputArr.length - 1];
-		double step = (lastVal - firstVal) / ((double) n - 1d);
-		
-//		// Fill list
-//		for (int i = 0; i < n; i++)
-//			for (double d : inputArr)
-//			outputArr[i] = Arrays.stream(inputArr).filter(elem -> (elem >= step * i)).findFirst().getAsDouble();
+		// Loop through input array to find index
+		int currentIndex = 0;
+		double currentValue = equidistantValues[currentIndex];
+
+		for (int i = 0; i < inputArr.length; i++) {
+			if (inputArr[i] >= currentValue) {
+				indices[currentIndex++] = i;
+				
+				// Break if finished
+				if (currentIndex == n) break;
+				
+				// Update search value
+				currentValue = equidistantValues[currentIndex];
+			}
+		}
 		
 		// Return reduced list
-		System.out.println(outputArr.length);
-		return outputArr;
+		return indices;
 	}
 	
 	/**
-	 * Returns a list of Chebyshev node indecies for the given array. To be used in Polynomial interpolation.
+	 * Returns the indices for n Chebyshev nodes from input array. Recommended for Polynomial interpolation.
 	 * Elements must be in strictly increasing order.
 	 */
-	private static int[] chebyshevIndecies(double[] inputArr, int n) {
-		// Output array
-		int[] indecies = new int[n];
+	public static int[] chebyshevIndices(double[] inputArr, int n) {
+		int[] indices = new int[n];
 		
 		// Endpoints
 		double a = inputArr[0];
@@ -156,22 +224,30 @@ public class Data {
 		for (int k = 1; k <= n; k++)
 			chebyshevValues[k - 1] = (1d/2d)*(a+b) + (1d/2d)*(a-b) * Math.cos((((double)(2*k - 1d)) / (2*n)) * Math.PI);
 		
-		// Loop for index generation
-		for (int i = 0; i < n; i++) {
-			// Value to find in input array
-			double currentVal = chebyshevValues[i];
-			
-			// Loop through input array to find index
-			for (int j = 0; j < inputArr.length; j++) {
-				if (inputArr[j] >= currentVal) {
-					indecies[i] = j;
-					break;
-				}
+		// Loop through input array to find index
+		int currentIndex = 0;
+		double currentValue = chebyshevValues[currentIndex];
+
+		for (int i = 0; i < inputArr.length; i++) {
+			if (inputArr[i] >= currentValue) {
+				indices[currentIndex++] = i;
+				
+				// Break if finished
+				if (currentIndex == n) break;
+				
+				// Update search value
+				currentValue = chebyshevValues[currentIndex];
 			}
 		}
 		
-		return indecies;
+		return indices;
 	}
+}
 
-	
+
+/**
+ * Enumeration for available node distributions.
+ */
+enum Nodes {
+	UNIFORM, EQUIDISTANT, CHEBYSHEV
 }

@@ -3,12 +3,14 @@ package app;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.math3.ml.distance.ChebyshevDistance;
 
 import enums.Style;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -160,6 +162,7 @@ public class Graph {
 		if (getXData() == null) return false;
 		if (getYData() == null) return false;
 		if (getTrace() == null) return false;
+		if (getTrace().getFile() == null) return false;
 		if (getMinX() == null) return false;
 		if (getMaxX() == null) return false;
 		if (getColor() == null) return false;
@@ -219,10 +222,13 @@ public class Graph {
 		
 		// Chebyshev indecies
 		
-		
+		// Reduced indices
+		int[] indices = parsers.Data.equidistantIndices(rawXData.stream().mapToDouble(doub -> doub.doubleValue()).toArray(), (int) actualSize);
 		// Reduce lists
-		List<Double> reducedXData = reduceList(rawXData, actualSize);
-		List<Double> reducedYData = reduceList(rawYData, actualSize);
+//		List<Double> reducedXData = reduceList(rawXData, actualSize);
+//		List<Double> reducedYData = reduceList(rawYData, actualSize);
+		List<Double> reducedXData = parsers.Data.reduceList(rawXData, indices);
+		List<Double> reducedYData = parsers.Data.reduceList(rawYData, indices);
 		
 		// Construct output list
 		for (int i = 0; i < reducedXData.size(); i++)

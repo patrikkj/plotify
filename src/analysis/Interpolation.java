@@ -35,10 +35,13 @@ public class Interpolation {
 			if (x[i] >= x[i+1])
 				throw new IllegalArgumentException("Values in array of x coordinates must be strictly increasing.");
 		
-//		//Reduce array
-//		x = reduceArray(x, 8);
-//		y = reduceArray(y, 8);
-//		
+		//Reduced indices
+		int[] indices = Data.equidistantIndices(x, 8);
+		
+		//Reduce array
+		x = Data.reduceArray(x, indices);
+		y = Data.reduceArray(y, indices);
+		
 		
 		//Perform interpolation
 		return new PolySpline(new SplineInterpolator().interpolate(x, y));
@@ -52,7 +55,7 @@ public class Interpolation {
 	 */
 	public static PolySpline polynomialSplineInterpolation(File file) {
 		//Parse tracking data from filepath to two arrays of doubles.
-		double[][] fileData = parseFile(file);
+		double[][] fileData = Data.parseFile(file);
 
 		//Perform interpolation
 		return polynomialSplineInterpolation(fileData[1], fileData[2]);
@@ -76,11 +79,11 @@ public class Interpolation {
 			if (x[i] >= x[i+1])
 				throw new IllegalArgumentException("Values in array of x coordinates must be strictly increasing.");
 		
-		//Reduced indecies
-		int[] indecies = chebyshevIndecies(x, 10);
+		//Reduced indices
+		int[] indices = Data.chebyshevIndices(x, 10);
 		//Reduce arrays
-		double[] xReduced = reduceArray(x, indecies);
-		double[] yReduced = reduceArray(y, indecies);
+		double[] xReduced = Data.reduceArray(x, indices);
+		double[] yReduced = Data.reduceArray(y, indices);
 		
 		//Perform interpolation
 		PolynomialFunctionLagrangeForm rawPolynomial = new PolynomialFunctionLagrangeForm(xReduced, yReduced);
