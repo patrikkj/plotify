@@ -1,7 +1,21 @@
 /* Chart */
-#lineChart .chart-content .chart-plot-background {
-	-fx-background-color: #EEEEEE;
+.chart-content .chart-plot-background {
+	-fx-background-color: #FFFFFF;
 }
+.chart-content {
+	-fx-background-color: #FFFFFF;
+	-fx-translate-x: -5;
+}
+.chart {
+	-fx-translate-x: 5;
+	-fx-background-color: #FFFFFF;
+}
+
+/* Axis  */
+.axis:left .axis-label {
+	-fx-translate-x: 0;
+}
+
 
 /* Text fields*/
 .jfx-text-field {

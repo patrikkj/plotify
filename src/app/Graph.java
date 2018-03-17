@@ -287,7 +287,7 @@ public class Graph {
 	// Layout getters
 	public Color getColor() {return color.get();}
 	public String getHexColor() {return getColor().toString().substring(2, 8);}
-	public Double getWidth() {return width.get()* (6d/100d);}
+	public Double getWidth() {return width.get()* (6d/100d)*2;}
 	public Style getStyle() {return style.get();}
 	public Double getDetail() {return 10d / ((0.5d - detail.get())/100d + 1d) - 7;}
 	public Boolean getVisible() {return visible.get();}

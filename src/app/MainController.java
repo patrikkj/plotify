@@ -291,7 +291,7 @@ public class MainController {
 		lineChart = new LineChart<>(xAxis, yAxis);
 
 		// Bind chart properties
-		chartTitle.textProperty().bindBidirectional(lineChart.titleProperty());
+//		chartTitle.textProperty().bindBidirectional(lineChart.titleProperty());
 		chartWidth.textProperty().bindBidirectional(lineChart.prefWidthProperty(), customStringDoubleConverter);
 		chartHeight.textProperty().bindBidirectional(lineChart.prefHeightProperty(), customStringDoubleConverter);
 		chartPoints.selectedProperty().bindBidirectional(lineChart.createSymbolsProperty());
@@ -319,8 +319,9 @@ public class MainController {
 		// Set chart properties
 		xAxis.setLabel("xAxis");
 		yAxis.setLabel("yAxis");
-		lineChart.setTitle("My Chart");
+		lineChart.setTitle(null);
 		lineChart.setCreateSymbols(false);
+		lineChart.setLegendVisible(false);
 		lineChart.setAnimated(false);
 		lineChart.minWidthProperty().bind(lineChart.prefWidthProperty());
 		lineChart.maxWidthProperty().bind(lineChart.prefWidthProperty());
@@ -804,7 +805,7 @@ public class MainController {
     	
     	// Write chart image to file
     	SnapshotParameters snapshotParameters = new SnapshotParameters();
-    	snapshotParameters.setFill(Paint.valueOf("#EEEEEE"));
+//    	snapshotParameters.setFill(Paint.valueOf("#EEEEEE"));
     	WritableImage image = lineChart.snapshot(snapshotParameters, null);
     	ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", selectedFile);
     }
