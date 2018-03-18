@@ -28,7 +28,7 @@
 
 <StackPane xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.MainController">
    <children>
-      <VBox fx:id="rootNode" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="1100.0" style="-fx-background-color: #EEEEEE;">
+      <VBox fx:id="rootNode" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: #EEEEEE;">
          <children>
             <HBox id="mainMenu" style="-fx-background-color: #450000;">
                <children>
@@ -280,7 +280,7 @@
                         <Insets left="20.0" right="20.0" top="20.0" />
                      </VBox.margin>
                   </HBox>
-                  <HBox maxHeight="-Infinity" prefHeight="320.0" prefWidth="1200.0" stylesheets="@../resources/tabPane.css">
+                  <HBox stylesheets="@../resources/tabPane.css">
                      <children>
                         <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
                            <children>
@@ -302,7 +302,7 @@
                               </Region>
                               <HBox VBox.vgrow="ALWAYS">
                                  <children>
-                                    <JFXListView fx:id="traceListView" focusTraversable="false" maxHeight="-Infinity" minWidth="110.0" onKeyPressed="#handleTraceListClick" onMouseClicked="#handleTraceListClick" prefHeight="195.0" HBox.hgrow="ALWAYS">
+                                    <JFXListView fx:id="traceListView" focusTraversable="false" maxHeight="-Infinity" maxWidth="195.0" minWidth="110.0" onKeyPressed="#handleTraceListClick" onMouseClicked="#handleTraceListClick" prefHeight="195.0" HBox.hgrow="SOMETIMES">
                                        <HBox.margin>
                                           <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                                        </HBox.margin>
@@ -667,7 +667,7 @@
                               </Region>
                               <HBox VBox.vgrow="ALWAYS">
                                  <children>
-                                    <JFXListView fx:id="graphListView" focusTraversable="false" maxHeight="-Infinity" minWidth="110.0" onKeyPressed="#handleGraphListClick" onMouseClicked="#handleGraphListClick" prefHeight="195.0" HBox.hgrow="ALWAYS">
+                                    <JFXListView fx:id="graphListView" focusTraversable="false" maxHeight="-Infinity" maxWidth="195.0" minWidth="110.0" onKeyPressed="#handleGraphListClick" onMouseClicked="#handleGraphListClick" prefHeight="195.0" HBox.hgrow="SOMETIMES">
                                        <HBox.margin>
                                           <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                                        </HBox.margin>

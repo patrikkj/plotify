@@ -17,7 +17,8 @@ import parsers.Data;
 
 
 public class Interpolation {
-	
+	private static final int POLY_SPLINE_NODES = 8;
+	private static final int POLYNOMIAL_NODES = 8;
 	/*
 	 * Returns a PolySpline object representing a set of third degree polynomials,
 	 * replicating a best-fit curve to the given set of coordinates.
@@ -36,7 +37,7 @@ public class Interpolation {
 				throw new IllegalArgumentException("Values in array of x coordinates must be strictly increasing.");
 		
 		//Reduced indices
-		int[] indices = Data.equidistantIndices(x, 8);
+		int[] indices = Data.equidistantIndices(x, POLY_SPLINE_NODES);
 		
 		//Reduce array
 		x = Data.reduceArray(x, indices);
@@ -80,7 +81,7 @@ public class Interpolation {
 				throw new IllegalArgumentException("Values in array of x coordinates must be strictly increasing.");
 		
 		//Reduced indices
-		int[] indices = Data.chebyshevIndices(x, 10);
+		int[] indices = Data.chebyshevIndices(x, POLYNOMIAL_NODES);
 		//Reduce arrays
 		double[] xReduced = Data.reduceArray(x, indices);
 		double[] yReduced = Data.reduceArray(y, indices);

@@ -154,6 +154,10 @@ public class MainController {
      */
     private Trace selectedTrace;
     private Graph selectedGraph;
+    
+    /*
+     * Change listeners
+     */
     private ChangeListener<Trace> traceChangeListener;
     private ChangeListener<Graph> graphChangeListener;
     private ChangeListener<String> traceNameChangeListener;
@@ -161,7 +165,6 @@ public class MainController {
     private ChangeListener<Color> graphColorChangeListener;
     private ChangeListener<Object> chartSeriersChangeListener;
     private ChangeListener<Boolean> chartPointsChangeListener;
-//    private ChangeListener<Bounds> boundsListener;
     
     /*
      * Observable lists used in ListViews and ChoiceBoxes
@@ -273,7 +276,7 @@ public class MainController {
 		graphStyle.setButtonCell(new StyleCell(true));
 		
 		// Add name listener
-		lineChart.dataProperty().addListener(chartSeriersChangeListener);
+//		lineChart.dataProperty().addListener(chartSeriersChangeListener);
 		lineChart.createSymbolsProperty().addListener(chartPointsChangeListener);
 		graphName.textProperty().addListener(graphNameChangeListener);
 		
@@ -319,9 +322,12 @@ public class MainController {
 		// Set chart properties
 		xAxis.setLabel("xAxis");
 		yAxis.setLabel("yAxis");
+//		xAxis.setForceZeroInRange(false);
+//		yAxis.setForceZeroInRange(false);
 		lineChart.setTitle(null);
 		lineChart.setCreateSymbols(false);
 		lineChart.setLegendVisible(false);
+		lineChart.setPrefSize(350, 300);
 		lineChart.setAnimated(false);
 		lineChart.minWidthProperty().bind(lineChart.prefWidthProperty());
 		lineChart.maxWidthProperty().bind(lineChart.prefWidthProperty());
@@ -332,7 +338,7 @@ public class MainController {
 		xAxis.setAnimated(false);
 		yAxis.setAutoRanging(true);
 		yAxis.setAnimated(false);
-		
+//		
 		// Add chart to GUI
 		chartPane.getChildren().setAll(lineChart);
 	}
@@ -344,6 +350,7 @@ public class MainController {
 		traceChangeListener = new ChangeListener<>() {
 			@Override
 			public void changed(ObservableValue<? extends Trace> traceProperty, Trace oldTrace, Trace newTrace) {
+				System.out.println("traceChangeListener");
 				// Unbind previous trace
 				if (oldTrace != null)
 					unbindTrace(oldTrace);
@@ -362,6 +369,7 @@ public class MainController {
 		graphChangeListener = new ChangeListener<>() {
 			@Override
 			public void changed(ObservableValue<? extends Graph> graphProperty, Graph oldGraph, Graph newGraph) {
+				System.out.println("graphChangeListener");
 				// Unbind previous graph
 				if (oldGraph != null)
 					unbindGraph(oldGraph);
@@ -384,6 +392,7 @@ public class MainController {
 		traceNameChangeListener = new ChangeListener<>() {
 			@Override
 			public void changed(ObservableValue<? extends String> traceNameProperty, String oldName, String newName) {
+				System.out.println("traceNameChangeListener");
 				// Update ListView entries
 				traceListView.refresh();
 				
@@ -400,14 +409,14 @@ public class MainController {
 		chartSeriersChangeListener = new ChangeListener<>() {
 			@Override
 			public void changed(ObservableValue<? extends Object> arg0, Object arg1, Object arg2) {
-//				updateGraphView();
-				System.out.println("Dataset changed");
+				System.out.println("chartSeriersChangeListener");
 			}
 		};
 		
 		graphNameChangeListener = new ChangeListener<>() {
 			@Override
 			public void changed(ObservableValue<? extends String> graphNameProperty, String oldName, String newName) {
+				System.out.println("graphNameChangeListener");
 				graphListView.refresh();
 				updateChartStyles();
 			}
@@ -416,6 +425,7 @@ public class MainController {
 		graphColorChangeListener = new ChangeListener<>() {
 			@Override
 			public void changed(ObservableValue<? extends Color> colorProperty, Color oldColor, Color newColor) {
+				System.out.println("graphColorChangeListener");
 				updateChartStyles();
 			}
 		};
@@ -424,6 +434,7 @@ public class MainController {
 
 			@Override
 			public void changed(ObservableValue<? extends Boolean> arg0, Boolean arg1, Boolean arg2) {
+				System.out.println("chartPointsChangeListener");
 				updateGraphView();
 //				updateChartStyles();
 			}
@@ -531,6 +542,7 @@ public class MainController {
      */
 	private void updateGraphView() {
     	// Update chart
+//		lineChart.requestLayout();
     	lineChart.getData().setAll(graphList.stream().map(graph -> graph.getSeries()).collect(Collectors.toList()));
     	
     	// Update graphs
@@ -607,7 +619,7 @@ public class MainController {
 			graphicNode.setStyle(graphStyle);
 		}
 	}
-    
+	
 	
 	// Bindings
 	/**
@@ -805,7 +817,7 @@ public class MainController {
     	
     	// Write chart image to file
     	SnapshotParameters snapshotParameters = new SnapshotParameters();
-//    	snapshotParameters.setFill(Paint.valueOf("#EEEEEE"));
+    	snapshotParameters.setFill(Paint.valueOf("#FFFFFF"));
     	WritableImage image = lineChart.snapshot(snapshotParameters, null);
     	ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", selectedFile);
     }
@@ -1014,46 +1026,3 @@ public class MainController {
 		}
 	}
 }
-
-//Dump code
-//.forEach(elem -> ((Labeled) elem).getGraphic().setStyle(nodeStyle));
-//String dotStyle = String.format("-fx-background-color: #%s;", graphList.get(i).getHexColor());
-//System.out.println(nodeSet);
-//nodeSet.forEach(item -> item.setStyle(String.format("-fx-background-color: #000000;")));
-//List<Node> nodeList = nodeSet.stream()
-//		.filter(test -> ((Parent) test).getChildrenUnmodifiable().size() != 0)
-//		.map(parent -> ((Parent) parent).getChildrenUnmodifiable().get(0)).collect(Collectors.toList());
-
-//System.out.println("Series are: " + lineChart.getData() + " Size: " + lineChart.getData().size());
-//System.out.println("Hei");
-//ObservableList<Node> nodeList = treeTraversal(lineChart, 2).getChildrenUnmodifiable();
-////Set<Node> nodelist = lineChart.lookupAll(".default-color0");
-////System.out.println("Nodes found: " + nodelist + " Size: " + nodelist.size());
-//System.out.println("Node found: " + nodeList);
-//if (nodeList.size() == 2)
-//	System.out.println();;
-//	for (int i = 0; i < nodeList.size(); i++) {
-//		if (nodeList.get(i).lookup(".default-color0") != null)
-//			nodeList.get(i).lookup(".default-color0").setStyle("-fx-background-color: #000000;");
-//		System.out.println("Children: " + ((Parent) nodeList.get(i)).getChildrenUnmodifiable());
-//		
-//	}
-
-//				.stream()
-////				.filter(node -> node instanceof Label)
-//				.forEach(node -> node.setStyle("-fx-background-color: #000000"));
-//	.forEach(elem -> System.out.println("Hei"));
-
-
-//// Prevent duplicate graphs
-//if (!lineChart.getData().contains(selectedGraph.getSeries()))
-//	lineChart.getData().add(selectedGraph.getSeries());
-
-//// Fix graph order
-//graphList.forEach(g -> g.getSeries().getNode().setViewOrder(graphList.indexOf(g)));
-
-//String nodeStyle = String.format("-fx-background-color: #%s, #FFFFFF; -fx-background-insets: 0, 2;", "ff0000");
-//lineChart.lookupAll(".chart-legend-item").stream()
-// chart-legend-item-symbol chart-line-symbol series0 default-color0
-//.map(elem -> ((Labeled) elem).getGraphic());
-//.forEach(elem -> ((Labeled) elem).getGraphic().getStyleClass().get(3));

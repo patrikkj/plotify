@@ -1,16 +1,9 @@
 package app;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.math3.ml.distance.ChebyshevDistance;
-
 import enums.Style;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -36,7 +29,6 @@ public class Graph {
 	private ObjectProperty<Trace> trace;
 	private ObjectProperty<Double> minX;
 	private ObjectProperty<Double> maxX;
-	
 	// Graph layout properties
 	private ObjectProperty<Color> color;
 	private ObjectProperty<Style> style;
@@ -45,7 +37,6 @@ public class Graph {
 	private BooleanProperty visible;
 	private BooleanProperty points;
 	List<Data<Number, Number>> dataList; 
-	
 	// Initial color selection
 	public static int initColorID;
 	public static Color[] initColors = new Color[] {
@@ -56,11 +47,11 @@ public class Graph {
 		Color.valueOf("#BB0000")
 	};
 	
-	/////////////////////////////
-	/////  ADD COMMENTS :)  /////
-	/////////////////////////////
 	
-	// Constructor
+	// Constructors
+	/**
+	 * Constructor used by Trace.
+	 */
 	public Graph(Trace initTrace) {
 		// Initialize graph properties
 		initializeProperties();
@@ -76,25 +67,9 @@ public class Graph {
 		updateTraceLink(null, initTrace);
 		
 		// Apply change listener
-		applyChangeListeners();
+		initializeChangeListeners();
 	}
 
-	private void setDefault(Trace initTrace) {
-		// Set default data properties
-		setName("New graph");
-		setXData("Raw data (x)");
-		setYData("Raw data (y)");
-		setTrace(initTrace);
-		setMinX(Double.NEGATIVE_INFINITY);
-		setMaxX(Double.POSITIVE_INFINITY);
-		
-		// Set default layout properties
-		setColor(initColors[initColorID++ % initColors.length]);
-		setStyle(Style.FULL_LINE);
-		setWidth(50d);
-		setDetail(100d);
-		setVisible(true);
-	}
 	
 	// Initialization
 	/**
@@ -121,7 +96,7 @@ public class Graph {
 	/**
 	 * Apply change listeners to dynamic data.
 	 */
-	private void applyChangeListeners() {
+	private void initializeChangeListeners() {
 		// Create changeListeners
 		ChangeListener<Object> dataChangeListener = new ChangeListener<>() {
 			@Override
@@ -152,6 +127,27 @@ public class Graph {
 		visible.addListener(dataChangeListener);
 	}
 
+	/**
+	 * Assign default graph values.
+	 */
+	private void setDefault(Trace initTrace) {
+		// Set default data properties
+		setName("New graph");
+		setXData("Raw data (x)");
+		setYData("Raw data (y)");
+		setTrace(initTrace);
+		setMinX(Double.NEGATIVE_INFINITY);
+		setMaxX(Double.POSITIVE_INFINITY);
+		
+		// Set default layout properties
+		setColor(initColors[initColorID++ % initColors.length]);
+		setStyle(Style.FULL_LINE);
+		setWidth(50d);
+		setDetail(100d);
+		setVisible(true);
+	}
+	
+	
 	// Validation
 	/**
 	 * Returns {@code true} if graph is valid, else {@code false}.
@@ -175,27 +171,11 @@ public class Graph {
 		return true;
 	}
 	
-	// Manage series
-	private List<Double> reduceList(List<Double> inputList, double n) {
-		n = (double) Math.round(n);
-		// Verify that reduction is necessary
-		if (n >= inputList.size())
-			return inputList;
-		
-		// Create output list
-		List<Double> outputList = new ArrayList<>();
-		
-		// Calculate step size
-		double step = ((double) inputList.size() - 1d)  /  (n - 1d); 
-		
-		// Fill list
-		for (int i = 0; i < n; i++)
-				outputList.add(inputList.get((int) Math.round(step * (double) i)));
-		
-		// Return reduced list
-		return outputList;
-	}
 	
+	// Update
+	/**
+	 * Updates data set and graph styling.
+	 */
 	public void updateGraph() {
 		// Break if graph is invalid
 		if (!isValidGraph()) return;
@@ -205,6 +185,9 @@ public class Graph {
 		updateStyle();
 	}
 	
+	/**
+	 * Updates data set.
+	 */
 	private void updateSeries() {
 		// Empty list used to build data set
 		dataList = new ArrayList<>();
@@ -215,18 +198,15 @@ public class Graph {
 		
 		// Break if any data sets are missing
 		if (rawXData == null  ||  rawYData == null) return;
+		if (rawXData.size() == 0  ||  rawYData.size() == 0) return;
 		
 		// Set lower boundary based on data set sizes
 		double listSize = Math.min(rawXData.size(), rawYData.size());
 		double actualSize = Math.min(listSize, getDetail());
 		
-		// Chebyshev indecies
-		
 		// Reduced indices
 		int[] indices = parsers.Data.equidistantIndices(rawXData.stream().mapToDouble(doub -> doub.doubleValue()).toArray(), (int) actualSize);
 		// Reduce lists
-//		List<Double> reducedXData = reduceList(rawXData, actualSize);
-//		List<Double> reducedYData = reduceList(rawYData, actualSize);
 		List<Double> reducedXData = parsers.Data.reduceList(rawXData, indices);
 		List<Double> reducedYData = parsers.Data.reduceList(rawYData, indices);
 		
@@ -236,38 +216,37 @@ public class Graph {
 		
 		// Update series
 		series.getData().setAll(dataList);
+		System.out.println("Data series size: " + series.getData().size());
 	}
 	
+	/**
+	 * Updates graph styling.
+	 */
 	private void updateStyle() {
-		String lineStyle, nodeStyle;
+		// Break if graph is not plotted
+		if (getSeries().getNode() == null) return;
 		
-		if (getVisible())
-			lineStyle = String.format("-fx-stroke: #%s;"
-									+ "-fx-stroke-width: %s;"
-									+ "-fx-stroke-dash-array: %s;", 
-									getHexColor(), getWidth(), getStyle());
-		else 
-			lineStyle = String.format("visibility: %s;", false);
-			
-		getSeries().getNode().setStyle(lineStyle);
+		// Set line styling
+		getSeries().getNode().setStyle(String.format("-fx-stroke: #%s;"
+													+ "-fx-stroke-width: %s;"
+													+ "-fx-stroke-dash-array: %s;"
+													+ "-fx-stroke-line-cap: %s;", 
+													getHexColor(), getWidth(), getStyle(), "ROUND"));
 		
-		if (getVisible() && getPoints()) {
-			
-			nodeStyle = String.format("-fx-background-color: #%s, #FFFFFF;"
+		// If points are plotted, set point styling
+		if (getPoints()) {
+			String nodeStyle = String.format("-fx-background-color: #%s, #FFFFFF;"
 											+ "-fx-background-radius: 100, 100;"
 											+ "-fx-background-insets: %s, 2;", getHexColor(), 2d - getWidth());
-			
 			getSeries().getData().forEach(data -> data.getNode().setStyle(nodeStyle));
-//		 WORKING
-//			getSeries().getChart().lookupAll(".chart-legend-item").stream()
-//	//		.forEach(elem -> ((Labeled) elem).setGraphic(new Circle(3, Paint.valueOf("#FF0000"))));
-//			.forEach(elem -> ((Labeled) elem).getGraphic().setStyle(nodeStyle));
-	
 		}
 	}
 	
 	
-	// Manage Trace <-> Graph link
+	// Links
+	/**
+	 * Update Trace <-> Graph 1-n association.
+	 */
 	public void updateTraceLink(Trace prevTrace, Trace currentTrace) {
 		if (prevTrace != null)
 			prevTrace.removeGraph(this);
@@ -275,6 +254,21 @@ public class Graph {
 			currentTrace.addGraph(this);
 	}
 
+	
+	// Other 
+	/**
+	 * String representation of this Graph, used in ListViews.
+	 */
+	public String toString() {
+		return getName();
+	}
+	
+	
+	
+	///////////////////////////////
+	/////  Setters / Getters  /////
+	///////////////////////////////
+	
 	// Data getters
 	public Series<Number, Number> getSeries() {return series;}
 	public String getName() {return series.nameProperty().get();}
@@ -287,7 +281,7 @@ public class Graph {
 	// Layout getters
 	public Color getColor() {return color.get();}
 	public String getHexColor() {return getColor().toString().substring(2, 8);}
-	public Double getWidth() {return width.get()* (6d/100d)*2;}
+	public Double getWidth() {return Math.pow(width.get(), 1.5) / 120d;}
 	public Style getStyle() {return style.get();}
 	public Double getDetail() {return 10d / ((0.5d - detail.get())/100d + 1d) - 7;}
 	public Boolean getVisible() {return visible.get();}
@@ -326,44 +320,5 @@ public class Graph {
 	public DoubleProperty getDetailProperty() {return detail;}
 	public BooleanProperty getVisibleProperty() {return visible;}
 	public BooleanProperty getPointsProperty() {return points;}
-	
-	public void printDetails() {
-		System.out.printf("\nSeries: %s\n"
-				+ "Name: %s\n"
-				+ "XData: %s\n"
-				+ "YData: %s\n"
-				+ "Trace: %s\n"
-				+ "MinX: %s\n"
-				+ "MaxX: %s\n"
-				+ "Color: %s\n"
-				+ "Stroke width: %s\n"
-				+ "Stroke style: %s\n"
-				+ "Detail: %s\n"
-				+ "Dataset length: %s\n"
-				+ "Requested length: %s\n"
-				+ "Trace xData length: %s\n"
-				+ "Trace yData length: %s\n",
-				getSeries(),
-				getName(),
-				getXData(),
-				getYData(),
-				getTrace(),
-				getMinX(),
-				getMaxX(),
-				getColor(),
-				getWidth(),
-				getStyle(),
-				getDetail(),
-				dataList.size(),
-				getDetail(),
-				getTrace().getDataMap().get(getXData()).size(),
-				getTrace().getDataMap().get(getYData()).size());
-	}
-	
-	public String toString() {
-		return getName();
-	}
-	
-	
 	
 }
