@@ -231,7 +231,7 @@ public class Graph {
 													+ "-fx-stroke-width: %s;"
 													+ "-fx-stroke-dash-array: %s;"
 													+ "-fx-stroke-line-cap: %s;", 
-													getHexColor(), getWidth(), getStyle(), "ROUND"));
+													getHexColor(), getWidth(), getStyle(), "SQUARE"));
 		
 		// If points are plotted, set point styling
 		if (getPoints()) {

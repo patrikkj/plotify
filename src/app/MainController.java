@@ -32,6 +32,9 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.LineChart;
@@ -183,7 +186,6 @@ public class MainController {
      * Used for resizing
      */
     private double initHeight, initWidth, initX, initY;
-    
     
     
 	/////////////////////
@@ -818,7 +820,43 @@ public class MainController {
     	// Write chart image to file
     	SnapshotParameters snapshotParameters = new SnapshotParameters();
     	snapshotParameters.setFill(Paint.valueOf("#FFFFFF"));
-    	WritableImage image = lineChart.snapshot(snapshotParameters, null);
+    	snapshotParameters.setViewport(new Rectangle2D(0, 0, lineChart.getWidth(), lineChart.getHeight()));
+//    	snapshotParameters.setViewport(new Rectangle2D(0, 0, 350, 300));
+    	WritableImage image = lineChart.lookup(".chart-content").snapshot(snapshotParameters, null);
+    	ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", selectedFile);
+    }
+
+    @FXML private void handleExportFigureClick(ActionEvent event) throws IOException {
+    	// Retrive parent for file chooser
+    	Stage mainStage = (Stage) rootNode.getScene().getWindow();
+    	
+    	// Construct file chooser
+    	FileChooser fileChooser = new FileChooser();
+    	fileChooser.setTitle("Export chart");
+    	fileChooser.getExtensionFilters().addAll(
+    			new ExtensionFilter("Image file (*.png)", "*.png"),
+    			new ExtensionFilter("All Files", "*.*"));
+    	
+    	// Launch file chooser and retrive selected file
+    	File selectedFile = fileChooser.showSaveDialog(mainStage);
+    	
+    	// Break if no file has been selected
+    	if (selectedFile == null) return;
+    	
+    	// Write chart image to file
+    	Region chartBackground = (Region) lineChart.lookup(".chart-plot-background");
+    	Bounds chartBounds = chartBackground.getBoundsInParent();
+//    	chartBounds.
+//    	double bgWidth = chartBackground.getWidth();
+//    	double bgHeight = chartBackground.getHeight();
+//    	new Rec
+//    	System.out.println("width: " + bgWidth);
+//    	System.out.println("height: " + bgHeight);
+    	SnapshotParameters snapshotParameters = new SnapshotParameters();
+    	snapshotParameters.setFill(Paint.valueOf("#FFFFFF"));
+    	snapshotParameters.setViewport(new Rectangle2D(chartBounds.getMinX(), chartBounds.getMinY(), chartBounds.getWidth(), chartBounds.getHeight()));
+//    	snapshotParameters.setViewport(new Rectangle2D(0, 0, 350, 300));
+    	WritableImage image = lineChart.lookup(".plot-content").snapshot(snapshotParameters, null);
     	ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", selectedFile);
     }
     

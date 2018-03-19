@@ -70,7 +70,7 @@ public class Trace {
 	private ObservableList<Double> totList, kinList, potList;
 	private ObservableList<Double> normForceList, fricForceList;
 	private ObservableList<Double> slopeAngleList, slopeAngleDegList, radCurvatureList;
-	private ObservableList<Double> tListRaw, xListRaw, yListRaw;
+	private ObservableList<Double> tListRaw, xListRaw, yListRaw, vListRaw, sListRaw;
 	private HashSet<Graph> linkedGraphs;
 	//Change listeners
 	private ChangeListener<File> fileChangeListener;
@@ -89,6 +89,7 @@ public class Trace {
 			"Raw data (t)",
 			"Raw data (x)",
 			"Raw data (y)",
+			"Raw data (v)",
 			"Normal force",
 			"Friction force",
 			"Slope angle (Rad)",
@@ -206,6 +207,8 @@ public class Trace {
 		tListRaw = FXCollections.observableArrayList();
 		xListRaw = FXCollections.observableArrayList();
 		yListRaw = FXCollections.observableArrayList();
+		sListRaw = FXCollections.observableArrayList();
+		vListRaw = FXCollections.observableArrayList();
 
 		//Fill raw data collections
 		if (getFile() != null) {
@@ -213,12 +216,25 @@ public class Trace {
 			Arrays.stream(rawData[0]).forEach(doub -> tListRaw.add(Double.valueOf(doub)));
 			Arrays.stream(rawData[1]).forEach(doub -> xListRaw.add(Double.valueOf(doub)));
 			Arrays.stream(rawData[2]).forEach(doub -> yListRaw.add(Double.valueOf(doub)));
+			
+			vListRaw.add(0d);
+			for (int i = 1; i < rawData[0].length; i++) {
+				double x0 = rawData[1][i - 1];
+				double x1 = rawData[1][i];
+				double y0 = rawData[2][i - 1];
+				double y1 = rawData[2][i];
+				double dy = y1 - y0;
+				double dx = x1 - x0;
+				
+				vListRaw.add(Math.sqrt(dy*dy + dx*dx) / 0.01);
+			}
 		}
 		
 		//Fill map
 		traceMap.put("Raw data (t)", tListRaw);
 		traceMap.put("Raw data (x)", xListRaw);
 		traceMap.put("Raw data (y)", yListRaw);
+		traceMap.put("Raw data (v)", vListRaw);
 	}
 	
 	/**
@@ -504,7 +520,7 @@ public class Trace {
 		rawEulerTrace();
 		
 		// Set initial parameters
-		double x = min; 
+		double x = min;
 		double v = getInitV();
 		double a = getAccel(x);	
 		
@@ -535,7 +551,6 @@ public class Trace {
 				fricForceList.add(getFrictionForce(x));
 				slopeAngleList.add(func.slopeAngle(x));
 				slopeAngleDegList.add(func.slopeAngleDegrees(x));
-//				radCurvatureList.add(func.radiusOfCurvature(x) == Double.POSITIVE_INFINITY ? 0 : func.radiusOfCurvature(x));
 				radCurvatureList.add(func.radiusOfCurvature(x));
 				
 				//Perform GUI Updates in FX Application Thread
@@ -620,9 +635,9 @@ public class Trace {
 	public String toString() {
 		return getName();
 	}
-
 	
-
+	
+	
 	/*
 	 * Property Getters
 	 */
