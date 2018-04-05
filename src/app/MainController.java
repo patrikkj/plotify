@@ -641,13 +641,13 @@ public class MainController {
 	    traceStep					.textProperty().bindBidirectional(trace.getStepProperty(), customStringConverter);
 		
 		// Set trace details
-	    funcTypeLabel.textProperty().bind(trace.getInterpolationTypeProperty());
-	    integrationTypeLabel.textProperty().bind(trace.getIntegrationTypeProperty());
-	    stepSizeLabel.textProperty().bind(trace.getStepSizeProperty());
-	    iterationsLabel.textProperty().bind(trace.getIterationsProperty());
-	    totalTimeLabel.textProperty().bind(trace.getTotalTimeProperty());
-	    computationTimeLabel.textProperty().bind(trace.getComputationTimeProperty());
-	    energyDifferenceLabel.textProperty().bind(trace.getEnergyDifferenceProperty());
+	    funcTypeLabel				.textProperty().bind(trace.getInterpolationTypeProperty());
+	    integrationTypeLabel		.textProperty().bind(trace.getIntegrationTypeProperty());
+	    stepSizeLabel				.textProperty().bind(trace.getStepSizeProperty());
+	    iterationsLabel				.textProperty().bind(trace.getIterationsProperty());
+	    totalTimeLabel				.textProperty().bind(trace.getTotalTimeProperty());
+	    computationTimeLabel		.textProperty().bind(trace.getComputationTimeProperty());
+	    energyDifferenceLabel		.textProperty().bind(trace.getEnergyDifferenceProperty());
 	    
 	    // Add change listeners
 	 	trace.getNameProperty().addListener(traceNameChangeListener);
@@ -863,7 +863,7 @@ public class MainController {
     
     // Trace button handlers
     @FXML private void handleNewTraceClick(ActionEvent event) {
-    	// Add ned trace
+    	// Add new trace
     	traceList.add(new Trace());
     	
     	// Select new trace
@@ -969,7 +969,7 @@ public class MainController {
     }
 
     @FXML private void handleGraphUpClick(ActionEvent event) {
-    	// Assign local variable
+    	// Assign local variables
     	Graph graph;
     	int graphIndex;
     	
@@ -996,7 +996,7 @@ public class MainController {
     }
     
     @FXML private void handleGraphDownClick(ActionEvent event) {
-    	// Assign local variable
+    	// Assign local variables
     	Graph graph;
     	int graphIndex;
     	
