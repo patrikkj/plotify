@@ -2,11 +2,8 @@ package analysis;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.Scanner;
 
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunctionLagrangeForm;
@@ -19,6 +16,7 @@ import parsers.Data;
 public class Interpolation {
 	private static final int POLY_SPLINE_NODES = 8;
 	private static final int POLYNOMIAL_NODES = 8;
+	
 	/*
 	 * Returns a PolySpline object representing a set of third degree polynomials,
 	 * replicating a best-fit curve to the given set of coordinates.
@@ -105,7 +103,7 @@ public class Interpolation {
 		//Get function domain
 		double[] domain = new double[] { x[0], x[x.length - 1] };
 		
-		//Return a Polynomail function
+		//Return a Polynomial function
 		return new Polynomial(coeffArray, domain);
 	}
 	

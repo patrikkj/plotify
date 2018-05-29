@@ -17,7 +17,7 @@ public class TraceProcessor implements Runnable {
 	
 	@Override
 	public void run() {
-		//Before lifting; tell me your name :)
+		//Before lifting, tell me your name :)
 		System.out.println("Processing: " + trace.getName() + " on " + Thread.currentThread());
 		
 		//Do some heavy lifting bruh
