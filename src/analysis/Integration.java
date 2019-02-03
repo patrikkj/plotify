@@ -3,6 +3,9 @@ package analysis;
 import java.time.LocalTime;
 
 public class Integration {
+	
+	
+	
 	//Performs one iteration of Eulers' Method
 	public static double eulerMethod(double initValue, double expr, double step) {
 		return initValue + expr * step;
@@ -29,4 +32,5 @@ public class Integration {
 		System.out.println("Total time: " + dt*iter);
 		
 	}
+
 }
