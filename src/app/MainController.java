@@ -34,7 +34,6 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.LineChart;
@@ -377,8 +376,8 @@ public class MainController {
 					unbindGraph(oldGraph);
 				
 				// Update colorpicker values
-				if (newGraph != null)
-					graphColor.setValue(newGraph.getColor());
+//				if (newGraph != null)
+//					graphColor.setValue(newGraph.getColor());
 				
 				// Bind new graph or clear UI if there is no selected graph
 				if (newGraph != null)
@@ -667,17 +666,18 @@ public class MainController {
 		
 		// Bind graph layout properties
 		graphStyle					.valueProperty().bindBidirectional(graph.getStyleProperty());
-//		graphColor					.valueProperty().bindBidirectional(graph.getColorProperty());
+		graphColor					.valueProperty().bindBidirectional(graph.getColorProperty());
+//		graphColor					.valueProperty().bind(graph.getColorProperty());
 		graphDetail					.valueProperty().bindBidirectional(graph.getDetailProperty());
 		graphWidth					.valueProperty().bindBidirectional(graph.getWidthProperty());
 		graphVisible				.selectedProperty().bindBidirectional(graph.getVisibleProperty());
 		
 		// Unidirectional color binding
-		graph.getColorProperty().bind(graphColor.valueProperty());
+//		graph.getColorProperty().bind(graphColor.valueProperty());
 		
 		// Add change listeners
 		graph.getNameProperty().addListener(graphNameChangeListener);
-		graph.getColorProperty().addListener(graphColorChangeListener);
+//		graph.getColorProperty().addListener(graphColorChangeListener);
 
 	}
 	
@@ -724,17 +724,17 @@ public class MainController {
 		
 		// Unbind graph layout properties
 		graphStyle				.valueProperty().unbindBidirectional(graph.getStyleProperty());
-//		graphColor				.valueProperty().unbindBidirectional(graph.getColorProperty());
+		graphColor				.valueProperty().unbindBidirectional(graph.getColorProperty());
 		graphDetail				.valueProperty().unbindBidirectional(graph.getDetailProperty());
 		graphWidth				.valueProperty().unbindBidirectional(graph.getWidthProperty());
 		graphVisible			.selectedProperty().unbindBidirectional(graph.getVisibleProperty());
 		
 		// Unbind unidirectional bindings
-		graph.getColorProperty().unbind();
+//		graph.getColorProperty().unbind();
 		
 		// Remove change listeners
 		graph.getNameProperty().removeListener(graphNameChangeListener);
-		graph.getColorProperty().removeListener(graphColorChangeListener);
+//		graph.getColorProperty().removeListener(graphColorChangeListener);
 	}
     
 	
